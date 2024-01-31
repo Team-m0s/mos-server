@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from domain.post import post_router
+from domain.comment import comment_router
 
 app = FastAPI()
 
@@ -24,3 +25,4 @@ def hello():
 
 
 app.include_router(post_router.router)
+app.include_router(comment_router.router)
