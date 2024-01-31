@@ -3,6 +3,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from domain.post import post_router
 from domain.comment import comment_router
+from domain.like import like_router
 
 app = FastAPI()
 
@@ -26,3 +27,4 @@ def hello():
 
 app.include_router(post_router.router)
 app.include_router(comment_router.router)
+app.include_router(like_router.router)

@@ -7,7 +7,7 @@ from domain.comment import comment_schema, comment_crud
 from domain.post import post_crud
 
 router = APIRouter(
-    prefix="/api/answer",
+    prefix="/api/comment",
 )
 
 
@@ -17,5 +17,5 @@ def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate,
 
     post = post_crud.get_post(db, post_id=post_id)
     if not post:
-        raise HTTPException(status_code=404, detail="Question not found")
-    comment_crud.create_answer(db, post=post, comment_create=_comment_create)
+        raise HTTPException(status_code=404, detail="Post not found")
+    comment_crud.create_comment(db, post=post, comment_create=_comment_create)
