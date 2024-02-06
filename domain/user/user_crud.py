@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from models import User
+from fastapi import FastAPI, Request, HTTPException, status
 
 from domain.user.user_schema import UserCreate
 
@@ -23,3 +24,10 @@ def create_user(db: Session, user_info: dict, user_create: UserCreate):
 def get_user_by_email(db: Session, email: str):
     return db.query(User).filter(User.email == email).first()
 
+
+def get_current_user(request: Request):
+    user = request.session.get('user')
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="로그인이 필요합니다.")
+    return user

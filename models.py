@@ -28,9 +28,9 @@ class Post(Base):
     report_count = Column(Integer, nullable=False, default=0)
     create_date = Column(DateTime, nullable=False)
     user_id = Column(Integer, ForeignKey("user.id"))
-    user = relationship("User", backref="posts")
+    user = relationship("User", backref="post_users")
     board_id = Column(Integer, ForeignKey("board.id"))
-    board = relationship("Board", backref="posts")
+    board = relationship("Board", backref="post_boards")
     # 닉네임, 좋아요 추가 필요
 
 
@@ -43,9 +43,9 @@ class Comment(Base):
     like_count = Column(Integer, default=0)
     create_date = Column(DateTime, nullable=False)
     user_id = Column(Integer, ForeignKey("user.id"))
-    user = relationship("User", backref="comments")
+    user = relationship("User", backref="comment_users")
     post_id = Column(Integer, ForeignKey("post.id"))
-    post = relationship("Post", backref="comments")
+    post = relationship("Post", backref="comment_posts")
 
 
 class Like(Base):
@@ -53,11 +53,11 @@ class Like(Base):
 
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("user.id"))
-    user = relationship("User", backref="likes")
+    user = relationship("User", backref="like_users")
     post_id = Column(Integer, ForeignKey("post.id"))
-    post = relationship("Post", backref="likes")
+    post = relationship("Post", backref="like_posts")
     comment_id = Column(Integer, ForeignKey("comment.id"))
-    comment = relationship("Comment", backref="likes")
+    comment = relationship("Comment", backref="like_comments")
 
 
 class Board(Base):

@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from authlib.integrations.base_client import OAuthError
 from fastapi import FastAPI, Request, Depends
 from fastapi.security import OAuth2AuthorizationCodeBearer
@@ -11,6 +13,7 @@ from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from fastapi_sso.sso.kakao import KakaoSSO
 
+import jwt_token
 from domain.user import user_crud
 from domain.post import post_router
 from domain.comment import comment_router
@@ -59,7 +62,14 @@ sso = KakaoSSO(
 
 
 @app.get("/", response_class=HTMLResponse)
-async def main():
+async def main(request: Request):
+    token = request.cookies.get('access_token')
+
+    if token:
+        payload = jwt_token.verify_token(token)
+        if payload:
+            return RedirectResponse(url='/welcome', status_code=302)
+
     html_content = """
     <html>
         <head>
@@ -92,12 +102,14 @@ async def auth(request: Request, db: Session = Depends(get_db)):
     except OAuthError as error:
         return HTMLResponse(content=f'<h1>{error.error}</h1>', status_code=400)
 
-    user = token.get('userinfo')
-    db_user = user_crud.get_user_by_email(db, user['email'])
+    user_info = token.get('userinfo')
+    db_user = user_crud.get_user_by_email(db, user_info['email'])
 
     if db_user:
-        request.session['user'] = dict(user)
-        return RedirectResponse(url='/welcome', status_code=302)
+        access_token_expires = timedelta(minutes=60)  # 토큰 유효 시간 설정
+        access_token = jwt_token.create_access_token(data={"sub": user_info['email']},
+                                                     expires_delta=access_token_expires)
+        return JSONResponse(content={"access_token": access_token, "token_type": "bearer"})
     else:
         return HTMLResponse(content='<h1>사용자 정보가 없습니다.</h1>', status_code=404)
 
