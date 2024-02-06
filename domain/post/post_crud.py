@@ -18,6 +18,6 @@ def get_post(db: Session, post_id: int):
 def create_post(db: Session, post_create: PostCreate):
     db_post = Post(subject=post_create.subject,
                    content=post_create.content,
-                   create_date= datetime.now())
+                   create_date=datetime.now())
     db.add(db_post)
     db.commit()

@@ -8,6 +8,7 @@ class User(Base):
     __tablename__ = "user"
 
     id = Column(Integer, primary_key=True)
+    email = Column(String, nullable=False)
     nickName = Column(String, nullable=False)
     profile_img = Column(String, nullable=True)
     point = Column(Integer, nullable=False, default=0)

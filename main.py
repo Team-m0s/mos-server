@@ -1,17 +1,21 @@
 from authlib.integrations.base_client import OAuthError
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends
 from fastapi.security import OAuth2AuthorizationCodeBearer
 from authlib.integrations.starlette_client import OAuth
+from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse, HTMLResponse, JSONResponse
 import os
+from database import get_db
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from fastapi_sso.sso.kakao import KakaoSSO
 
+from domain.user import user_crud
 from domain.post import post_router
 from domain.comment import comment_router
 from domain.like import like_router
+from domain.user import user_router
 
 load_dotenv()
 
@@ -82,15 +86,20 @@ async def login(request: Request):
 
 
 @app.get('/auth')
-async def auth(request: Request):
+async def auth(request: Request, db: Session = Depends(get_db)):
     try:
         token = await oauth.google.authorize_access_token(request)
     except OAuthError as error:
-        return HTMLResponse(f'<h1>{error.error}</h1>')
+        return HTMLResponse(content=f'<h1>{error.error}</h1>', status_code=400)
+
     user = token.get('userinfo')
-    if user:
+    db_user = user_crud.get_user_by_email(db, user['email'])
+
+    if db_user:
         request.session['user'] = dict(user)
-    return RedirectResponse(url='/welcome')
+        return RedirectResponse(url='/welcome', status_code=302)
+    else:
+        return HTMLResponse(content='<h1>사용자 정보가 없습니다.</h1>', status_code=404)
 
 
 @app.get("/auth/login")
@@ -113,3 +122,4 @@ async def auth_callback(request: Request):
 app.include_router(post_router.router)
 app.include_router(comment_router.router)
 app.include_router(like_router.router)
+app.include_router(user_router.router)
