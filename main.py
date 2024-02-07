@@ -49,7 +49,7 @@ oauth.register(
     authorize_url='https://accounts.google.com/o/oauth2/auth',
     client_kwargs={
         'scope': 'email openid profile',
-        'redirect_url': 'http://39.113.43.239:8000/auth'
+        'redirect_url': 'http://127.0.0.1:8000/auth'
     }
 )
 
@@ -122,13 +122,16 @@ async def auth_init():
 
 
 @app.get("/auth/callback")
-async def auth_callback(request: Request):
+async def auth_callback(request: Request, db: Session = Depends(get_db)):
     """Verify login"""
     with sso:
-        user = await sso.verify_and_process(request, params={"client_secret": os.getenv("KAKAO_CLIENT_SECRET")})
-    if user:
-        request.session['user'] = dict(user)
-    return RedirectResponse(url='/welcome')
+        token = await sso.verify_and_process(request, params={"client_secret": os.getenv("KAKAO_CLIENT_SECRET")})
+
+    user_info = dict(token)
+    token_data = {"display_name": user_info["display_name"]}
+    # 토큰 생성
+    access_token = jwt_token.create_access_token(data=token_data)
+    return {"access_token": access_token}
 
 
 app.include_router(post_router.router)
