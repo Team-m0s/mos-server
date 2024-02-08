@@ -1,7 +1,7 @@
 from datetime import timedelta
-
+import logging
 from authlib.integrations.base_client import OAuthError
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI, Request, Depends, HTTPException
 from fastapi.security import OAuth2AuthorizationCodeBearer
 from authlib.integrations.starlette_client import OAuth
 from sqlalchemy.orm import Session
@@ -49,7 +49,7 @@ oauth.register(
     authorize_url='https://accounts.google.com/o/oauth2/auth',
     client_kwargs={
         'scope': 'email openid profile',
-        'redirect_url': 'http://127.0.0.1:8000/auth'
+        # 'redirect_url': 'http://127.0.0.1:8000/auth'
     }
 )
 
@@ -105,13 +105,15 @@ async def auth(request: Request, db: Session = Depends(get_db)):
     user_info = token.get('userinfo')
     db_user = user_crud.get_user_by_email(db, user_info['email'])
 
-    if db_user:
+    if db_user is None:
+        user_crud.create_user(db, user_info=user_info)
+        print("회원가입 완료")
+    else:
+        print("이미 가입된 회원")
         access_token_expires = timedelta(minutes=60)  # 토큰 유효 시간 설정
         access_token = jwt_token.create_access_token(data={"sub": user_info['email']},
                                                      expires_delta=access_token_expires)
         return JSONResponse(content={"access_token": access_token, "token_type": "bearer"})
-    else:
-        return HTMLResponse(content='<h1>사용자 정보가 없습니다.</h1>', status_code=404)
 
 
 @app.get("/auth/login")
@@ -125,13 +127,25 @@ async def auth_init():
 async def auth_callback(request: Request, db: Session = Depends(get_db)):
     """Verify login"""
     with sso:
-        token = await sso.verify_and_process(request, params={"client_secret": os.getenv("KAKAO_CLIENT_SECRET")})
+        user = await sso.verify_and_process(request, params={"client_secret": os.getenv("KAKAO_CLIENT_SECRET")})
 
-    user_info = dict(token)
-    token_data = {"display_name": user_info["display_name"]}
+    user_info = dict(user)
+    db_user = user_crud.get_user_by_email(db, user_info['email'])
+    if db_user is None:
+        user_crud.create_user(db, user_info=user_info)
+        print("회원가입 완료")
+
+    token_data = {"email": user_info["email"]}
     # 토큰 생성
     access_token = jwt_token.create_access_token(data=token_data)
     return {"access_token": access_token}
+
+
+@app.get("/auth/logout")
+async def auth_logout(request: Request):
+    response = RedirectResponse(url="/", status_code=302)
+    response.delete_cookie("access_token")
+    return response
 
 
 app.include_router(post_router.router)
