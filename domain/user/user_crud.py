@@ -1,11 +1,9 @@
 from sqlalchemy.orm import Session
 from models import User
 from fastapi import FastAPI, Request, HTTPException, status
-import jwt_token
+import jwt
 from jwt_token import ALGORITHM, SECRET_KEY
 from jose.exceptions import JWTError
-
-from domain.user.user_schema import UserCreate
 
 
 def create_user(db: Session, user_info: dict):
@@ -23,7 +21,21 @@ def get_user_by_email(db: Session, email: str):
 
 
 def get_current_user(db: Session, token: str):
-    payload = jwt_token.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-    email: str = payload.get("sub")
-    return db.query(User).filter(User.email == email).first()
-
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_email: str = payload.get("sub")
+        print(user_email)
+        if user_email is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    else:
+        user = get_user_by_email(db, user_email)
+        if user is None:
+            raise credentials_exception
+        return user

@@ -1,7 +1,10 @@
-from fastapi import APIRouter, Depends
+from typing import Optional
+
+from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy.orm import Session
 from starlette import status
 
+import jwt_token
 from database import get_db
 from domain.post import post_schema, post_crud
 router = APIRouter(
@@ -24,4 +27,3 @@ def post_detail(post_id: int, db: Session = Depends(get_db)):
 @router.post("/create", status_code=status.HTTP_204_NO_CONTENT)
 def post_create(_post_create: post_schema.PostCreate, db: Session = Depends(get_db)):
     _post_create = post_crud.create_post(db, post_create=_post_create)
-

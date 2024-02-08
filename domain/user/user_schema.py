@@ -1,6 +1,11 @@
 from pydantic import BaseModel, field_validator
 
 
+class PostUser(BaseModel):
+    nickname: str
+    profile_img: str
+
+
 class UserCreate(BaseModel):
     nickname: str
 

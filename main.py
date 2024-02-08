@@ -110,10 +110,11 @@ async def auth(request: Request, db: Session = Depends(get_db)):
         print("회원가입 완료")
     else:
         print("이미 가입된 회원")
-        access_token_expires = timedelta(minutes=60)  # 토큰 유효 시간 설정
-        access_token = jwt_token.create_access_token(data={"sub": user_info['email']},
-                                                     expires_delta=access_token_expires)
-        return JSONResponse(content={"access_token": access_token, "token_type": "bearer"})
+
+    access_token_expires = timedelta(minutes=60)  # 토큰 유효 시간 설정
+    access_token = jwt_token.create_access_token(data={"sub": user_info['email']},
+                                                 expires_delta=access_token_expires)
+    return JSONResponse(content={"access_token": access_token, "token_type": "bearer"})
 
 
 @app.get("/auth/login")
@@ -131,13 +132,15 @@ async def auth_callback(request: Request, db: Session = Depends(get_db)):
 
     user_info = dict(user)
     db_user = user_crud.get_user_by_email(db, user_info['email'])
+
     if db_user is None:
         user_crud.create_user(db, user_info=user_info)
         print("회원가입 완료")
+    else:
+        print("이미 가입된 회원")
 
-    token_data = {"email": user_info["email"]}
     # 토큰 생성
-    access_token = jwt_token.create_access_token(data=token_data)
+    access_token = jwt_token.create_access_token(data={"sub": user_info['email']})
     return {"access_token": access_token}
 
 
