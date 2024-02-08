@@ -2,7 +2,7 @@ from pydantic import BaseModel, field_validator
 
 
 class PostUser(BaseModel):
-    nickname: str
+    nickName: str
     profile_img: str
 
 

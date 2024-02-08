@@ -21,6 +21,8 @@ class Post(BaseModel):
 class PostCreate(BaseModel):
     subject: str
     content: str
+    content_img: str | None
+    is_anonymous: bool
 
     @field_validator('subject', 'content')
     def not_empty(cls, v):

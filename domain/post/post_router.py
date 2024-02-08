@@ -5,8 +5,11 @@ from sqlalchemy.orm import Session
 from starlette import status
 
 import jwt_token
+from models import User
 from database import get_db
 from domain.post import post_schema, post_crud
+from domain.user.user_crud import get_current_user
+
 router = APIRouter(
     prefix="/api/post",
 )
@@ -25,5 +28,6 @@ def post_detail(post_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/create", status_code=status.HTTP_204_NO_CONTENT)
-def post_create(_post_create: post_schema.PostCreate, db: Session = Depends(get_db)):
-    _post_create = post_crud.create_post(db, post_create=_post_create)
+def post_create(token: str, _post_create: post_schema.PostCreate, db: Session = Depends(get_db)):
+    current_user = get_current_user(db, token)
+    _post_create = post_crud.create_post(db, post_create=_post_create, user=current_user)

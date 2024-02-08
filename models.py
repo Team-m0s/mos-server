@@ -30,7 +30,7 @@ class Post(Base):
     user_id = Column(Integer, ForeignKey("user.id"))
     user = relationship("User", backref="post_users")
     board_id = Column(Integer, ForeignKey("board.id"))
-    board = relationship("board", backref="post_boards")
+    board = relationship("Board", backref="post_boards")
     # 닉네임, 좋아요 추가 필요
 
 
