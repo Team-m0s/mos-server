@@ -19,7 +19,16 @@ class Comment(BaseModel):
     parent_id: int | None
     content: str
     like_count: int
+    is_anonymous: bool
     user: CommentUser | None
     create_date: datetime.datetime
     modify_date: datetime.datetime | None
     post_id: int
+
+
+class CommentUpdate(CommentCreate):
+    comment_id: int
+
+
+class CommentDelete(BaseModel):
+    comment_id: int
