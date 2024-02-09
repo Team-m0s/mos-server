@@ -43,3 +43,15 @@ def post_update(token: str, _post_update: post_schema.PostUpdate, db: Session = 
     if post.user != current_user:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="권한이 없습니다.")
     post_crud.update_post(db, db_post=post, post_update=_post_update)
+
+
+@router.delete("/delete", status_code=status.HTTP_204_NO_CONTENT)
+def delete_post(token: str, _post_delete: post_schema.PostDelete, db: Session = Depends(get_db)):
+    current_user = get_current_user(db, token)
+    post = post_crud.get_post(db, post_id=_post_delete.post_id)
+    if not post:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="데이터를 찾을수 없습니다.")
+    if post.user != current_user:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="권한이 없습니다.")
+    post_crud.delete_post(db, db_post=post)

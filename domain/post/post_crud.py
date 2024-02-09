@@ -34,3 +34,8 @@ def update_post(db: Session, db_post: Post, post_update: PostUpdate):
     db_post.modify_date = datetime.now()
     db.add(db_post)
     db.commit()
+
+
+def delete_post(db: Session, db_post: Post):
+    db.delete(db_post)
+    db.commit()

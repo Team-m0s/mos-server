@@ -14,6 +14,6 @@ def create_comment(db: Session, post: Post, comment_create: CommentCreate):
     db.commit()
 
 
-def get_comment(db:Session, comment_id: int):
+def get_comment(db: Session, comment_id: int):
     comment = db.query(Comment).get(comment_id)
     return comment

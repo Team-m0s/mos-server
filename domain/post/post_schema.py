@@ -34,3 +34,7 @@ class PostCreate(BaseModel):
 
 class PostUpdate(PostCreate):
     post_id: int
+
+
+class PostDelete(BaseModel):
+    post_id: int
