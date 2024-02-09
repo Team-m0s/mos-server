@@ -6,6 +6,11 @@ class PostUser(BaseModel):
     profile_img: str
 
 
+class CommentUser(BaseModel):
+    nickName: str
+    profile_img: str
+
+
 class UserCreate(BaseModel):
     nickname: str
 

@@ -16,7 +16,7 @@ class Post(BaseModel):
     is_anonymous: bool
     create_date: datetime.datetime
     modify_date: datetime.datetime | None
-    comments: list[Comment] = []
+    comment_posts: list[Comment] = []
 
 
 class PostCreate(BaseModel):

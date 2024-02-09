@@ -43,6 +43,8 @@ class Comment(Base):
     content = Column(Text, nullable=False)
     like_count = Column(Integer, default=0)
     create_date = Column(DateTime, nullable=False)
+    modify_date = Column(DateTime, nullable=True)
+    is_anonymous = Column(Boolean, nullable=False, default=True)
     user_id = Column(Integer, ForeignKey("user.id"))
     user = relationship("User", backref="comment_users")
     post_id = Column(Integer, ForeignKey("post.id"))
