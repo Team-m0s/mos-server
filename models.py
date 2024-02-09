@@ -27,6 +27,7 @@ class Post(Base):
     is_anonymous = Column(Boolean, nullable=False, default=True)
     report_count = Column(Integer, nullable=False, default=0)
     create_date = Column(DateTime, nullable=False)
+    modify_date = Column(DateTime, nullable=True)
     user_id = Column(Integer, ForeignKey("user.id"))
     user = relationship("User", backref="post_users")
     board_id = Column(Integer, ForeignKey("board.id"))

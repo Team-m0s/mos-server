@@ -31,3 +31,15 @@ def post_detail(post_id: int, db: Session = Depends(get_db)):
 def post_create(token: str, _post_create: post_schema.PostCreate, db: Session = Depends(get_db)):
     current_user = get_current_user(db, token)
     _post_create = post_crud.create_post(db, post_create=_post_create, user=current_user)
+
+
+@router.put("/update", status_code=status.HTTP_204_NO_CONTENT)
+def post_update(token: str, _post_update: post_schema.PostUpdate, db: Session = Depends(get_db)):
+    current_user = get_current_user(db, token)
+    post = post_crud.get_post(db, post_id=_post_update.post_id)
+    if not post:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="데이터를 찾을수 없습니다.")
+    if post.user != current_user:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="권한이 없습니다.")
+    post_crud.update_post(db, db_post=post, post_update=_post_update)

@@ -15,6 +15,7 @@ class Post(BaseModel):
     content_img: str
     is_anonymous: bool
     create_date: datetime.datetime
+    modify_date: datetime.datetime | None
     comments: list[Comment] = []
 
 
@@ -29,3 +30,7 @@ class PostCreate(BaseModel):
         if not v or not v.strip():
             raise ValueError('빈 값은 허용되지 않습니다.')
         return v
+
+
+class PostUpdate(PostCreate):
+    post_id: int
