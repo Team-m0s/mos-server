@@ -23,7 +23,7 @@ from domain.user import user_router
 load_dotenv()
 
 origins = [
-    "http://127.0.0.1:8000",
+    "*",
 ]
 
 app = FastAPI()
@@ -56,8 +56,8 @@ oauth.register(
 sso = KakaoSSO(
     client_id=os.getenv("KAKAO_CLIENT_ID"),
     client_secret=os.getenv("KAKAO_CLIENT_SECRET"),
-    #redirect_uri="http://127.0.0.1:8000/auth/callback",
-    redirect_uri="http://ec2-13-125-254-93.ap-northeast-2.compute.amazonaws.com:8000/auth/callback",
+    #redirect_uri="http://127.0.0.1:8000/login/kakao/auth",
+    redirect_uri="http://ec2-13-125-254-93.ap-northeast-2.compute.amazonaws.com:8000/login/kakao/auth",
     allow_insecure_http=True,
 )
 
@@ -90,13 +90,13 @@ async def welcome():
     return HTMLResponse(content="<h1>환영합니다</h1>", status_code=200)
 
 
-@app.get("/login")
+@app.get("/login/google", tags=["Google"])
 async def login(request: Request):
     redirect_uri = request.url_for('auth')
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
 
-@app.get('/auth')
+@app.get('/auth', tags=["Google"])
 async def auth(request: Request, db: Session = Depends(get_db)):
     try:
         token = await oauth.google.authorize_access_token(request)
@@ -118,14 +118,14 @@ async def auth(request: Request, db: Session = Depends(get_db)):
     return JSONResponse(content={"access_token": access_token, "token_type": "bearer"})
 
 
-@app.get("/auth/login")
+@app.get("/login/kakao", tags=["Kakao"])
 async def auth_init():
     """Initialize auth and redirect"""
     with sso:
         return await sso.get_login_redirect()
 
 
-@app.get("/auth/callback")
+@app.get("/login/kakao/auth", tags=["Kakao"])
 async def auth_callback(request: Request, db: Session = Depends(get_db)):
     """Verify login"""
     with sso:

@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 
-@router.post("/create/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.post("/create/{post_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Comment"])
 def comment_create(token: str, post_id: int, _comment_create: comment_schema.CommentCreate,
                    db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
@@ -22,7 +22,7 @@ def comment_create(token: str, post_id: int, _comment_create: comment_schema.Com
     comment_crud.create_comment(db, post=post, comment_create=_comment_create, user=current_user)
 
 
-@router.put("/update", status_code=status.HTTP_204_NO_CONTENT)
+@router.put("/update", status_code=status.HTTP_204_NO_CONTENT, tags=["Comment"])
 def comment_update(token: str, _comment_update: comment_schema.CommentUpdate,
                    db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
@@ -35,7 +35,7 @@ def comment_update(token: str, _comment_update: comment_schema.CommentUpdate,
     comment_crud.update_comment(db, db_comment=comment, comment_update=_comment_update)
 
 
-@router.delete("/delete", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete", status_code=status.HTTP_204_NO_CONTENT, tags=["Comment"])
 def comment_delete(token: str, _comment_delete: comment_schema.CommentDelete,
                    db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)

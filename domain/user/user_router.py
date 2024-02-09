@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 
-@router.post("/create", status_code=status.HTTP_204_NO_CONTENT)
+@router.post("/create", status_code=status.HTTP_204_NO_CONTENT, tags=["User"])
 def user_create(user_info: dict, user_create_: user_schema.UserCreate, db: Session = Depends(get_db)):
     existing_user = user_crud.get_user_by_email(db, user_info['email'])
     if existing_user:
@@ -20,7 +20,7 @@ def user_create(user_info: dict, user_create_: user_schema.UserCreate, db: Sessi
     user_crud.create_user(db, user_info=user_info, user_create=user_create_)
 
 
-@router.post("/findUser")
+@router.post("/findUser", tags=["User"])
 def find_user(token: str, db: Session = Depends(get_db)):
     current_user_ = user_crud.get_current_user(db, token)
     return current_user_
