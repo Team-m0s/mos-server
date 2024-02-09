@@ -9,6 +9,7 @@ from models import User
 from database import get_db
 from domain.post import post_schema, post_crud
 from domain.user.user_crud import get_current_user
+from domain.board import board_crud
 
 router = APIRouter(
     prefix="/api/post",
@@ -28,9 +29,12 @@ def post_detail(post_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/create", status_code=status.HTTP_204_NO_CONTENT, tags=["Post"])
-def post_create(token: str, _post_create: post_schema.PostCreate, db: Session = Depends(get_db)):
+def post_create(token: str, board_id: int, _post_create: post_schema.PostCreate, db: Session = Depends(get_db)):
     current_user = get_current_user(db, token)
-    _post_create = post_crud.create_post(db, post_create=_post_create, user=current_user)
+    board = board_crud.get_board(db, board_id)
+    if not board:
+        raise HTTPException(status_code=404, detail="Board not found")
+    _post_create = post_crud.create_post(db, post_create=_post_create, board=board, user=current_user)
 
 
 @router.put("/update", status_code=status.HTTP_204_NO_CONTENT, tags=["Post"])

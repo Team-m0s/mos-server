@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from domain.post.post_schema import PostCreate, PostUpdate
-from models import Post, User
+from models import Post, User, Board
 from sqlalchemy.orm import Session
 
 
@@ -15,8 +15,9 @@ def get_post(db: Session, post_id: int):
     return post
 
 
-def create_post(db: Session, post_create: PostCreate, user: User):
-    db_post = Post(subject=post_create.subject,
+def create_post(db: Session, post_create: PostCreate, board: Board, user: User):
+    db_post = Post(board=board,
+                   subject=post_create.subject,
                    content=post_create.content,
                    content_img=post_create.content_img,
                    is_anonymous=post_create.is_anonymous,

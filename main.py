@@ -19,6 +19,7 @@ from domain.post import post_router
 from domain.comment import comment_router
 from domain.like import like_router
 from domain.user import user_router
+from domain.board import board_router
 
 load_dotenv()
 
@@ -107,7 +108,7 @@ async def auth(request: Request, db: Session = Depends(get_db)):
     db_user = user_crud.get_user_by_email(db, user_info['email'])
 
     if db_user is None:
-        user_crud.create_user(db, user_info=user_info)
+        user_crud.create_user_google(db, user_info=user_info)
         print("회원가입 완료")
     else:
         print("이미 가입된 회원")
@@ -135,7 +136,7 @@ async def auth_callback(request: Request, db: Session = Depends(get_db)):
     db_user = user_crud.get_user_by_email(db, user_info['email'])
 
     if db_user is None:
-        user_crud.create_user(db, user_info=user_info)
+        user_crud.create_user_kakao(db, user_info=user_info)
         print("회원가입 완료")
     else:
         print("이미 가입된 회원")
@@ -156,3 +157,4 @@ app.include_router(post_router.router)
 app.include_router(comment_router.router)
 app.include_router(like_router.router)
 app.include_router(user_router.router)
+app.include_router(board_router.router)
