@@ -37,8 +37,16 @@ def post_list(token: str = None, db: Session = Depends(get_db),
 
 
 @router.get("/detail/{post_id}", response_model=post_schema.Post, tags=["Post"])
-def post_detail(post_id: int, db: Session = Depends(get_db)):
+def post_detail(post_id: int, token: str = None, db: Session = Depends(get_db)):
+    current_user = None
     _post = post_crud.get_post(db, post_id=post_id)
+
+    if token:
+        current_user = get_current_user(db, token)
+
+    if current_user:
+        _post.is_liked_by_user = like_crud.get_like(db, post_id=_post.id, user=current_user)
+
     return _post
 
 
