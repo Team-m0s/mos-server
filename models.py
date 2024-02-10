@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Bool
 from sqlalchemy.orm import relationship
 
 from database import Base
+from datetime import datetime
 
 
 class User(Base):
@@ -68,6 +69,7 @@ class Board(Base):
 
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
+    create_date = Column(DateTime, nullable=False)
     parent_id = Column(Integer, nullable=True)
 
 
