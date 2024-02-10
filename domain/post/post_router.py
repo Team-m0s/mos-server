@@ -28,7 +28,13 @@ def post_list(token: str = None, db: Session = Depends(get_db),
 
     if current_user:
         for post in _post_list:
-            post.is_liked_by_user = like_crud.get_like(db, post_id=post.id, user=current_user)
+            post_like = like_crud.get_post_like(db, post_id=post.id, user=current_user)
+            if post_like:
+                post.is_liked_by_user = True
+            for comment in post.comment_posts:
+                comment_like = like_crud.get_comment_like(db, comment_id=comment.id, user=current_user)
+                if comment_like:
+                    comment.is_liked_by_user = True
 
     return {
         'total': total,
@@ -45,8 +51,14 @@ def post_detail(post_id: int, token: str = None, db: Session = Depends(get_db)):
         current_user = get_current_user(db, token)
 
     if current_user:
-        _post.is_liked_by_user = like_crud.get_like(db, post_id=_post.id, user=current_user)
+        post_like = like_crud.get_post_like(db, post_id=_post.id, user=current_user)
+        if post_like:
+            _post.is_liked_by_user = True
 
+        for comment in _post.comment_posts:
+            comment_like = like_crud.get_comment_like(db, comment_id=comment.id, user=current_user)
+            if comment_like:
+                comment.is_liked_by_user = True
     return _post
 
 
