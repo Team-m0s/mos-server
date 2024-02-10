@@ -5,9 +5,12 @@ from models import Post, User, Board
 from sqlalchemy.orm import Session
 
 
-def get_post_list(db: Session):
-    post_list = db.query(Post).order_by(Post.create_date.desc()).all()
-    return post_list
+def get_post_list(db: Session, start_index: int = 0, limit: int = 10):
+    post_list = db.query(Post).order_by(Post.create_date.desc())
+
+    total = post_list.count()
+    _post_list = post_list.offset(start_index).limit(limit).all()
+    return total, _post_list
 
 
 def get_post(db: Session, post_id: int):

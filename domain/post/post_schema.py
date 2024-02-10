@@ -19,6 +19,11 @@ class Post(BaseModel):
     comment_posts: list[Comment] = []
 
 
+class PostList(BaseModel):
+    total: int = 0
+    post_list: list[Post] = []
+
+
 class PostCreate(BaseModel):
     subject: str
     content: str
