@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 
-@router.post("/create/{post_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Comment"])
+@router.post("/create/post/{post_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Comment"])
 def comment_create(token: str, post_id: int, _comment_create: comment_schema.CommentCreate,
                    db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
@@ -20,6 +20,18 @@ def comment_create(token: str, post_id: int, _comment_create: comment_schema.Com
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
     comment_crud.create_comment(db, post=post, comment_create=_comment_create, user=current_user)
+
+
+@router.post("/create/comment/{comment_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Comment"])
+def sub_comment_create(token: str, comment_id: int, _comment_create: comment_schema.SubCommentCreate,
+                       db: Session = Depends(get_db)):
+    current_user = user_crud.get_current_user(db, token)
+    comment = comment_crud.get_comment(db, comment_id=comment_id)
+    if not comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    elif comment.parent_id:
+        raise HTTPException(status_code=404, detail="Can not create comment")
+    comment_crud.create_sub_comment(db, comment=comment, sub_comment_create=_comment_create, user=current_user)
 
 
 @router.put("/update", status_code=status.HTTP_204_NO_CONTENT, tags=["Comment"])

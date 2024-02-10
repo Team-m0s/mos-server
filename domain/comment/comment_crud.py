@@ -2,7 +2,7 @@ from datetime import datetime
 
 from sqlalchemy.orm import Session
 
-from domain.comment.comment_schema import CommentCreate, CommentUpdate, CommentDelete
+from domain.comment.comment_schema import CommentCreate, CommentUpdate, CommentDelete, SubCommentCreate
 from models import Post, Comment, User
 
 
@@ -13,6 +13,17 @@ def create_comment(db: Session, post: Post, comment_create: CommentCreate, user:
                          create_date=datetime.now(),
                          user=user)
     db.add(db_comment)
+    db.commit()
+
+
+def create_sub_comment(db: Session, comment: Comment, sub_comment_create: SubCommentCreate, user: User):
+    db_sub_comment = Comment(post=comment.post,
+                             parent_id=comment.id,
+                             content=sub_comment_create.content,
+                             is_anonymous=sub_comment_create.is_anonymous,
+                             create_date=datetime.now(),
+                             user=user)
+    db.add(db_sub_comment)
     db.commit()
 
 

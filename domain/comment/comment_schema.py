@@ -14,6 +14,10 @@ class CommentCreate(BaseModel):
         return v
 
 
+class SubCommentCreate(CommentCreate):
+    pass
+
+
 class Comment(BaseModel):
     id: int
     parent_id: int | None
