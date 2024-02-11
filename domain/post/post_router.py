@@ -90,15 +90,27 @@ def post_create(token: str = Form(...), board_id: int = Form(...),
 
 
 @router.put("/update", status_code=status.HTTP_204_NO_CONTENT, tags=["Post"])
-def post_update(token: str, _post_update: post_schema.PostUpdate, db: Session = Depends(get_db)):
+def post_update(token: str = Form(...), post_id: int = Form(...),
+                subject: str = Form(...), content: str = Form(...),
+                is_anonymous: bool = Form(...),
+                image_file: Optional[UploadFile] = File(None),
+                db: Session = Depends(get_db)):
     current_user = get_current_user(db, token)
-    post = post_crud.get_post(db, post_id=_post_update.post_id)
+    post = post_crud.get_post(db, post_id=post_id)
     if not post:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="데이터를 찾을수 없습니다.")
     if post.user != current_user:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="권한이 없습니다.")
-    post_crud.update_post(db, db_post=post, post_update=_post_update)
+
+    image_path = None
+    if image_file:
+        image_path = file_utils.save_image_file(image_file)
+
+    post_update_data = post_schema.PostUpdate(subject=subject, content=content,
+                                              is_anonymous=is_anonymous, content_img=image_path, post_id=post_id)
+
+    post_crud.update_post(db, db_post=post, post_update=post_update_data)
 
 
 @router.delete("/delete", status_code=status.HTTP_204_NO_CONTENT, tags=["Post"])
