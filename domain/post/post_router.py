@@ -18,13 +18,14 @@ router = APIRouter(
 
 
 @router.get("/list", response_model=post_schema.PostList, tags=["Post"],
-            description="board_id가 0이면 전체 게시글 조회, page는 시작 index, size는 조회 개수입니다.")
+            description="board_id가 0이면 전체 게시글 조회, page는 시작 index, size는 조회 개수입니다. keyword를 사용해 검색 가능합니다.")
 def post_list(token: str = None, db: Session = Depends(get_db),
-              board_id: int = 0, page: int = 0, size: int = 10, ):
+              board_id: int = 0, page: int = 0, size: int = 10, search_keyword: str = None):
     current_user = None
     if token:
         current_user = get_current_user(db, token)
-    total, _post_list = post_crud.get_post_list(db, board_id=board_id, start_index=page * size, limit=size)
+    total, _post_list = post_crud.get_post_list(db, board_id=board_id, start_index=page * size, limit=size,
+                                                search_keyword=search_keyword)
 
     if current_user:
         for post in _post_list:

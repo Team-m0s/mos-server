@@ -3,16 +3,20 @@ from datetime import datetime
 from domain.post.post_schema import PostCreate, PostUpdate
 from models import Post, User, Board
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 
 
-def get_post_list(db: Session, board_id: int = 0, start_index: int = 0, limit: int = 10):
-    if board_id == 0:
-        post_list = db.query(Post).order_by(Post.create_date.desc())
-    else:
-        post_list = db.query(Post).filter(Post.board_id == board_id).order_by(Post.create_date.desc())
+def get_post_list(db: Session, board_id: int = 0, start_index: int = 0, limit: int = 10, search_keyword: str = None):
+    query = db.query(Post)
+    if board_id != 0:
+        query = query.filter(Post.board_id == board_id)
+    if search_keyword:
+        keyword_filter = or_(Post.subject.ilike(f"%{search_keyword}%"), Post.content.ilike(f"%{search_keyword}%"))
+        query = query.filter(keyword_filter)
+    query = query.order_by(Post.create_date.desc())
 
-    total = post_list.count()
-    _post_list = post_list.offset(start_index).limit(limit).all()
+    total = query.count()
+    _post_list = query.offset(start_index).limit(limit).all()
     return total, _post_list
 
 
