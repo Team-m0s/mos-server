@@ -6,14 +6,21 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
 
-def get_post_list(db: Session, board_id: int = 0, start_index: int = 0, limit: int = 10, search_keyword: str = None):
+def get_post_list(db: Session, board_id: int = 0, start_index: int = 0, limit: int = 10,
+                  search_keyword: str = None, sort_order: str = 'newest'):
     query = db.query(Post)
     if board_id != 0:
         query = query.filter(Post.board_id == board_id)
     if search_keyword:
         keyword_filter = or_(Post.subject.ilike(f"%{search_keyword}%"), Post.content.ilike(f"%{search_keyword}%"))
         query = query.filter(keyword_filter)
-    query = query.order_by(Post.create_date.desc())
+
+    if sort_order == 'oldest':
+        query = query.order_by(Post.create_date.asc())
+    elif sort_order == 'likes':
+        query = query.order_by(Post.like_count.desc())
+    else:
+        query = query.order_by(Post.create_date.desc())
 
     total = query.count()
     _post_list = query.offset(start_index).limit(limit).all()
