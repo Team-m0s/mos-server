@@ -45,9 +45,12 @@ def post_list(token: str = None, db: Session = Depends(get_db),
 
 
 @router.get("/detail/{post_id}", response_model=post_schema.Post, tags=["Post"])
-def post_detail(post_id: int, token: str = None, db: Session = Depends(get_db)):
+def post_detail(post_id: int, token: str = None, comment_sort_order: str = 'oldest', db: Session = Depends(get_db)):
     current_user = None
-    _post = post_crud.get_post(db, post_id=post_id)
+    _post = post_crud.get_post(db, post_id=post_id, comment_sort_order=comment_sort_order)
+
+    if not _post:
+        raise HTTPException(status_code=404, detail="Post not found")
 
     if token:
         current_user = get_current_user(db, token)

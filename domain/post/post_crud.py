@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from domain.post.post_schema import PostCreate, PostUpdate
-from models import Post, User, Board
+from models import Post, User, Board, Comment
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
@@ -27,8 +27,17 @@ def get_post_list(db: Session, board_id: int = 0, start_index: int = 0, limit: i
     return total, _post_list
 
 
-def get_post(db: Session, post_id: int):
+def get_post(db: Session, post_id: int, comment_sort_order: str = 'oldest'):
     post = db.query(Post).get(post_id)
+
+    if post:
+        if comment_sort_order == 'newest':
+            comments = db.query(Comment).filter(Comment.post_id == post.id).order_by(Comment.create_date.desc()).all()
+        else:
+            comments = db.query(Comment).filter(Comment.post_id == post.id).order_by(Comment.create_date.asc()).all()
+
+        post.comment_posts = comments
+
     return post
 
 
