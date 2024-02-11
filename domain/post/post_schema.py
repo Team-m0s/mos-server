@@ -1,6 +1,7 @@
 import datetime
 from domain.user.user_schema import PostUser
 from pydantic import BaseModel, field_validator
+from typing import Optional
 from domain.comment.comment_schema import Comment
 from domain.board.board_schema import Board
 
@@ -28,13 +29,19 @@ class PostList(BaseModel):
 class PostCreate(BaseModel):
     subject: str
     content: str
-    content_img: str | None
+    content_img: Optional[str] = None
     is_anonymous: bool
 
-    @field_validator('subject', 'content')
-    def not_empty(cls, v):
-        if not v or not v.strip():
-            raise ValueError('빈 값은 허용되지 않습니다.')
+    @field_validator('subject')
+    def subject_length(cls, v):
+        if not v or len(v.strip()) < 2:
+            raise ValueError('제목은 공백 제외 2글자 이상이어야 합니다.')
+        return v
+
+    @field_validator('content')
+    def content_length(cls, v):
+        if not v or len(v.strip()) < 5:
+            raise ValueError('내용은 공백 제외 5글자 이상이어야 합니다.')
         return v
 
 

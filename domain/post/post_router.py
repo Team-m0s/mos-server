@@ -1,12 +1,12 @@
 from typing import Optional
-
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Form, UploadFile, File
 from sqlalchemy.orm import Session
 from starlette import status
-
-import jwt_token
+from uuid import uuid4
 from models import User
 from database import get_db
+
+from utils import file_utils
 from domain.post import post_schema, post_crud
 from domain.like import like_crud
 from domain.user.user_crud import get_current_user
@@ -64,12 +64,25 @@ def post_detail(post_id: int, token: str = None, db: Session = Depends(get_db)):
 
 
 @router.post("/create", status_code=status.HTTP_204_NO_CONTENT, tags=["Post"])
-def post_create(token: str, board_id: int, _post_create: post_schema.PostCreate, db: Session = Depends(get_db)):
+def post_create(token: str = Form(...), board_id: int = Form(...),
+                subject: str = Form(...), content: str = Form(...),
+                is_anonymous: bool = Form(...),
+                image_file: Optional[UploadFile] = File(None),
+                db: Session = Depends(get_db)):
+
     current_user = get_current_user(db, token)
     board = board_crud.get_board(db, board_id)
     if not board:
         raise HTTPException(status_code=404, detail="Board not found")
-    _post_create = post_crud.create_post(db, post_create=_post_create, board=board, user=current_user)
+
+    image_path = None
+    if image_file:
+        image_path = file_utils.save_image_file(image_file)
+
+    post_create_data = post_schema.PostCreate(subject=subject, content=content,
+                                              is_anonymous=is_anonymous, content_img=image_path)
+
+    _post_create = post_crud.create_post(db, post_create=post_create_data, board=board, user=current_user)
 
 
 @router.put("/update", status_code=status.HTTP_204_NO_CONTENT, tags=["Post"])
