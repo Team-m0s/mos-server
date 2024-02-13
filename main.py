@@ -20,6 +20,7 @@ from domain.comment import comment_router
 from domain.like import like_router
 from domain.user import user_router
 from domain.board import board_router
+from domain.accompany import accompany_router
 
 load_dotenv()
 
@@ -158,3 +159,4 @@ app.include_router(comment_router.router)
 app.include_router(like_router.router)
 app.include_router(user_router.router)
 app.include_router(board_router.router)
+app.include_router(accompany_router.router)
