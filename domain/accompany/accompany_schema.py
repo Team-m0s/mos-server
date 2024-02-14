@@ -1,7 +1,7 @@
 from pydantic import BaseModel, field_validator
 import datetime
 from enum import Enum
-from typing import List
+from typing import List, Optional
 from models import ActivityScope, Tag, Image, Notice
 from domain.user.user_schema import UserBase
 from models import ActivityScope
@@ -42,7 +42,7 @@ class AccompanyBase(BaseModel):
     leader_id: int
     leader: UserBase
     member: list[UserBase] = []
-    images_accompany: List[ImageBase] = []
+    image_urls: List[str] = []
     tags_accompany: List[TagBase] = []
     notices_accompany: List[NoticeBase] = []
     introduce: str
@@ -57,10 +57,10 @@ class AccompanyCreate(BaseModel):
     category: str
     title: str
     activity_scope: ActivityScope
-    images_accompany: List[ImageCreate] = []
+    images_accompany: Optional[List[ImageCreate]] = None
     city: str
     introduce: str
     total_member: int
-    tags_accompany: List[TagCreate] = []
+    tags_accompany: Optional[List[TagCreate]] = None
 
 

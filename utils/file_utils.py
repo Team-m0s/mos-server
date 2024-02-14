@@ -8,7 +8,7 @@ def save_image_file(image_file: UploadFile):
     try:
         file_extension = os.path.splitext(image_file.filename)[1]
         file_name = f"{uuid4()}{file_extension}"  # 고유한 파일명 생성
-        file_path = f"./uploaded_images/{file_name}"
+        file_path = f"uploaded_images/{file_name}"
 
         with open(file_path, "wb") as buffer:
             buffer.write(image_file.file.read())

@@ -13,6 +13,10 @@ def get_accompany_list(db: Session):
     return accompany_list
 
 
+def get_image_by_accompany_id(db: Session, accompany_id: int):
+    return db.query(Image).filter(Image.accompany_id == accompany_id).all()
+
+
 def create_accompany(db: Session, accompany_create: AccompanyCreate, user: User):
     db_accompany = Accompany(title=accompany_create.title,
                              category=accompany_create.category,

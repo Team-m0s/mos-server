@@ -1,13 +1,12 @@
 from fastapi import APIRouter, Depends, Form, File, UploadFile
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from starlette import status
 
 from database import get_db
 from domain.accompany import accompany_schema, accompany_crud
 from domain.user import user_crud
 from utils import file_utils
-
 
 router = APIRouter(
     prefix="/api/accompany"
@@ -22,6 +21,10 @@ def accompany_list(db: Session = Depends(get_db)):
         leader = user_crud.get_user_by_id(db, user_id=accompany.leader_id)
         accompany.leader = leader
         accompany.member = [member for member in accompany.member if member.id != accompany.leader_id]
+
+        images = accompany_crud.get_image_by_accompany_id(db, accompany_id=accompany.id)
+        accompany.image_urls = [f"http://127.0.0.1:8000/static/{image.image_url}" for image in images if
+                                image.image_url] if images else []
     return _accompany_list
 
 
@@ -30,7 +33,7 @@ def accompany_create(token: str = Form(...), category: str = Form(...),
                      title: str = Form(...), activity_scope: accompany_schema.ActivityScope = Form(...),
                      images: List[UploadFile] = File(None), city: str = Form(...),
                      introduce: str = Form(...), total_member: int = Form(...),
-                     tags: List[str] = Form(...), db: Session = Depends(get_db)):
+                     tags: List[str] = Form(None), db: Session = Depends(get_db)):
 
     current_user = user_crud.get_current_user(db, token)
 
@@ -39,7 +42,10 @@ def accompany_create(token: str = Form(...), category: str = Form(...),
         for image in images:
             image_path.append(file_utils.save_image_file(image))
 
-    split_tags = [tag.strip() for sublist in tags for tag in sublist.split(',')]
+    split_tags = []
+    if tags:
+        split_tags = [tag.strip() for tag in tags if tag]
+
     image_creates = [accompany_schema.ImageCreate(image_url=path) for path in image_path]
     tag_creates = [accompany_schema.TagCreate(name=tag) for tag in split_tags]
     print(image_creates)
@@ -50,6 +56,4 @@ def accompany_create(token: str = Form(...), category: str = Form(...),
                                                              city=city, introduce=introduce, total_member=total_member,
                                                              tags_accompany=tag_creates)
     accompany_crud.create_accompany(db, accompany_create=accompany_create_data, user=current_user)
-
-
 
