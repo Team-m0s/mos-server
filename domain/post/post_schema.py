@@ -1,9 +1,10 @@
 import datetime
 from domain.user.user_schema import PostUser
 from pydantic import BaseModel, field_validator
-from typing import Optional
+from typing import Optional, List
 from domain.comment.comment_schema import Comment
 from domain.board.board_schema import Board
+from domain.accompany.accompany_schema import ImageCreate
 
 
 class Post(BaseModel):
@@ -29,7 +30,7 @@ class PostList(BaseModel):
 class PostCreate(BaseModel):
     subject: str
     content: str
-    content_img: Optional[str] = None
+    images_post: Optional[List[ImageCreate]] = None
     is_anonymous: bool
 
     @field_validator('subject')

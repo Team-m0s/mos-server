@@ -1,9 +1,10 @@
 from datetime import datetime
 
 from domain.post.post_schema import PostCreate, PostUpdate
-from models import Post, User, Board, Comment
+from models import Post, User, Board, Comment, Image
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
+import domain.accompany.accompany_crud
 
 
 def get_post_list(db: Session, board_id: int = 0, start_index: int = 0, limit: int = 10,
@@ -45,11 +46,17 @@ def create_post(db: Session, post_create: PostCreate, board: Board, user: User):
     db_post = Post(board=board,
                    subject=post_create.subject,
                    content=post_create.content,
-                   content_img=post_create.content_img,
                    is_anonymous=post_create.is_anonymous,
                    create_date=datetime.now(),
                    user=user)
     db.add(db_post)
+    db.commit()
+    db.refresh(db_post)
+
+    for image in post_create.images_post:
+        db_image = Image(image_url=image.image_url, post_id=db_post.id)
+        db.add(db_image)
+
     db.commit()
 
 

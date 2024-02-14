@@ -26,7 +26,6 @@ class Post(Base):
     subject = Column(String, nullable=False)
     content = Column(Text, nullable=False)
     like_count = Column(Integer, default=0)
-    content_img = Column(String, nullable=True)
     is_anonymous = Column(Boolean, nullable=False, default=True)
     report_count = Column(Integer, nullable=False, default=0)
     create_date = Column(DateTime, nullable=False)
@@ -112,6 +111,8 @@ class Image(Base):
     __tablename__ = "image"
     id = Column(Integer, primary_key=True)
     image_url = Column(String, nullable=False)
+    post_id = Column(Integer, ForeignKey("post.id"))
+    post = relationship("Post", backref="images_post")
     accompany_id = Column(Integer, ForeignKey("accompany.id"))
     accompany = relationship("Accompany", backref="images_accompany")
 

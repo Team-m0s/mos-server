@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from fastapi import APIRouter, Depends, Header, HTTPException, Form, UploadFile, File
 from sqlalchemy.orm import Session
 from starlette import status
@@ -11,6 +11,7 @@ from domain.post import post_schema, post_crud
 from domain.like import like_crud
 from domain.user.user_crud import get_current_user
 from domain.board import board_crud
+from domain.accompany import accompany_schema
 
 router = APIRouter(
     prefix="/api/post",
@@ -71,7 +72,7 @@ def post_detail(post_id: int, token: str = None, comment_sort_order: str = 'olde
 def post_create(token: str = Form(...), board_id: int = Form(...),
                 subject: str = Form(...), content: str = Form(...),
                 is_anonymous: bool = Form(...),
-                image_file: Optional[UploadFile] = File(None),
+                images: List[UploadFile] = File(None),
                 db: Session = Depends(get_db)):
 
     current_user = get_current_user(db, token)
@@ -79,12 +80,14 @@ def post_create(token: str = Form(...), board_id: int = Form(...),
     if not board:
         raise HTTPException(status_code=404, detail="Board not found")
 
-    image_path = None
-    if image_file:
-        image_path = file_utils.save_image_file(image_file)
+    image_path = []
+    if images:
+        for image in images:
+            image_path.append(file_utils.save_image_file(image))
+    image_creates = [accompany_schema.ImageCreate(image_url=path) for path in image_path]
 
     post_create_data = post_schema.PostCreate(subject=subject, content=content,
-                                              is_anonymous=is_anonymous, content_img=image_path)
+                                              is_anonymous=is_anonymous, images_post=image_creates)
 
     post_crud.create_post(db, post_create=post_create_data, board=board, user=current_user)
 
