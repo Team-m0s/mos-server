@@ -4,10 +4,15 @@ from enum import Enum
 from typing import List
 from models import ActivityScope, Tag, Image, Notice
 from domain.user.user_schema import UserBase
+from models import ActivityScope
 
 
 class ImageBase(BaseModel):
     id: int
+    image_url: str
+
+
+class ImageCreate(BaseModel):
     image_url: str
 
 
@@ -16,8 +21,16 @@ class TagBase(BaseModel):
     name: str
 
 
+class TagCreate(BaseModel):
+    name: str
+
+
 class NoticeBase(BaseModel):
     id: int
+    content: str
+
+
+class NoticeCreate(BaseModel):
     content: str
 
 
@@ -38,4 +51,16 @@ class AccompanyBase(BaseModel):
     update_date: datetime.datetime | None
     chat_count: int
     like_count: int
+
+
+class AccompanyCreate(BaseModel):
+    category: str
+    title: str
+    activity_scope: ActivityScope
+    images_accompany: List[ImageCreate] = []
+    city: str
+    introduce: str
+    total_member: int
+    tags_accompany: List[TagCreate] = []
+
 

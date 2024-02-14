@@ -86,7 +86,7 @@ def post_create(token: str = Form(...), board_id: int = Form(...),
     post_create_data = post_schema.PostCreate(subject=subject, content=content,
                                               is_anonymous=is_anonymous, content_img=image_path)
 
-    _post_create = post_crud.create_post(db, post_create=post_create_data, board=board, user=current_user)
+    post_crud.create_post(db, post_create=post_create_data, board=board, user=current_user)
 
 
 @router.put("/update", status_code=status.HTTP_204_NO_CONTENT, tags=["Post"])
