@@ -25,6 +25,14 @@ class TagBase(BaseModel):
 class TagCreate(BaseModel):
     name: str
 
+    @field_validator('name')
+    def introduce_length(cls, v):
+        if not v or len(v.strip()) < 2:  # 공백을 제외한 길이가 2글자 미만인 경우
+            raise ValueError('내용은 공백 제외 2글자 이상이어야 합니다.')
+        if len(v) > 8:
+            raise ValueError('내용은 공백 포함 8글자 이하이어야 합니다.')
+        return v
+
 
 class AccompanyBase(BaseModel):
     id: int
@@ -55,5 +63,21 @@ class AccompanyCreate(BaseModel):
     introduce: str
     total_member: int
     tags_accompany: Optional[List[TagCreate]] = None
+
+    @field_validator('content')
+    def content_length(cls, v):
+        if not v or len(v.strip()) < 2:  # 공백을 제외한 길이가 2글자 미만인 경우
+            raise ValueError('내용은 공백 제외 2글자 이상이어야 합니다.')
+        if len(v) > 30:  # 공백 포함 길이가 30글자를 초과하는 경우
+            raise ValueError('내용은 공백 포함 30글자 이하이어야 합니다.')
+        return v
+
+    @field_validator('introduce')
+    def introduce_length(cls, v):
+        if not v or len(v.strip()) < 2:  # 공백을 제외한 길이가 2글자 미만인 경우
+            raise ValueError('내용은 공백 제외 2글자 이상이어야 합니다.')
+        if len(v) > 1000:
+            raise ValueError('내용은 공백 포함 1000글자 이하이어야 합니다.')
+        return v
 
 
