@@ -4,7 +4,7 @@ from enum import Enum
 from typing import List, Optional
 from models import ActivityScope, Tag, Image, Notice
 from domain.user.user_schema import UserBase
-from models import ActivityScope
+from models import ActivityScope, Category
 
 
 class ImageBase(BaseModel):
@@ -36,6 +36,7 @@ class NoticeCreate(BaseModel):
 
 class AccompanyBase(BaseModel):
     id: int
+    category: Category
     title: str
     city: str
     total_member: int
@@ -54,7 +55,7 @@ class AccompanyBase(BaseModel):
 
 
 class AccompanyCreate(BaseModel):
-    category: str
+    category: Category
     title: str
     activity_scope: ActivityScope
     images_accompany: Optional[List[ImageCreate]] = None

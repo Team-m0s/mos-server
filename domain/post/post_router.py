@@ -20,9 +20,9 @@ router = APIRouter(
 
 @router.get("/list", response_model=post_schema.PostList, tags=["Post"],
             description="board_id가 0이면 전체 게시글 조회, page는 시작 index, size는 조회 개수입니다. keyword를 사용해 검색 가능합니다."
-                        "\n정렬 순서는 기본 최신순이며, 과거순은 'oldest' 좋아요순은 'likes'를 넣어서 요청하시면 됩니다.")
+                        "\n정렬 순서는 기본 최신순이며, 과거순은 'oldest' 좋아요순은 'popularity'를 넣어서 요청하시면 됩니다.")
 def post_list(token: str = None, db: Session = Depends(get_db),
-              board_id: int = 0, page: int = 0, size: int = 10, search_keyword: str = None, sort_order: str = 'newest'):
+              board_id: int = 0, page: int = 0, size: int = 10, search_keyword: str = None, sort_order: str = 'latest'):
     current_user = None
     if token:
         current_user = get_current_user(db, token)

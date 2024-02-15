@@ -8,7 +8,7 @@ import domain.accompany.accompany_crud
 
 
 def get_post_list(db: Session, board_id: int = 0, start_index: int = 0, limit: int = 10,
-                  search_keyword: str = None, sort_order: str = 'newest'):
+                  search_keyword: str = None, sort_order: str = 'latest'):
     query = db.query(Post)
     if board_id != 0:
         query = query.filter(Post.board_id == board_id)
@@ -18,7 +18,7 @@ def get_post_list(db: Session, board_id: int = 0, start_index: int = 0, limit: i
 
     if sort_order == 'oldest':
         query = query.order_by(Post.create_date.asc())
-    elif sort_order == 'likes':
+    elif sort_order == 'popularity':
         query = query.order_by(Post.like_count.desc())
     else:
         query = query.order_by(Post.create_date.desc())
@@ -32,7 +32,7 @@ def get_post(db: Session, post_id: int, comment_sort_order: str = 'oldest'):
     post = db.query(Post).get(post_id)
 
     if post:
-        if comment_sort_order == 'newest':
+        if comment_sort_order == 'latest':
             comments = db.query(Comment).filter(Comment.post_id == post.id).order_by(Comment.create_date.desc()).all()
         else:
             comments = db.query(Comment).filter(Comment.post_id == post.id).order_by(Comment.create_date.asc()).all()

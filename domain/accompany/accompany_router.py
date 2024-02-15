@@ -29,7 +29,7 @@ def accompany_list(db: Session = Depends(get_db)):
 
 
 @router.post("/create", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
-def accompany_create(token: str = Form(...), category: str = Form(...),
+def accompany_create(token: str = Form(...), category: accompany_schema.Category = Form(...),
                      title: str = Form(...), activity_scope: accompany_schema.ActivityScope = Form(...),
                      images: List[UploadFile] = File(None), city: str = Form(...),
                      introduce: str = Form(...), total_member: int = Form(...),
@@ -44,7 +44,7 @@ def accompany_create(token: str = Form(...), category: str = Form(...),
 
     split_tags = []
     if tags:
-        split_tags = [tag.strip() for tag in tags if tag]
+        split_tags = [tag.strip() for sublist in tags for tag in sublist.split(',')]
 
     image_creates = [accompany_schema.ImageCreate(image_url=path) for path in image_path]
     tag_creates = [accompany_schema.TagCreate(name=tag) for tag in split_tags]
