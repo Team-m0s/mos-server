@@ -81,19 +81,19 @@ class ActivityScope(enum.Enum):
 
 
 class Category(enum.Enum):
-    activity = '액티비티',
-    cultureArt = '문화 ･ 예술',
-    hobby = '취미생활',
-    musicInstrument = '음악 ･ 악기',
-    volunteering = '봉사활동',
-    oneDayClass = '원데이 클래스',
-    parentingPet = '육아 ･ 반려동물',
-    foodTour = '맛집 투어',
-    languageExchange = '언어 교환',
-    game = '게임 ･ 오락',
-    exerciseSport = '운동 ･ 스포츠',
-    booksSelfImprovement = '책 ･ 자기계발',
-    dating = '연애',
+    activity = '액티비티'
+    cultureArt = '문화 ･ 예술'
+    hobby = '취미생활'
+    musicInstrument = '음악 ･ 악기'
+    volunteering = '봉사활동'
+    oneDayClass = '원데이 클래스'
+    parentingPet = '육아 ･ 반려동물'
+    foodTour = '맛집 투어'
+    languageExchange = '언어 교환'
+    game = '게임 ･ 오락'
+    exerciseSport = '운동 ･ 스포츠'
+    booksSelfImprovement = '책 ･ 자기계발'
+    dating = '연애'
     others = '기타'
 
 

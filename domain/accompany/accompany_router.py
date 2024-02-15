@@ -43,7 +43,7 @@ def accompany_create(token: str = Form(...), category: accompany_schema.Category
             image_path.append(file_utils.save_image_file(image))
 
     split_tags = []
-    if tags:
+    if tags and any(tags):
         split_tags = [tag.strip() for sublist in tags for tag in sublist.split(',')]
 
     image_creates = [accompany_schema.ImageCreate(image_url=path) for path in image_path]
