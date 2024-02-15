@@ -146,5 +146,6 @@ class Notice(Base):
     __tablename__ = "notice"
     id = Column(Integer, primary_key=True)
     content = Column(String, nullable=False)
+    create_date = Column(DateTime, nullable=False)
     accompany_id = Column(Integer, ForeignKey("accompany.id"))
     accompany = relationship("Accompany", backref="notices_accompany")

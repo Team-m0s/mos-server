@@ -42,6 +42,10 @@ def get_post(db: Session, post_id: int, comment_sort_order: str = 'oldest'):
     return post
 
 
+def get_image_by_post_id(db: Session, post_id: int):
+    return db.query(Image).filter(Image.post_id == post_id).all()
+
+
 def create_post(db: Session, post_create: PostCreate, board: Board, user: User):
     db_post = Post(board=board,
                    subject=post_create.subject,

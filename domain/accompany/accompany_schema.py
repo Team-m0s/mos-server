@@ -28,6 +28,7 @@ class TagCreate(BaseModel):
 class NoticeBase(BaseModel):
     id: int
     content: str
+    create_date: datetime.datetime
 
 
 class NoticeCreate(BaseModel):

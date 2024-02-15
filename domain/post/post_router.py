@@ -29,6 +29,11 @@ def post_list(token: str = None, db: Session = Depends(get_db),
     total, _post_list = post_crud.get_post_list(db, board_id=board_id, start_index=page * size, limit=size,
                                                 search_keyword=search_keyword, sort_order=sort_order)
 
+    for post in _post_list:
+        images = post_crud.get_image_by_post_id(db, post_id=post.id)
+        post.image_urls = [f"http://127.0.0.1:8000/static/{image.image_url}" for image in images if
+                           image.image_url] if images else []
+
     if current_user:
         for post in _post_list:
             post_like = like_crud.get_post_like(db, post_id=post.id, user=current_user)
@@ -74,7 +79,6 @@ def post_create(token: str = Form(...), board_id: int = Form(...),
                 is_anonymous: bool = Form(...),
                 images: List[UploadFile] = File(None),
                 db: Session = Depends(get_db)):
-
     current_user = get_current_user(db, token)
     board = board_crud.get_board(db, board_id)
     if not board:
