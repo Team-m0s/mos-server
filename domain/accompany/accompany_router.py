@@ -62,7 +62,7 @@ def accompany_create(token: str = Form(...), category: accompany_schema.Category
 
 
 @router.post("/create/notice", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
-def accompany_create_notice(token: str, accompany_id: int, _notice_create: accompany_schema.NoticeCreate,
+def accompany_create_notice(token: str, accompany_id: int, _notice_create: notice_schema.NoticeCreate,
                             db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
 
@@ -74,6 +74,38 @@ def accompany_create_notice(token: str, accompany_id: int, _notice_create: accom
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="권한이 없습니다.")
 
     notice_crud.create_accompany_notice(db, accompany_id=accompany_id, notice_create=_notice_create)
+
+
+@router.put("/update/notice", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
+def accompany_update_notice(token: str, _notice_update: notice_schema.NoticeUpdate,
+                            db: Session = Depends(get_db)):
+    current_user = user_crud.get_current_user(db, token)
+
+    notice = notice_crud.get_notice_by_id(db, notice_id=_notice_update.notice_id)
+    if not notice:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"데이터를 찾을 수 없습니다.")
+
+    accompany = accompany_crud.get_accompany_by_id(db, accompany_id=notice.accompany_id)
+    if current_user.id != accompany.leader_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="권한이 없습니다.")
+
+    notice_crud.update_accompany_notice(db, db_notice=notice, notice_update=_notice_update)
+
+
+@router.delete("/delete/notice", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
+def accompany_delete_notice(token: str, _notice_delete: notice_schema.NoticeDelete,
+                            db: Session = Depends(get_db)):
+    current_user = user_crud.get_current_user(db, token)
+
+    notice = notice_crud.get_notice_by_id(db, notice_id=_notice_delete.notice_id)
+    if not notice:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"데이터를 찾을 수 없습니다.")
+
+    accompany = accompany_crud.get_accompany_by_id(db, accompany_id=notice.accompany_id)
+    if current_user.id != accompany.leader_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="권한이 없습니다.")
+
+    notice_crud.delete_accompany_notice(db, db_notice=notice)
 
 
 @router.delete("/ban-member/{accompany_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
@@ -93,3 +125,4 @@ def accompany_ban_member(token: str, accompany_id: int, user_id: int, db: Sessio
                             detail=f"해당 멤버가 존재하지 않습니다.")
 
     accompany_crud.ban_accompany_member(db, accompany_id=accompany.id, member_id=member.id)
+

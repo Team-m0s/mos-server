@@ -6,6 +6,7 @@ class NoticeBase(BaseModel):
     id: int
     content: str
     create_date: datetime.datetime
+    update_date: datetime.datetime
 
 
 class NoticeCreate(BaseModel):
@@ -18,3 +19,12 @@ class NoticeCreate(BaseModel):
         if len(v) > 1000:  # 공백 포함 길이가 1000글자를 초과하는 경우
             raise ValueError('내용은 공백 포함 1000글자 이하이어야 합니다.')
         return v
+
+
+class NoticeUpdate(NoticeCreate):
+    notice_id: int
+
+
+class NoticeDelete(BaseModel):
+    notice_id: int
+

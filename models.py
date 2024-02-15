@@ -147,5 +147,6 @@ class Notice(Base):
     id = Column(Integer, primary_key=True)
     content = Column(String, nullable=False)
     create_date = Column(DateTime, nullable=False)
+    update_date = Column(DateTime, nullable=True)
     accompany_id = Column(Integer, ForeignKey("accompany.id"))
     accompany = relationship("Accompany", backref="notices_accompany")
