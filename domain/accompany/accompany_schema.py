@@ -44,7 +44,7 @@ class AccompanyBase(BaseModel):
     leader_id: int
     leader: UserBase
     member: list[UserBase] = []
-    image_urls: List[str] = []
+    image_urls: List[ImageBase] = []
     tags_accompany: List[TagBase] = []
     notices_accompany: List[NoticeBase] = []
     introduce: str

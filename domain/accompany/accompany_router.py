@@ -23,8 +23,9 @@ def accompany_list(db: Session = Depends(get_db)):
         accompany.member = [member for member in accompany.member if member.id != accompany.leader_id]
 
         images = accompany_crud.get_image_by_accompany_id(db, accompany_id=accompany.id)
-        accompany.image_urls = [f"http://127.0.0.1:8000/static/{image.image_url}" for image in images if
-                                image.image_url] if images else []
+        accompany.image_urls = [accompany_schema.ImageBase(id=image.id,
+                                image_url=f"http://127.0.0.1:8000/static/{image.image_url}") for
+                                image in images if image.image_url] if images else []
     return _accompany_list
 
 

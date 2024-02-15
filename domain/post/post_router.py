@@ -31,8 +31,9 @@ def post_list(token: str = None, db: Session = Depends(get_db),
 
     for post in _post_list:
         images = post_crud.get_image_by_post_id(db, post_id=post.id)
-        post.image_urls = [f"http://127.0.0.1:8000/static/{image.image_url}" for image in images if
-                           image.image_url] if images else []
+        post.image_urls = [accompany_schema.ImageBase(id=image.id,
+                           image_url=f"http://127.0.0.1:8000/static/{image.image_url}") for
+                           image in images if image.image_url] if images else []
 
     if current_user:
         for post in _post_list:

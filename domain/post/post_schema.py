@@ -4,7 +4,7 @@ from pydantic import BaseModel, field_validator
 from typing import Optional, List
 from domain.comment.comment_schema import Comment
 from domain.board.board_schema import Board
-from domain.accompany.accompany_schema import ImageCreate
+from domain.accompany.accompany_schema import ImageCreate, ImageBase
 
 
 class Post(BaseModel):
@@ -15,7 +15,7 @@ class Post(BaseModel):
     content: str
     like_count: int
     is_liked_by_user: bool = False
-    image_urls: List[str] = []
+    image_urls: List[ImageBase] = []
     is_anonymous: bool
     create_date: datetime.datetime
     modify_date: datetime.datetime | None
