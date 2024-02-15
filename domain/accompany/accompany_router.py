@@ -5,6 +5,7 @@ from starlette import status
 
 from database import get_db
 from domain.accompany import accompany_schema, accompany_crud
+from domain.notice import notice_schema, notice_crud
 from domain.user import user_crud
 from utils import file_utils
 
@@ -24,7 +25,8 @@ def accompany_list(db: Session = Depends(get_db)):
 
         images = accompany_crud.get_image_by_accompany_id(db, accompany_id=accompany.id)
         accompany.image_urls = [accompany_schema.ImageBase(id=image.id,
-                                image_url=f"http://127.0.0.1:8000/static/{image.image_url}") for
+                                                           image_url=f"http://127.0.0.1:8000/static/{image.image_url}")
+                                for
                                 image in images if image.image_url] if images else []
     return _accompany_list
 
@@ -35,7 +37,6 @@ def accompany_create(token: str = Form(...), category: accompany_schema.Category
                      images: List[UploadFile] = File(None), city: str = Form(...),
                      introduce: str = Form(...), total_member: int = Form(...),
                      tags: List[str] = Form(None), db: Session = Depends(get_db)):
-
     current_user = user_crud.get_current_user(db, token)
 
     image_path = []
@@ -53,10 +54,26 @@ def accompany_create(token: str = Form(...), category: accompany_schema.Category
     print(tag_creates)
 
     accompany_create_data = accompany_schema.AccompanyCreate(title=title, category=category,
-                                                             activity_scope=activity_scope, images_accompany=image_creates,
+                                                             activity_scope=activity_scope,
+                                                             images_accompany=image_creates,
                                                              city=city, introduce=introduce, total_member=total_member,
                                                              tags_accompany=tag_creates)
     accompany_crud.create_accompany(db, accompany_create=accompany_create_data, user=current_user)
+
+
+@router.post("/create/notice", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
+def accompany_create_notice(token: str, accompany_id: int, _notice_create: accompany_schema.NoticeCreate,
+                            db: Session = Depends(get_db)):
+    current_user = user_crud.get_current_user(db, token)
+
+    accompany = accompany_crud.get_accompany_by_id(db, accompany_id=accompany_id)
+    if not accompany:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"동행을 찾을 수 없습니다.")
+
+    if current_user.id != accompany.leader_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="권한이 없습니다.")
+
+    notice_crud.create_accompany_notice(db, accompany_id=accompany_id, notice_create=_notice_create)
 
 
 @router.delete("/ban-member/{accompany_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])

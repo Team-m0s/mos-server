@@ -54,7 +54,7 @@ oauth.register(
     authorize_url='https://accounts.google.com/o/oauth2/auth',
     client_kwargs={
         'scope': 'email openid profile',
-        # 'redirect_url': 'http://127.0.0.1:8000/auth'
+        # 'redirect_url': 'http://127.0.0.1:8000/login/google/auth'
     }
 )
 
@@ -97,11 +97,11 @@ async def welcome():
 
 @app.get("/login/google", tags=["Google"])
 async def login(request: Request):
-    redirect_uri = request.url_for('auth')
+    redirect_uri = request.url_for("google_auth")
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
 
-@app.get('/auth', tags=["Google"])
+@app.get("/login/google/auth", tags=["Google"], name="google_auth")
 async def auth(request: Request, db: Session = Depends(get_db)):
     try:
         token = await oauth.google.authorize_access_token(request)
@@ -141,9 +141,6 @@ async def auth_callback(request: Request, db: Session = Depends(get_db)):
 
     if db_user is None:
         user_crud.create_user_kakao(db, user_info=user_info)
-        print("회원가입 완료")
-    else:
-        print("이미 가입된 회원")
 
     # 토큰 생성
     access_token = jwt_token.create_access_token(data={"sub": user_info['email']})

@@ -39,7 +39,6 @@ def create_accompany(db: Session, accompany_create: AccompanyCreate, user: User)
         db.add(db_image)
 
     for tag in accompany_create.tags_accompany:
-        print(tag.name)
         db_tag = Tag(name=tag.name, accompany_id=db_accompany.id)
         db.add(db_tag)
 

@@ -4,6 +4,7 @@ from enum import Enum
 from typing import List, Optional
 from models import ActivityScope, Tag, Image, Notice
 from domain.user.user_schema import UserBase
+from domain.notice.notice_schema import NoticeCreate, NoticeBase
 from models import ActivityScope, Category
 
 
@@ -23,16 +24,6 @@ class TagBase(BaseModel):
 
 class TagCreate(BaseModel):
     name: str
-
-
-class NoticeBase(BaseModel):
-    id: int
-    content: str
-    create_date: datetime.datetime
-
-
-class NoticeCreate(BaseModel):
-    content: str
 
 
 class AccompanyBase(BaseModel):
