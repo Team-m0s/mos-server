@@ -1,12 +1,14 @@
 from pydantic import BaseModel, field_validator
 import datetime
+from domain.comment.comment_schema import NoticeComment
 
 
 class NoticeBase(BaseModel):
     id: int
     content: str
     create_date: datetime.datetime
-    update_date: datetime.datetime
+    update_date: datetime.datetime | None
+    comment_notices: list[NoticeComment] = []
 
 
 class NoticeCreate(BaseModel):

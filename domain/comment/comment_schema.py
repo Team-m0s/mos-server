@@ -18,6 +18,16 @@ class SubCommentCreate(CommentCreate):
     pass
 
 
+class NoticeCommentCreate(BaseModel):
+    content: str
+
+    @field_validator('content')
+    def not_empty(cls, v):
+        if not v or not v.strip():
+            raise ValueError('빈 값은 허용되지 않습니다.')
+        return v
+
+
 class Comment(BaseModel):
     id: int
     parent_id: int | None
@@ -29,6 +39,18 @@ class Comment(BaseModel):
     create_date: datetime.datetime
     modify_date: datetime.datetime | None
     post_id: int
+
+
+class NoticeComment(BaseModel):
+    id: int
+    parent_id: int | None
+    content: str
+    like_count: int
+    is_liked_by_user: bool = False
+    is_anonymous: bool
+    user: CommentUser | None
+    create_date: datetime.datetime
+    modify_date: datetime.datetime | None
 
 
 class CommentUpdate(CommentCreate):

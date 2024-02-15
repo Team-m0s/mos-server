@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Boolean, JSON, Enum, Table
 from sqlalchemy.orm import relationship
 
+from pydantic import BaseModel
 from database import Base
 from datetime import datetime
 
@@ -34,7 +35,6 @@ class Post(Base):
     user = relationship("User", backref="post_users")
     board_id = Column(Integer, ForeignKey("board.id"))
     board = relationship("Board", backref="post_boards")
-    # 닉네임, 좋아요 추가 필요
 
 
 class Comment(Base):
@@ -51,6 +51,8 @@ class Comment(Base):
     user = relationship("User", backref="comment_users")
     post_id = Column(Integer, ForeignKey("post.id"))
     post = relationship("Post", backref="comment_posts")
+    notice_id = Column(Integer, ForeignKey("notice.id"))
+    notice = relationship("Notice", backref="comment_notices")
 
 
 class Like(Base):

@@ -23,7 +23,7 @@ class UserBase(BaseModel):
     lang_level: Dict[str, int]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserCreate(BaseModel):

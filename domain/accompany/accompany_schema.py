@@ -4,7 +4,7 @@ from enum import Enum
 from typing import List, Optional
 from models import ActivityScope, Tag, Image, Notice
 from domain.user.user_schema import UserBase
-from domain.notice.notice_schema import NoticeCreate, NoticeBase
+from domain.notice.notice_schema import NoticeBase
 from models import ActivityScope, Category
 
 

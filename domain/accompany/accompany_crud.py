@@ -42,6 +42,9 @@ def create_accompany(db: Session, accompany_create: AccompanyCreate, user: User)
         db_tag = Tag(name=tag.name, accompany_id=db_accompany.id)
         db.add(db_tag)
 
+    # 생성자(leader)를 accompany_member에 추가
+    db.add(accompany_member.insert().values(user_id=user.id, accompany_id=db_accompany.id))
+
     db.commit()
 
 

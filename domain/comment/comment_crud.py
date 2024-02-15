@@ -2,8 +2,8 @@ from datetime import datetime
 
 from sqlalchemy.orm import Session
 
-from domain.comment.comment_schema import CommentCreate, CommentUpdate, CommentDelete, SubCommentCreate
-from models import Post, Comment, User
+from domain.comment.comment_schema import CommentCreate, CommentUpdate, CommentDelete, SubCommentCreate, NoticeCommentCreate
+from models import Post, Comment, User, Notice
 
 
 def create_comment(db: Session, post: Post, comment_create: CommentCreate, user: User):
@@ -24,6 +24,16 @@ def create_sub_comment(db: Session, comment: Comment, sub_comment_create: SubCom
                              create_date=datetime.now(),
                              user=user)
     db.add(db_sub_comment)
+    db.commit()
+
+
+def create_notice_comment(db: Session, notice: Notice, notice_comment_create: NoticeCommentCreate, user: User):
+    db_notice_comment = Comment(notice=notice,
+                                content=notice_comment_create.content,
+                                is_anonymous=False,
+                                create_date=datetime.now(),
+                                user=user)
+    db.add(db_notice_comment)
     db.commit()
 
 
