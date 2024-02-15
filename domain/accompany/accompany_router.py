@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Form, File, UploadFile
+from fastapi import APIRouter, Depends, Form, File, UploadFile, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from starlette import status
@@ -58,3 +58,21 @@ def accompany_create(token: str = Form(...), category: accompany_schema.Category
                                                              tags_accompany=tag_creates)
     accompany_crud.create_accompany(db, accompany_create=accompany_create_data, user=current_user)
 
+
+@router.delete("/ban-member/{accompany_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
+def accompany_ban_member(token: str, accompany_id: int, user_id: int, db: Session = Depends(get_db)):
+    current_user = user_crud.get_current_user(db, token)
+
+    accompany = accompany_crud.get_accompany_by_id(db, accompany_id=accompany_id)
+    if not accompany:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"동행을 찾을 수 없습니다.")
+
+    if current_user.id != accompany.leader_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="권한이 없습니다.")
+
+    member = user_crud.get_user_by_id(db, user_id=user_id)
+    if not member:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"해당 멤버가 존재하지 않습니다.")
+
+    accompany_crud.ban_accompany_member(db, accompany_id=accompany.id, member_id=member.id)

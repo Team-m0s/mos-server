@@ -17,6 +17,7 @@ class CommentUser(BaseModel):
 
 
 class UserBase(BaseModel):
+    id: int
     nickName: str
     profile_img: str
     lang_level: Dict[str, int]
