@@ -130,6 +130,7 @@ class Image(Base):
     __tablename__ = "image"
     id = Column(Integer, primary_key=True)
     image_url = Column(String, nullable=False)
+    image_hash = Column(String, nullable=False)
     post_id = Column(Integer, ForeignKey("post.id"))
     post = relationship("Post", backref="images_post")
     accompany_id = Column(Integer, ForeignKey("accompany.id"))

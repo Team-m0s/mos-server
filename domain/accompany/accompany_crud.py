@@ -7,7 +7,10 @@ from models import Accompany, User, Image, Tag, accompany_member
 from domain.accompany.accompany_schema import AccompanyCreate, TagCreate, ImageCreate
 
 
-def get_accompany_list(db: Session):
+def get_accompany_list(db: Session, search_keyword: str = None, sort_order: str = 'latest'):
+
+
+
     accompany_list = db.query(Accompany).order_by(Accompany.id.desc()).all()
     return accompany_list
 

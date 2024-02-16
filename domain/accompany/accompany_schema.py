@@ -15,6 +15,7 @@ class ImageBase(BaseModel):
 
 class ImageCreate(BaseModel):
     image_url: str
+    image_hash: str
 
 
 class TagBase(BaseModel):
@@ -26,7 +27,7 @@ class TagCreate(BaseModel):
     name: str
 
     @field_validator('name')
-    def introduce_length(cls, v):
+    def name_length(cls, v):
         if not v or len(v.strip()) < 2:  # 공백을 제외한 길이가 2글자 미만인 경우
             raise ValueError('내용은 공백 제외 2글자 이상이어야 합니다.')
         if len(v) > 8:
@@ -64,7 +65,7 @@ class AccompanyCreate(BaseModel):
     total_member: int
     tags_accompany: Optional[List[TagCreate]] = None
 
-    @field_validator('content')
+    @field_validator('title')
     def content_length(cls, v):
         if not v or len(v.strip()) < 2:  # 공백을 제외한 길이가 2글자 미만인 경우
             raise ValueError('내용은 공백 제외 2글자 이상이어야 합니다.')

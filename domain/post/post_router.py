@@ -85,11 +85,16 @@ def post_create(token: str = Form(...), board_id: int = Form(...),
     if not board:
         raise HTTPException(status_code=404, detail="Board not found")
 
-    image_path = []
+    image_creates = []
     if images:
         for image in images:
-            image_path.append(file_utils.save_image_file(image))
-    image_creates = [accompany_schema.ImageCreate(image_url=path) for path in image_path]
+            image_hash = file_utils.calculate_image_hash(image)
+            existing_image = post_crud.get_image_by_hash(db, image_hash)
+            if existing_image:
+                image_creates.append(accompany_schema.ImageCreate(image_url=existing_image.image_url, image_hash=image_hash))
+            else:
+                image_path = file_utils.save_image_file(image)
+                image_creates.append(accompany_schema.ImageCreate(image_url=image_path, image_hash=image_hash))
 
     post_create_data = post_schema.PostCreate(subject=subject, content=content,
                                               is_anonymous=is_anonymous, images_post=image_creates)
@@ -101,7 +106,7 @@ def post_create(token: str = Form(...), board_id: int = Form(...),
 def post_update(token: str = Form(...), post_id: int = Form(...),
                 subject: str = Form(...), content: str = Form(...),
                 is_anonymous: bool = Form(...),
-                image_file: Optional[UploadFile] = File(None),
+                images: List[UploadFile] = File(None),
                 db: Session = Depends(get_db)):
     current_user = get_current_user(db, token)
     post = post_crud.get_post(db, post_id=post_id)
@@ -111,12 +116,20 @@ def post_update(token: str = Form(...), post_id: int = Form(...),
     if post.user != current_user:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="권한이 없습니다.")
 
-    image_path = None
-    if image_file:
-        image_path = file_utils.save_image_file(image_file)
+    image_creates = []
+    if images:
+        for image in images:
+            image_hash = file_utils.calculate_image_hash(image)
+            existing_image = post_crud.get_image_by_hash(db, image_hash)
+            # 기존에 저장된 이미지와 hash 비교, 이미 존재하는 이미지면 다시 저장 X
+            if existing_image:
+                image_creates.append(accompany_schema.ImageCreate(image_url=existing_image.image_url, image_hash=image_hash))
+            else:
+                image_path = file_utils.save_image_file(image)
+                image_creates.append(accompany_schema.ImageCreate(image_url=image_path, image_hash=image_hash))
 
     post_update_data = post_schema.PostUpdate(subject=subject, content=content,
-                                              is_anonymous=is_anonymous, content_img=image_path, post_id=post_id)
+                                              is_anonymous=is_anonymous, images_post=image_creates, post_id=post_id)
 
     post_crud.update_post(db, db_post=post, post_update=post_update_data)
 
@@ -130,4 +143,5 @@ def delete_post(token: str, _post_delete: post_schema.PostDelete, db: Session = 
                             detail="데이터를 찾을수 없습니다.")
     if post.user != current_user:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="권한이 없습니다.")
+
     post_crud.delete_post(db, db_post=post)
