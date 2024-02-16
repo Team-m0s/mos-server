@@ -15,8 +15,8 @@ router = APIRouter(
 
 
 @router.get("/list", response_model=list[accompany_schema.AccompanyBase], tags=["Accompany"])
-def accompany_list(db: Session = Depends(get_db)):
-    _accompany_list = accompany_crud.get_accompany_list(db)
+def accompany_list(db: Session = Depends(get_db), search_keyword: str = None, sort_order: str = 'latest'):
+    _accompany_list = accompany_crud.get_accompany_list(db, search_keyword=search_keyword, sort_order=sort_order)
 
     for accompany in _accompany_list:
         leader = user_crud.get_user_by_id(db, user_id=accompany.leader_id)

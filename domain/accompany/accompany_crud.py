@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 from typing import List
 from datetime import datetime
 
@@ -8,10 +8,25 @@ from domain.accompany.accompany_schema import AccompanyCreate, TagCreate, ImageC
 
 
 def get_accompany_list(db: Session, search_keyword: str = None, sort_order: str = 'latest'):
+    query = db.query(Accompany)
 
+    if search_keyword:
+        # Accompany와 Tag를 연결하는 조인을 생성
+        query = query.outerjoin(Tag, Accompany.id == Tag.accompany_id)
 
+        keyword_filter = or_(Accompany.title.ilike(f"%{search_keyword}%"), Tag.name.ilike(f"%{search_keyword}%"))
+        query = query.filter(keyword_filter)
 
-    accompany_list = db.query(Accompany).order_by(Accompany.id.desc()).all()
+        query = query.group_by(Accompany.id)
+
+    if sort_order == 'oldest':
+        query = query.order_by(Accompany.create_date.asc())
+    elif sort_order == 'popularity':
+        query = query.order_by(Accompany.like_count.desc())
+    else:
+        query = query.order_by(Accompany.create_date.desc())
+
+    accompany_list = query.all()
     return accompany_list
 
 
