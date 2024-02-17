@@ -40,10 +40,6 @@ def post_list(token: str = None, db: Session = Depends(get_db),
             post_like = like_crud.get_post_like(db, post_id=post.id, user=current_user)
             if post_like:
                 post.is_liked_by_user = True
-            for comment in post.comment_posts:
-                comment_like = like_crud.get_comment_like(db, comment_id=comment.id, user=current_user)
-                if comment_like:
-                    comment.is_liked_by_user = True
 
     return {
         'total': total,

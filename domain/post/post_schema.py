@@ -7,7 +7,7 @@ from domain.board.board_schema import Board
 from domain.accompany.accompany_schema import ImageCreate, ImageBase
 
 
-class Post(BaseModel):
+class PostDetail(BaseModel):
     id: int
     board: Board | None
     user: PostUser | None
@@ -20,6 +20,21 @@ class Post(BaseModel):
     create_date: datetime.datetime
     modify_date: datetime.datetime | None
     comment_posts: list[Comment] = []
+
+
+class Post(BaseModel):
+    id: int
+    board: Board | None
+    user: PostUser | None
+    subject: str
+    content: str
+    like_count: int
+    is_liked_by_user: bool = False
+    image_urls: List[ImageBase] = []
+    is_anonymous: bool
+    create_date: datetime.datetime
+    modify_date: datetime.datetime | None
+    comment_count: int
 
 
 class PostList(BaseModel):

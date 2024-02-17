@@ -25,6 +25,9 @@ def get_post_list(db: Session, board_id: int = 0, start_index: int = 0, limit: i
 
     total = query.count()
     _post_list = query.offset(start_index).limit(limit).all()
+
+    for post in _post_list:
+        post.comment_count = db.query(Comment).filter(Comment.post_id == post.id).count()
     return total, _post_list
 
 
