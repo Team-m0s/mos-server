@@ -47,10 +47,11 @@ def post_list(token: str = None, db: Session = Depends(get_db),
     }
 
 
-@router.get("/detail/{post_id}", response_model=post_schema.Post, tags=["Post"])
-def post_detail(post_id: int, token: str = None, comment_sort_order: str = 'oldest', db: Session = Depends(get_db)):
+@router.get("/detail/{post_id}", response_model=post_schema.PostDetail, tags=["Post"])
+def post_detail(post_id: int, token: str = None, comment_sort_order: str = 'oldest',
+                db: Session = Depends(get_db)):
     current_user = None
-    _post = post_crud.get_post(db, post_id=post_id, comment_sort_order=comment_sort_order)
+    _post = post_crud.get_post(db, post_id=post_id)
 
     if not _post:
         raise HTTPException(status_code=404, detail="Post not found")
@@ -63,10 +64,32 @@ def post_detail(post_id: int, token: str = None, comment_sort_order: str = 'olde
         if post_like:
             _post.is_liked_by_user = True
 
-        for comment in _post.comment_posts:
+    comment_map = {}
+
+    top_level_comments = []
+
+    for comment in _post.comment_posts:
+        if current_user:
             comment_like = like_crud.get_comment_like(db, comment_id=comment.id, user=current_user)
             if comment_like:
                 comment.is_liked_by_user = True
+
+        comment.sub_comments = []
+        comment_map[comment.id] = comment
+
+        if comment.parent_id is None:
+            top_level_comments.append(comment)
+        else:
+            if comment.parent_id in comment_map:
+                comment_map[comment.parent_id].sub_comments.append(comment)
+
+    # Apply sorting to top-level comments based on comment_sort_order
+    if comment_sort_order == 'latest':
+        top_level_comments.sort(key=lambda x: x.create_date, reverse=True)
+    else:
+        top_level_comments.sort(key=lambda x: x.create_date)
+
+    _post.comment_posts = top_level_comments
     return _post
 
 

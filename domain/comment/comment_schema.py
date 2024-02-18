@@ -28,6 +28,19 @@ class NoticeCommentCreate(BaseModel):
         return v
 
 
+class PostComment(BaseModel):
+    id: int
+    parent_id: int | None
+    content: str
+    like_count: int
+    is_liked_by_user: bool = False
+    is_anonymous: bool
+    user: CommentUser | None
+    create_date: datetime.datetime
+    modify_date: datetime.datetime | None
+    post_id: int
+
+
 class Comment(BaseModel):
     id: int
     parent_id: int | None
@@ -39,6 +52,7 @@ class Comment(BaseModel):
     create_date: datetime.datetime
     modify_date: datetime.datetime | None
     post_id: int
+    sub_comments: list[PostComment] = []
 
 
 class NoticeComment(BaseModel):
