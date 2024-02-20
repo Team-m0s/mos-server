@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Annotated
 from fastapi import APIRouter, Depends, Header, HTTPException, Form, UploadFile, File
 from sqlalchemy.orm import Session
 from starlette import status
@@ -21,7 +21,7 @@ router = APIRouter(
 @router.get("/list", response_model=post_schema.PostList, tags=["Post"],
             description="board_id가 0이면 전체 게시글 조회, page는 시작 index, size는 조회 개수입니다. keyword를 사용해 검색 가능합니다."
                         "\n정렬 순서는 기본 최신순이며, 과거순은 'oldest' 좋아요순은 'popularity'를 넣어서 요청하시면 됩니다.")
-def post_list(token: str = None, db: Session = Depends(get_db),
+def post_list(token: Optional[str] = Header(None), db: Session = Depends(get_db),
               board_id: int = 0, page: int = 0, size: int = 10, search_keyword: str = None, sort_order: str = 'latest'):
     current_user = None
     if token:
@@ -48,7 +48,7 @@ def post_list(token: str = None, db: Session = Depends(get_db),
 
 
 @router.get("/detail/{post_id}", response_model=post_schema.PostDetail, tags=["Post"])
-def post_detail(post_id: int, token: str = None, comment_sort_order: str = 'oldest',
+def post_detail(post_id: int, token: Optional[str] = Header(None), comment_sort_order: str = 'oldest',
                 db: Session = Depends(get_db)):
     current_user = None
     _post = post_crud.get_post(db, post_id=post_id)
@@ -94,7 +94,7 @@ def post_detail(post_id: int, token: str = None, comment_sort_order: str = 'olde
 
 
 @router.post("/create", status_code=status.HTTP_204_NO_CONTENT, tags=["Post"])
-def post_create(token: str = Form(...), board_id: int = Form(...),
+def post_create(token: str = Header(), board_id: int = Form(...),
                 subject: str = Form(...), content: str = Form(...),
                 is_anonymous: bool = Form(...),
                 images: List[UploadFile] = File(None),
@@ -122,7 +122,7 @@ def post_create(token: str = Form(...), board_id: int = Form(...),
 
 
 @router.put("/update", status_code=status.HTTP_204_NO_CONTENT, tags=["Post"])
-def post_update(token: str = Form(...), post_id: int = Form(...),
+def post_update(token: str = Header(), post_id: int = Form(...),
                 subject: str = Form(...), content: str = Form(...),
                 is_anonymous: bool = Form(...),
                 images: List[UploadFile] = File(None),
@@ -154,7 +154,7 @@ def post_update(token: str = Form(...), post_id: int = Form(...),
 
 
 @router.delete("/delete", status_code=status.HTTP_204_NO_CONTENT, tags=["Post"])
-def delete_post(token: str, _post_delete: post_schema.PostDelete, db: Session = Depends(get_db)):
+def delete_post(_post_delete: post_schema.PostDelete, token: str = Header(), db: Session = Depends(get_db)):
     current_user = get_current_user(db, token)
     post = post_crud.get_post(db, post_id=_post_delete.post_id)
     if not post:

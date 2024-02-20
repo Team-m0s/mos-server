@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from starlette import status
 
@@ -15,7 +15,7 @@ router = APIRouter(
 
 
 @router.post("/create/post/{post_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Comment"])
-def comment_create(token: str, post_id: int, _comment_create: comment_schema.CommentCreate,
+def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, token: str = Header(),
                    db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
     post = post_crud.get_post(db, post_id=post_id)
@@ -25,7 +25,7 @@ def comment_create(token: str, post_id: int, _comment_create: comment_schema.Com
 
 
 @router.post("/create/accompany/notice/{notice_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Comment"])
-def notice_comment_create(token: str, notice_id: int, _comment_create: comment_schema.NoticeCommentCreate,
+def notice_comment_create(notice_id: int, _comment_create: comment_schema.NoticeCommentCreate, token: str = Header(),
                           db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
 
@@ -42,7 +42,7 @@ def notice_comment_create(token: str, notice_id: int, _comment_create: comment_s
 
 
 @router.post("/create/comment/{comment_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Comment"])
-def sub_comment_create(token: str, comment_id: int, _comment_create: comment_schema.SubCommentCreate,
+def sub_comment_create(comment_id: int, _comment_create: comment_schema.SubCommentCreate, token: str = Header(),
                        db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
     comment = comment_crud.get_comment(db, comment_id=comment_id)
@@ -54,7 +54,7 @@ def sub_comment_create(token: str, comment_id: int, _comment_create: comment_sch
 
 
 @router.put("/update", status_code=status.HTTP_204_NO_CONTENT, tags=["Comment"])
-def comment_update(token: str, _comment_update: comment_schema.CommentUpdate,
+def comment_update(_comment_update: comment_schema.CommentUpdate, token: str = Header(),
                    db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
     comment = comment_crud.get_comment(db, comment_id=_comment_update.comment_id)
@@ -67,7 +67,7 @@ def comment_update(token: str, _comment_update: comment_schema.CommentUpdate,
 
 
 @router.delete("/delete", status_code=status.HTTP_204_NO_CONTENT, tags=["Comment"])
-def comment_delete(token: str, _comment_delete: comment_schema.CommentDelete,
+def comment_delete(_comment_delete: comment_schema.CommentDelete, token: str = Header(),
                    db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
     comment = comment_crud.get_comment(db, _comment_delete.comment_id)

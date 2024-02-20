@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Form, File, UploadFile, HTTPException
+from fastapi import APIRouter, Depends, Form, File, UploadFile, HTTPException, Header
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from starlette import status
@@ -32,7 +32,7 @@ def accompany_list(db: Session = Depends(get_db), search_keyword: str = None, so
 
 
 @router.post("/create", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
-def accompany_create(token: str = Form(...), category: accompany_schema.Category = Form(...),
+def accompany_create(token: str = Header(), category: accompany_schema.Category = Form(...),
                      title: str = Form(...), activity_scope: accompany_schema.ActivityScope = Form(...),
                      images: List[UploadFile] = File(None), city: str = Form(...),
                      introduce: str = Form(...), total_member: int = Form(...),
@@ -62,7 +62,7 @@ def accompany_create(token: str = Form(...), category: accompany_schema.Category
 
 
 @router.post("/create/notice", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
-def accompany_create_notice(token: str, accompany_id: int, _notice_create: notice_schema.NoticeCreate,
+def accompany_create_notice(accompany_id: int, _notice_create: notice_schema.NoticeCreate, token: str = Header(),
                             db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
 
@@ -77,7 +77,7 @@ def accompany_create_notice(token: str, accompany_id: int, _notice_create: notic
 
 
 @router.put("/update/notice", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
-def accompany_update_notice(token: str, _notice_update: notice_schema.NoticeUpdate,
+def accompany_update_notice(_notice_update: notice_schema.NoticeUpdate, token: str = Header(),
                             db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
 
@@ -93,7 +93,7 @@ def accompany_update_notice(token: str, _notice_update: notice_schema.NoticeUpda
 
 
 @router.delete("/delete/notice", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
-def accompany_delete_notice(token: str, _notice_delete: notice_schema.NoticeDelete,
+def accompany_delete_notice(_notice_delete: notice_schema.NoticeDelete, token: str = Header(),
                             db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
 
@@ -109,7 +109,7 @@ def accompany_delete_notice(token: str, _notice_delete: notice_schema.NoticeDele
 
 
 @router.delete("/ban-member/{accompany_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
-def accompany_ban_member(token: str, accompany_id: int, user_id: int, db: Session = Depends(get_db)):
+def accompany_ban_member(accompany_id: int, user_id: int, token: str = Header(), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
 
     accompany = accompany_crud.get_accompany_by_id(db, accompany_id=accompany_id)

@@ -54,7 +54,6 @@ oauth.register(
     authorize_url='https://accounts.google.com/o/oauth2/auth',
     client_kwargs={
         'scope': 'email openid profile',
-        # 'redirect_url': 'http://127.0.0.1:8000/login/google/auth'
     }
 )
 
@@ -68,13 +67,7 @@ sso = KakaoSSO(
 
 
 @app.get("/", response_class=HTMLResponse)
-async def main(request: Request):
-    token = request.cookies.get('access_token')
-
-    if token:
-        payload = jwt_token.verify_token(token)
-        if payload:
-            return RedirectResponse(url='/welcome', status_code=302)
+async def main():
 
     html_content = """
     <html>
@@ -83,7 +76,7 @@ async def main(request: Request):
         </head>
         <body>
             <h2>Login with Google</h2>
-            <a href="/login">Login</a>
+            <a href="/login/google/auth">Login</a>
         </body>
     </html>
     """
