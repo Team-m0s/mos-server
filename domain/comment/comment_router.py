@@ -1,17 +1,40 @@
 from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from starlette import status
+from typing import Optional, List
 
 from database import get_db
 from domain.comment import comment_schema, comment_crud
 from domain.post import post_crud
 from domain.user import user_crud
+from domain.like import like_crud
 from domain.notice import notice_crud
 from domain.accompany import accompany_crud
 
 router = APIRouter(
     prefix="/api/comment",
 )
+
+
+@router.get("/detail/{comment_id}", response_model=List[comment_schema.Comment], tags=["Comment"])
+def comment_detail(comment_id: int, token: Optional[str] = Header(None),
+                   page: int = 0, size: int = 10, db: Session = Depends(get_db)):
+    current_user = None
+    _sub_comments = comment_crud.get_sub_comments(db, comment_id=comment_id, start_index=page * size, limit=size)
+
+    if not _sub_comments:
+        raise HTTPException(status_code=404, detail="Comment not found")
+
+    if token:
+        current_user = user_crud.get_current_user(db, token)
+
+    for comment in _sub_comments:
+        if current_user:
+            comment_like = like_crud.get_comment_like(db, comment_id=comment_id, user=current_user)
+            if comment_like:
+                comment.is_liked_by_user = True
+
+    return _sub_comments
 
 
 @router.post("/create/post/{post_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Comment"])

@@ -31,8 +31,44 @@ def get_post_list(db: Session, board_id: int = 0, start_index: int = 0, limit: i
     return total, _post_list
 
 
-def get_post(db: Session, post_id: int):
+def get_post(db: Session, post_id: int, start_index: int = 0, limit: int = 10, sort_order: str = 'latest'):
     post = db.query(Post).get(post_id)
+
+    comment_map = {}
+    sub_comments_count = {}
+
+    top_level_comments = []
+
+    for comment in post.comment_posts:
+        comment.sub_comments = []
+        comment_map[comment.id] = comment
+
+        if comment.parent_id is None:
+            comment.sub_comments_count = 0
+            top_level_comments.append(comment)
+            comment_map[comment.id] = top_level_comments[-1]
+        else:
+            if comment.parent_id in sub_comments_count:
+                sub_comments_count[comment.parent_id] += 1
+            else:
+                sub_comments_count[comment.parent_id] = 1
+
+    # Sort the comments based on the sort_order parameter
+    if sort_order == 'oldest':
+        top_level_comments.sort(key=lambda x: x.create_date)
+    elif sort_order == 'popularity':
+        top_level_comments.sort(key=lambda x: x.like_count, reverse=True)
+    else:
+        top_level_comments.sort(key=lambda x: x.create_date, reverse=True)
+
+    # Apply pagination to the sorted comments
+    paginated_comments = top_level_comments[start_index:start_index + limit]
+
+    for comment in paginated_comments:
+        if comment.id in sub_comments_count:
+            comment.sub_comments_count = sub_comments_count[comment.id]
+
+    post.comment_posts = paginated_comments
     return post
 
 

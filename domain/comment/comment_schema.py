@@ -1,5 +1,6 @@
 from pydantic import BaseModel, field_validator
 from domain.user.user_schema import CommentUser
+from typing import Optional
 import datetime
 
 
@@ -28,19 +29,6 @@ class NoticeCommentCreate(BaseModel):
         return v
 
 
-class PostComment(BaseModel):
-    id: int
-    parent_id: int | None
-    content: str
-    like_count: int
-    is_liked_by_user: bool = False
-    is_anonymous: bool
-    user: CommentUser | None
-    create_date: datetime.datetime
-    modify_date: datetime.datetime | None
-    post_id: int
-
-
 class Comment(BaseModel):
     id: int
     parent_id: int | None
@@ -52,7 +40,7 @@ class Comment(BaseModel):
     create_date: datetime.datetime
     modify_date: datetime.datetime | None
     post_id: int
-    sub_comments: list[PostComment] = []
+    sub_comments_count: Optional[int] = None
 
 
 class NoticeComment(BaseModel):

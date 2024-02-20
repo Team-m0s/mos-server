@@ -32,7 +32,7 @@ def post_list(token: Optional[str] = Header(None), db: Session = Depends(get_db)
     for post in _post_list:
         images = post_crud.get_image_by_post_id(db, post_id=post.id)
         post.image_urls = [accompany_schema.ImageBase(id=image.id,
-                           image_url=f"http://127.0.0.1:8000/static/{image.image_url}") for
+                                                      image_url=f"http://127.0.0.1:8000/static/{image.image_url}") for
                            image in images if image.image_url] if images else []
 
     if current_user:
@@ -49,9 +49,10 @@ def post_list(token: Optional[str] = Header(None), db: Session = Depends(get_db)
 
 @router.get("/detail/{post_id}", response_model=post_schema.PostDetail, tags=["Post"])
 def post_detail(post_id: int, token: Optional[str] = Header(None), comment_sort_order: str = 'oldest',
-                db: Session = Depends(get_db)):
+                page: int = 0, size: int = 10, db: Session = Depends(get_db)):
     current_user = None
-    _post = post_crud.get_post(db, post_id=post_id)
+    _post = post_crud.get_post(db, post_id=post_id, start_index=page * size, limit=size,
+                               sort_order=comment_sort_order)
 
     if not _post:
         raise HTTPException(status_code=404, detail="Post not found")
@@ -64,8 +65,6 @@ def post_detail(post_id: int, token: Optional[str] = Header(None), comment_sort_
         if post_like:
             _post.is_liked_by_user = True
 
-    comment_map = {}
-
     top_level_comments = []
 
     for comment in _post.comment_posts:
@@ -74,20 +73,8 @@ def post_detail(post_id: int, token: Optional[str] = Header(None), comment_sort_
             if comment_like:
                 comment.is_liked_by_user = True
 
-        comment.sub_comments = []
-        comment_map[comment.id] = comment
-
         if comment.parent_id is None:
             top_level_comments.append(comment)
-        else:
-            if comment.parent_id in comment_map:
-                comment_map[comment.parent_id].sub_comments.append(comment)
-
-    # Apply sorting to top-level comments based on comment_sort_order
-    if comment_sort_order == 'latest':
-        top_level_comments.sort(key=lambda x: x.create_date, reverse=True)
-    else:
-        top_level_comments.sort(key=lambda x: x.create_date)
 
     _post.comment_posts = top_level_comments
     return _post
@@ -110,7 +97,8 @@ def post_create(token: str = Header(), board_id: int = Form(...),
             image_hash = file_utils.calculate_image_hash(image)
             existing_image = post_crud.get_image_by_hash(db, image_hash)
             if existing_image:
-                image_creates.append(accompany_schema.ImageCreate(image_url=existing_image.image_url, image_hash=image_hash))
+                image_creates.append(
+                    accompany_schema.ImageCreate(image_url=existing_image.image_url, image_hash=image_hash))
             else:
                 image_path = file_utils.save_image_file(image)
                 image_creates.append(accompany_schema.ImageCreate(image_url=image_path, image_hash=image_hash))
@@ -142,7 +130,8 @@ def post_update(token: str = Header(), post_id: int = Form(...),
             existing_image = post_crud.get_image_by_hash(db, image_hash)
             # 기존에 저장된 이미지와 hash 비교, 이미 존재하는 이미지면 다시 저장 X
             if existing_image:
-                image_creates.append(accompany_schema.ImageCreate(image_url=existing_image.image_url, image_hash=image_hash))
+                image_creates.append(
+                    accompany_schema.ImageCreate(image_url=existing_image.image_url, image_hash=image_hash))
             else:
                 image_path = file_utils.save_image_file(image)
                 image_creates.append(accompany_schema.ImageCreate(image_url=image_path, image_hash=image_hash))
