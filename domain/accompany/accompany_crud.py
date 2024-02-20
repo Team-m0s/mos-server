@@ -53,15 +53,14 @@ def create_accompany(db: Session, accompany_create: AccompanyCreate, user: User)
     db.refresh(db_accompany)
 
     for image in accompany_create.images_accompany:
-        db_image = Image(image_url=image.image_url, accompany_id=db_accompany.id)
+        if image.image_hash is None:
+            image.image_hash = ''
+        db_image = Image(image_url=image.image_url, image_hash=image.image_hash, accompany_id=db_accompany.id)
         db.add(db_image)
 
     for tag in accompany_create.tags_accompany:
         db_tag = Tag(name=tag.name, accompany_id=db_accompany.id)
         db.add(db_tag)
-
-    # 생성자(leader)를 accompany_member에 추가
-    db.add(accompany_member.insert().values(user_id=user.id, accompany_id=db_accompany.id))
 
     db.commit()
 

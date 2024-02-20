@@ -20,6 +20,8 @@ def accompany_list(db: Session = Depends(get_db), search_keyword: str = None, so
 
     for accompany in _accompany_list:
         leader = user_crud.get_user_by_id(db, user_id=accompany.leader_id)
+        if leader.lang_level is None:
+            leader.lang_level = {}
         accompany.leader = leader
         accompany.member = [member for member in accompany.member if member.id != accompany.leader_id]
 
@@ -34,7 +36,7 @@ def accompany_list(db: Session = Depends(get_db), search_keyword: str = None, so
 @router.post("/create", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
 def accompany_create(token: str = Header(), category: accompany_schema.Category = Form(...),
                      title: str = Form(...), activity_scope: accompany_schema.ActivityScope = Form(...),
-                     images: List[UploadFile] = File(None), city: str = Form(...),
+                     images: List[UploadFile] = File(None), city: str = Form(None),
                      introduce: str = Form(...), total_member: int = Form(...),
                      tags: List[str] = Form(None), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)

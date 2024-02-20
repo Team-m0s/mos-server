@@ -15,7 +15,7 @@ class ImageBase(BaseModel):
 
 class ImageCreate(BaseModel):
     image_url: str
-    image_hash: str
+    image_hash: Optional[str] = None
 
 
 class TagBase(BaseModel):
