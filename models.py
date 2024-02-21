@@ -79,7 +79,7 @@ class Board(Base):
 class ActivityScope(enum.Enum):
     online = "온라인"
     offline = "오프라인"
-    hybrid = "온/오프라인"
+    hybrid = "온오프라인"
 
 
 class Category(enum.Enum):
