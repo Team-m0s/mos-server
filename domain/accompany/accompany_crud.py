@@ -38,6 +38,10 @@ def get_image_by_accompany_id(db: Session, accompany_id: int):
     return db.query(Image).filter(Image.accompany_id == accompany_id).all()
 
 
+def get_image_by_hash(db: Session, image_hash: str):
+    return db.query(Image).filter(Image.image_hash == image_hash).first()
+
+
 def create_accompany(db: Session, accompany_create: AccompanyCreate, user: User):
     db_accompany = Accompany(title=accompany_create.title,
                              category=accompany_create.category,
@@ -53,8 +57,6 @@ def create_accompany(db: Session, accompany_create: AccompanyCreate, user: User)
     db.refresh(db_accompany)
 
     for image in accompany_create.images_accompany:
-        if image.image_hash is None:
-            image.image_hash = ''
         db_image = Image(image_url=image.image_url, image_hash=image.image_hash, accompany_id=db_accompany.id)
         db.add(db_image)
 
@@ -75,3 +77,11 @@ def ban_accompany_member(db: Session, accompany_id: int, member_id: int):
     db.commit()
 
 
+def assign_new_leader(db: Session, accompany_id: int, member_id: int):
+    accompany = db.query(Accompany).filter(Accompany.id == accompany_id).first()
+    old_leader_id = accompany.leader_id
+    accompany.leader_id = member_id
+
+    db.execute(accompany_member.insert().values(user_id=old_leader_id, accompany_id=accompany_id))
+    ban_accompany_member(db, accompany_id=accompany_id, member_id=member_id)
+    db.commit()

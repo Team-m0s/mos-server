@@ -80,7 +80,7 @@ def get_image_by_hash(db: Session, image_hash: str):
     return db.query(Image).filter(Image.image_hash == image_hash).first()
 
 
-def create_post(db: Session, post_create: PostCreate, board: Board, user: User):
+def create_post(db: Session, post_create: PostCreate, board: Board, user: User, flag: bool):
     db_post = Post(board=board,
                    subject=post_create.subject,
                    content=post_create.content,
@@ -92,8 +92,8 @@ def create_post(db: Session, post_create: PostCreate, board: Board, user: User):
     db.refresh(db_post)
 
     for image in post_create.images_post:
-        db_image = Image(image_url=image.image_url, image_hash=image.image_hash, post_id=db_post.id)
-        db.add(db_image)
+            db_image = Image(image_url=image.image_url, image_hash=image.image_hash, post_id=db_post.id)
+            db.add(db_image)
 
     db.commit()
 
