@@ -3,8 +3,9 @@ from sqlalchemy import and_, or_
 from typing import List
 from datetime import datetime
 
+from utils import file_utils
 from models import Accompany, User, Image, Tag, accompany_member
-from domain.accompany.accompany_schema import AccompanyCreate, TagCreate, ImageCreate
+from domain.accompany.accompany_schema import AccompanyCreate, AccompanyUpdate, TagCreate, ImageCreate
 
 
 def get_accompany_list(db: Session, search_keyword: str = None, sort_order: str = 'latest'):
@@ -34,6 +35,10 @@ def get_accompany_by_id(db: Session, accompany_id: int):
     return db.query(Accompany).filter(Accompany.id == accompany_id).first()
 
 
+def get_tag_by_accompany_id(db: Session, accompany_id: int):
+    return db.query(Tag).filter(Tag.accompany_id == accompany_id).all()
+
+
 def get_image_by_accompany_id(db: Session, accompany_id: int):
     return db.query(Image).filter(Image.accompany_id == accompany_id).all()
 
@@ -61,6 +66,52 @@ def create_accompany(db: Session, accompany_create: AccompanyCreate, user: User)
         db.add(db_image)
 
     for tag in accompany_create.tags_accompany:
+        db_tag = Tag(name=tag.name, accompany_id=db_accompany.id)
+        db.add(db_tag)
+
+    db.commit()
+
+
+def update_accompany(db: Session, db_accompany: Accompany, accompany_update: AccompanyUpdate):
+    db_accompany.title = accompany_update.title
+    db_accompany.category = accompany_update.category
+    db_accompany.city = accompany_update.city
+    db_accompany.activity_scope = accompany_update.activity_scope
+    db_accompany.introduce = accompany_update.introduce
+    db_accompany.total_member = accompany_update.total_member
+
+    current_images = get_image_by_accompany_id(db, accompany_id=db_accompany.id)
+    submitted_images = accompany_update.images_accompany
+
+    current_tags = get_tag_by_accompany_id(db, accompany_id=db_accompany.id)
+    submitted_tags = accompany_update.tags_accompany
+
+    images_to_delete = [image for image in current_images
+                        if image.image_hash not in [img.image_hash for img in submitted_images]]
+    images_to_add = [image for image in submitted_images
+                     if image.image_hash not in [img.image_hash for img in current_images]]
+
+    tags_to_delete = [tag for tag in current_tags
+                      if tag.name not in [t.name for t in submitted_tags]]
+    tags_to_add = [tag for tag in submitted_tags
+                   if tag.name not in [t.name for t in current_tags]]
+
+    # Delete images
+    for image in images_to_delete:
+        file_utils.delete_image_file(image.image_url)
+        db.delete(image)
+
+    # Add new images
+    for image in images_to_add:
+        db_image = Image(image_url=image.image_url, image_hash=image.image_hash, accompany_id=db_accompany.id)
+        db.add(db_image)
+
+    # Delete tags
+    for tag in tags_to_delete:
+        db.delete(tag)
+
+    # Add new tags
+    for tag in tags_to_add:
         db_tag = Tag(name=tag.name, accompany_id=db_accompany.id)
         db.add(db_tag)
 

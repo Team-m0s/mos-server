@@ -67,6 +67,48 @@ def accompany_create(token: str = Header(), category: accompany_schema.Category 
     accompany_crud.create_accompany(db, accompany_create=accompany_create_data, user=current_user)
 
 
+@router.put("/update", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
+def accompany_update(token: str = Header(), accompany_id: int = Form(...),
+                     category: accompany_schema.Category = Form(...),
+                     title: str = Form(...), activity_scope: accompany_schema.ActivityScope = Form(...),
+                     images: List[UploadFile] = File(None), city: str = Form(None),
+                     introduce: str = Form(...), total_member: int = Form(...),
+                     tags: List[str] = Form(None), db: Session = Depends(get_db)):
+    current_user = user_crud.get_current_user(db, token)
+    accompany = accompany_crud.get_accompany_by_id(db, accompany_id=accompany_id)
+    if not accompany:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="데이터를 찾을수 없습니다.")
+    if accompany.leader_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="권한이 없습니다.")
+
+    image_creates = []
+    if images:
+        for image in images:
+            image_hash = file_utils.calculate_image_hash(image)
+            existing_image = accompany_crud.get_image_by_hash(db, image_hash)
+            # 기존에 저장된 이미지와 hash 비교, 이미 존재하는 이미지면 다시 저장 X
+            if existing_image:
+                image_creates.append(
+                    accompany_schema.ImageCreate(image_url=existing_image.image_url, image_hash=image_hash))
+            else:
+                image_path = file_utils.save_image_file(image)
+                image_creates.append(accompany_schema.ImageCreate(image_url=image_path, image_hash=image_hash))
+
+    tag_creates = []
+    if tags and any(tags):
+        split_tags = [tag.strip() for sublist in tags for tag in sublist.split(',')]
+        tag_creates = [accompany_schema.TagCreate(name=tag) for tag in split_tags]
+
+    accompany_update_data = accompany_schema.AccompanyUpdate(category=category, title=title,
+                                                             activity_scope=activity_scope,
+                                                             images_accompany=image_creates,
+                                                             city=city, introduce=introduce, total_member=total_member,
+                                                             tags_accompany=tag_creates, accompany_id=accompany_id)
+
+    accompany_crud.update_accompany(db, db_accompany=accompany, accompany_update=accompany_update_data)
+
+
 @router.post("/create/notice", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
 def accompany_create_notice(accompany_id: int, _notice_create: notice_schema.NoticeCreate, token: str = Header(),
                             db: Session = Depends(get_db)):
@@ -150,4 +192,3 @@ def accompany_delegate_leader(accompany_id: int, user_id: int, token: str = Head
                             detail=f"해당 멤버가 존재하지 않습니다.")
 
     accompany_crud.assign_new_leader(db, accompany_id=accompany_id, member_id=member.id)
-

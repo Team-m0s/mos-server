@@ -82,3 +82,8 @@ class AccompanyCreate(BaseModel):
         return v
 
 
+class AccompanyUpdate(AccompanyCreate):
+    accompany_id: int
+
+
+

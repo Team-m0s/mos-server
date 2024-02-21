@@ -4,6 +4,7 @@ from domain.post.post_schema import PostCreate, PostUpdate
 from models import Post, User, Board, Comment, Image
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
+from utils import file_utils
 import domain.accompany.accompany_crud
 
 
@@ -80,7 +81,7 @@ def get_image_by_hash(db: Session, image_hash: str):
     return db.query(Image).filter(Image.image_hash == image_hash).first()
 
 
-def create_post(db: Session, post_create: PostCreate, board: Board, user: User, flag: bool):
+def create_post(db: Session, post_create: PostCreate, board: Board, user: User):
     db_post = Post(board=board,
                    subject=post_create.subject,
                    content=post_create.content,
@@ -92,8 +93,8 @@ def create_post(db: Session, post_create: PostCreate, board: Board, user: User, 
     db.refresh(db_post)
 
     for image in post_create.images_post:
-            db_image = Image(image_url=image.image_url, image_hash=image.image_hash, post_id=db_post.id)
-            db.add(db_image)
+        db_image = Image(image_url=image.image_url, image_hash=image.image_hash, post_id=db_post.id)
+        db.add(db_image)
 
     db.commit()
 
@@ -117,6 +118,7 @@ def update_post(db: Session, db_post: Post, post_update: PostUpdate):
 
     # Delete images
     for image in images_to_delete:
+        file_utils.delete_image_file(image.image_url)
         db.delete(image)
 
     # Add new images
@@ -130,6 +132,7 @@ def update_post(db: Session, db_post: Post, post_update: PostUpdate):
 def delete_post(db: Session, db_post: Post):
     images = get_image_by_post_id(db, post_id=db_post.id)
     for image in images:
+        file_utils.delete_image_file(image.image_url)
         db.delete(image)
     db.delete(db_post)
     db.commit()
