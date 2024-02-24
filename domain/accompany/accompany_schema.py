@@ -53,6 +53,7 @@ class AccompanyBase(BaseModel):
     update_date: datetime.datetime | None
     chat_count: int
     like_count: int
+    is_like_by_user: bool = False
 
 
 class AccompanyCreate(BaseModel):

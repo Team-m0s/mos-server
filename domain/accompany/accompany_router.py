@@ -7,6 +7,7 @@ from database import get_db
 from domain.accompany import accompany_schema, accompany_crud
 from domain.notice import notice_schema, notice_crud
 from domain.user import user_crud
+from domain.like import like_crud
 from utils import file_utils
 
 router = APIRouter(
@@ -15,7 +16,11 @@ router = APIRouter(
 
 
 @router.get("/list", response_model=list[accompany_schema.AccompanyBase], tags=["Accompany"])
-def accompany_list(db: Session = Depends(get_db), search_keyword: str = None, sort_order: str = 'latest'):
+def accompany_list(token: Optional[str] = Header(None), db: Session = Depends(get_db),
+                   search_keyword: str = None, sort_order: str = 'latest'):
+    current_user = None
+    if token:
+        current_user = user_crud.get_current_user(db, token)
     _accompany_list = accompany_crud.get_accompany_list(db, search_keyword=search_keyword, sort_order=sort_order)
 
     for accompany in _accompany_list:
@@ -30,6 +35,13 @@ def accompany_list(db: Session = Depends(get_db), search_keyword: str = None, so
                                                            image_url=f"https://www.mos-server.store/static/{image.image_url}")
                                 for
                                 image in images if image.image_url] if images else []
+
+    if current_user:
+        for accompany in _accompany_list:
+            accompany_like = like_crud.get_accompany_like(db, accompany_id=accompany.id, user=current_user)
+            if accompany_like:
+                accompany.is_like_by_user = True
+
     return _accompany_list
 
 
