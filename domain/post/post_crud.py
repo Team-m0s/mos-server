@@ -132,6 +132,11 @@ def update_post(db: Session, db_post: Post, post_update: PostUpdate):
 def delete_post(db: Session, db_post: Post):
     images = get_image_by_post_id(db, post_id=db_post.id)
     for image in images:
+        #이미지가 다른 게시글에서 사용중이면 저장소에서는 삭제 X
+        other_image = get_image_by_hash(db, image_hash=image.image_hash)
+        if other_image and other_image.post_id != db_post.id:
+            continue
+
         file_utils.delete_image_file(image.image_url)
         db.delete(image)
     db.delete(db_post)

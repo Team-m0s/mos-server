@@ -65,6 +65,8 @@ class Like(Base):
     post = relationship("Post", backref="like_posts")
     comment_id = Column(Integer, ForeignKey("comment.id"))
     comment = relationship("Comment", backref="like_comments")
+    accompany_id = Column(Integer, ForeignKey("accompany.id"))
+    accompany = relationship("Accompany", backref="like_accompanies")
 
 
 class Board(Base):
@@ -122,8 +124,8 @@ class Accompany(Base):
     create_date = Column(String, nullable=False)
     update_date = Column(String, nullable=False)
     category = Column(Enum(Category), nullable=False)
-    chat_count = Column(String, nullable=False, default=0)
-    like_count = Column(String, nullable=False, default=0)
+    chat_count = Column(Integer, nullable=False, default=0)
+    like_count = Column(Integer, nullable=False, default=0)
 
 
 class Image(Base):
