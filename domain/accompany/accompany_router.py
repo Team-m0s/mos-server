@@ -168,6 +168,23 @@ def accompany_delete_notice(_notice_delete: notice_schema.NoticeDelete, token: s
     notice_crud.delete_accompany_notice(db, db_notice=notice)
 
 
+@router.delete("/leave/{accompany_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
+def accompany_leave(accompany_id: int, token: str = Header(), db: Session = Depends(get_db)):
+    current_user = user_crud.get_current_user(db, token)
+    accompany = accompany_crud.get_accompany_by_id(db, accompany_id=accompany_id)
+    if not accompany:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"동행을 찾을 수 없습니다.")
+
+    if current_user.id == accompany.leader_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="리더는 동행을 탈퇴할 수 없습니다.")
+
+    members = accompany_crud.get_members_by_accompany_id(db, accompany_id=accompany_id)
+    if current_user not in members:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="권한이 없습니다.")
+
+    accompany_crud.leave_accompany(db, accompany_id=accompany_id, member_id=current_user.id)
+
+
 @router.delete("/ban-member/{accompany_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
 def accompany_ban_member(accompany_id: int, user_id: int, token: str = Header(), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
