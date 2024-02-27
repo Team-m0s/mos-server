@@ -1,4 +1,6 @@
 from datetime import timedelta
+
+import fastapi
 from authlib.integrations.base_client import OAuthError
 from fastapi import FastAPI, Request, Depends, HTTPException, Header
 from authlib.integrations.starlette_client import OAuth
@@ -110,10 +112,11 @@ async def welcome():
 #
 #     return JSONResponse(content={"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"})
 
-@app.get("/login/google/auth", tags=["Google"], name="google_auth")
-async def google_auth(request: requests.Request(), token: str = Header(), db: Session = Depends(get_db)):
+
+@app.get("/login/google/auth", tags=["Authentication"])
+async def google_auth(token: str = Header(), db: Session = Depends(get_db)):
     try:
-        id_info = await id_token.verify_oauth2_token(token, request, os.getenv("GOOGLE_CLIENT_ID_IOS"))
+        id_info = id_token.verify_oauth2_token(token, requests.Request(), os.getenv("GOOGLE_CLIENT_ID_IOS"))
 
         if id_info['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
             raise ValueError('Wrong issuer.')
@@ -126,9 +129,6 @@ async def google_auth(request: requests.Request(), token: str = Header(), db: Se
 
     if db_user is None:
         user_crud.create_user_google(db, user_info=user_info)
-        print("회원가입 완료")
-    else:
-        print("이미 가입된 회원")
 
     access_token_expires = timedelta(minutes=15)  # 토큰 유효 시간 설정
     access_token = jwt_token.create_access_token(data={"sub": user_info['email']},
@@ -154,13 +154,11 @@ async def apple_login():
     )
 
 
-@app.get("/login/kakao/auth", tags=["Kakao"])
-async def kakao_auth(request: Request, db: Session = Depends(get_db)):
-    """Verify login"""
-    with sso:
-        user = await sso.verify_and_process(request, params={"client_secret": os.getenv("KAKAO_CLIENT_SECRET")})
+@app.get("/login/kakao/auth", tags=["Authentication"])
+async def kakao_auth(token: str = Header(), db: Session = Depends(get_db)):
+    id_info = await jwt_token.verify_kakao_token(token)
 
-    user_info = dict(user)
+    user_info = dict(id_info)
     db_user = user_crud.get_user_by_email(db, user_info['email'])
 
     if db_user is None:
