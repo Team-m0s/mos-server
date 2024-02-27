@@ -26,6 +26,16 @@ def create_user_google(db: Session, user_info: dict):
     db.commit()
 
 
+def create_user_apple(db: Session, user_info: dict):
+    db_user = User(
+        email=user_info['email'],
+        nickName=user_info['name'],
+        profile_img=user_info.get("picture", None)  # 'picture' 키가 없을 경우 None으로 처리
+    )
+    db.add(db_user)
+    db.commit()
+
+
 def get_user_by_email(db: Session, email: str):
     return db.query(User).filter(User.email == email).first()
 
