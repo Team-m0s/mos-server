@@ -9,7 +9,7 @@ from jose.exceptions import JWTError
 def create_user_kakao(db: Session, user_info: dict):
     db_user = User(
         email=user_info['email'],
-        nickName=user_info['display_name'],
+        nickName=user_info['nickname'],
         profile_img=user_info.get("picture", None)  # 'picture' 키가 없을 경우 None으로 처리
     )
     db.add(db_user)
@@ -29,8 +29,7 @@ def create_user_google(db: Session, user_info: dict):
 def create_user_apple(db: Session, user_info: dict):
     db_user = User(
         email=user_info['email'],
-        nickName=user_info['name'],
-        profile_img=user_info.get("picture", None)  # 'picture' 키가 없을 경우 None으로 처리
+        nickName='Unknown',
     )
     db.add(db_user)
     db.commit()
