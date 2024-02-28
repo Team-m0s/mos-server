@@ -28,11 +28,11 @@ def create_user_google(db: Session, user_info: dict):
     db.commit()
 
 
-def create_user_apple(db: Session, user_info: dict):
+def create_user_apple(db: Session, user_info: dict, name: str):
     db_user = User(
         uuid=user_info['sub'],
         email=user_info['email'],
-        nickName='Unknown',
+        nickName=name,
     )
     db.add(db_user)
     db.commit()
