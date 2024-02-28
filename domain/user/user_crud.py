@@ -1,9 +1,11 @@
+from datetime import datetime
+
 from sqlalchemy.orm import Session
 from models import User
 from fastapi import FastAPI, Request, HTTPException, status
 import jwt
 from jwt_token import ALGORITHM, SECRET_KEY
-from jose.exceptions import JWTError
+from jose.exceptions import JWTError, ExpiredSignatureError
 
 
 def create_user_kakao(db: Session, user_info: dict, provider: str):
@@ -60,8 +62,12 @@ def get_current_user(db: Session, token: str):
         user_email: str = payload.get("sub")
         if user_email is None:
             raise credentials_exception
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
     except JWTError:
-        raise credentials_exception
+        raise HTTPException(status_code=400, detail="Invalid token format")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="An error occurred while verifying the token: " + str(e))
     else:
         user = get_user_by_uuid(db, user_email)
         if user is None:

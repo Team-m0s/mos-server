@@ -46,7 +46,7 @@ def get_accompany_filtered_list(db: Session, is_closed: bool, total_member: List
         query = query.filter(Accompany.activity_scope == activity_scope)
 
     if city is not None:
-        query = query.filter(Accompany.city == city)
+        query = query.filter(Accompany.city.ilike(f"%{city}%"))  # 수정된 부분
 
     if category is not None:
         query = query.filter(Accompany.category.in_(category))
