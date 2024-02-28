@@ -8,6 +8,7 @@ from jose.exceptions import JWTError
 
 def create_user_kakao(db: Session, user_info: dict):
     db_user = User(
+        uuid=user_info['sub'],
         email=user_info['email'],
         nickName=user_info['nickname'],
         profile_img=user_info.get("picture", None)  # 'picture' 키가 없을 경우 None으로 처리
@@ -18,6 +19,7 @@ def create_user_kakao(db: Session, user_info: dict):
 
 def create_user_google(db: Session, user_info: dict):
     db_user = User(
+        uuid=user_info['sub'],
         email=user_info['email'],
         nickName=user_info['name'],
         profile_img=user_info.get("picture", None)  # 'picture' 키가 없을 경우 None으로 처리
@@ -28,6 +30,7 @@ def create_user_google(db: Session, user_info: dict):
 
 def create_user_apple(db: Session, user_info: dict):
     db_user = User(
+        uuid=user_info['sub'],
         email=user_info['email'],
         nickName='Unknown',
     )
@@ -35,8 +38,8 @@ def create_user_apple(db: Session, user_info: dict):
     db.commit()
 
 
-def get_user_by_email(db: Session, email: str):
-    return db.query(User).filter(User.email == email).first()
+def get_user_by_uuid(db: Session, uuid: str):
+    return db.query(User).filter(User.uuid == uuid).first()
 
 
 def get_user_by_id(db: Session, user_id: int):

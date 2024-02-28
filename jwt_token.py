@@ -31,17 +31,6 @@ async def get_kakao_jwks(force_update=False):
         return jwks
 
 
-async def get_apple_jwks(force_update=False):
-    url = "https://appleid.apple.com/auth/keys"
-    if 'jwks' in kakao_jwks_cache and not force_update:
-        return kakao_jwks_cache['jwks']
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url)
-        jwks = response.json()
-        kakao_jwks_cache['jwks'] = jwks
-        return jwks
-
-
 async def find_kakao_key_by_kid(kid):
     jwks = await get_kakao_jwks()
     for jwk in jwks.get('keys', []):
@@ -53,6 +42,17 @@ async def find_kakao_key_by_kid(kid):
         if jwk.get('kid') == kid:
             return RSAAlgorithm.from_jwk(json.dumps(jwk))
     return None
+
+
+async def get_apple_jwks(force_update=False):
+    url = "https://appleid.apple.com/auth/keys"
+    if 'jwks' in apple_jwks_cache and not force_update:
+        return apple_jwks_cache['jwks']
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+        jwks = response.json()
+        apple_jwks_cache['jwks'] = jwks
+        return jwks
 
 
 async def find_apple_key_by_kid(kid):
@@ -119,6 +119,8 @@ async def verify_apple_token(token: str):
     except (ValueError, JWTError):
         raise HTTPException(status_code=400, detail="Payload decoding failed")
 
+    print(payload_data)
+
     if payload_data.get('iss') != "https://appleid.apple.com":
         raise HTTPException(status_code=401, detail="Invalid issuer")
 
@@ -143,6 +145,7 @@ async def verify_apple_token(token: str):
     except JWTError as e:
         raise HTTPException(status_code=401, detail="Signature verification failed: " + str(e))
 
+    print(decoded_payload)
     return decoded_payload
 
 

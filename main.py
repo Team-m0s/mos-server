@@ -57,16 +57,17 @@ async def google_auth(token: str = Header(), db: Session = Depends(get_db)):
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid token.")
 
+    print(id_info)
     user_info = dict(id_info)
-    db_user = user_crud.get_user_by_email(db, user_info['email'])
+    db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
 
     if db_user is None:
         user_crud.create_user_google(db, user_info=user_info)
 
     access_token_expires = timedelta(minutes=15)  # 토큰 유효 시간 설정
-    access_token = jwt_token.create_access_token(data={"sub": user_info['email']},
+    access_token = jwt_token.create_access_token(data={"sub": user_info['sub']},
                                                  expires_delta=access_token_expires)
-    refresh_token = jwt_token.create_refresh_token(data={"sub": user_info['email']})
+    refresh_token = jwt_token.create_refresh_token(data={"sub": user_info['sub']})
 
     return JSONResponse(content={"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"})
 
@@ -76,14 +77,14 @@ async def kakao_auth(token: str = Header(), db: Session = Depends(get_db)):
     id_info = await jwt_token.verify_kakao_token(token)
 
     user_info = dict(id_info)
-    db_user = user_crud.get_user_by_email(db, user_info['email'])
+    db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
 
     if db_user is None:
         user_crud.create_user_kakao(db, user_info=user_info)
 
     # 토큰 생성
-    access_token = jwt_token.create_access_token(data={"sub": user_info['email']}, expires_delta=timedelta(minutes=15))
-    refresh_token = jwt_token.create_refresh_token(data={"sub": user_info['email']})
+    access_token = jwt_token.create_access_token(data={"sub": user_info['sub']}, expires_delta=timedelta(minutes=15))
+    refresh_token = jwt_token.create_refresh_token(data={"sub": user_info['sub']})
 
     return {"access_token": access_token, "refresh_token": refresh_token}
 
@@ -93,14 +94,14 @@ async def apple_auth(token: str = Header(), db: Session = Depends(get_db)):
     id_info = await jwt_token.verify_apple_token(token)
 
     user_info = dict(id_info)
-    db_user = user_crud.get_user_by_email(db, user_info['email'])
+    db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
 
     if db_user is None:
         user_crud.create_user_apple(db, user_info=user_info)
 
     # 토큰 생성
-    access_token = jwt_token.create_access_token(data={"sub": user_info['email']}, expires_delta=timedelta(minutes=15))
-    refresh_token = jwt_token.create_refresh_token(data={"sub": user_info['email']})
+    access_token = jwt_token.create_access_token(data={"sub": user_info['sub']}, expires_delta=timedelta(minutes=15))
+    refresh_token = jwt_token.create_refresh_token(data={"sub": user_info['sub']})
 
     return {"access_token": access_token, "refresh_token": refresh_token}
 
