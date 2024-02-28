@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Header
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import RedirectResponse
@@ -21,7 +21,7 @@ def user_create(user_info: dict, user_create_: user_schema.UserCreate, db: Sessi
 
 
 @router.post("/findUser", tags=["User"])
-def find_user(token: str, db: Session = Depends(get_db)):
+def find_user(token: str = Header(), db: Session = Depends(get_db)):
     current_user_ = user_crud.get_current_user(db, token)
     return current_user_
 

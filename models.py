@@ -128,6 +128,7 @@ class Accompany(Base):
     category = Column(Enum(Category), nullable=False)
     chat_count = Column(Integer, nullable=False, default=0)
     like_count = Column(Integer, nullable=False, default=0)
+    is_closed = Column(Boolean, nullable=False, default=False)
 
 
 class Image(Base):

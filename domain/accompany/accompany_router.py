@@ -9,10 +9,21 @@ from domain.notice import notice_schema, notice_crud
 from domain.user import user_crud
 from domain.like import like_crud
 from utils import file_utils
+from models import ActivityScope, Category
 
 router = APIRouter(
     prefix="/api/accompany"
 )
+
+
+def member_query_processor(total_member_min: int, total_member_max: int):
+    result = [total_member_min, total_member_max]
+    return result
+
+
+def category_query_processor(category1: Category = None, category2: Category = None, category3: Category = None):
+    result = [category1, category2, category3]
+    return result
 
 
 @router.get("/list", response_model=list[accompany_schema.AccompanyBase], tags=["Accompany"])
@@ -22,6 +33,40 @@ def accompany_list(token: Optional[str] = Header(None), db: Session = Depends(ge
     if token:
         current_user = user_crud.get_current_user(db, token)
     _accompany_list = accompany_crud.get_accompany_list(db, search_keyword=search_keyword, sort_order=sort_order)
+
+    for accompany in _accompany_list:
+        leader = user_crud.get_user_by_id(db, user_id=accompany.leader_id)
+        if leader.lang_level is None:
+            leader.lang_level = {}
+        accompany.leader = leader
+        accompany.member = [member for member in accompany.member if member.id != accompany.leader_id]
+
+        images = accompany_crud.get_image_by_accompany_id(db, accompany_id=accompany.id)
+        accompany.image_urls = [accompany_schema.ImageBase(id=image.id,
+                                                           image_url=f"https://www.mos-server.store/static/{image.image_url}")
+                                for
+                                image in images if image.image_url] if images else []
+
+    if current_user:
+        for accompany in _accompany_list:
+            accompany_like = like_crud.get_accompany_like(db, accompany_id=accompany.id, user=current_user)
+            if accompany_like:
+                accompany.is_like_by_user = True
+
+    return _accompany_list
+
+
+@router.get("/filtered/list", response_model=list[accompany_schema.AccompanyBase], tags=["Accompany"])
+def accompany_filtered_list(is_closed: bool, total_member: List[int] = Depends(member_query_processor),
+                            token: Optional[str] = Header(None), db: Session = Depends(get_db),
+                            activity_scope: ActivityScope = None, city: str = None,
+                            category: List[Category] = Depends(category_query_processor)):
+    current_user = None
+    if token:
+        current_user = user_crud.get_current_user(db, token)
+    _accompany_list = accompany_crud.get_accompany_filtered_list(db, is_closed=is_closed, total_member=total_member,
+                                                                 activity_scope=activity_scope, city=city,
+                                                                 category=category)
 
     for accompany in _accompany_list:
         leader = user_crud.get_user_by_id(db, user_id=accompany.leader_id)

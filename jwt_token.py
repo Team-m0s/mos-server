@@ -3,7 +3,7 @@ import os
 from jwt import PyJWTError
 from fastapi import HTTPException
 from datetime import datetime, timedelta
-from jose import jwt, JWTError
+from jose import jwt, JWTError, ExpiredSignatureError
 from dotenv import load_dotenv
 import httpx
 from jwt.algorithms import RSAAlgorithm
@@ -173,5 +173,7 @@ def verify_token(token: str):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
     except PyJWTError:
         return None

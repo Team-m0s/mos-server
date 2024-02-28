@@ -4,7 +4,7 @@ from typing import List
 from datetime import datetime
 
 from utils import file_utils
-from models import Accompany, User, Image, Tag, accompany_member
+from models import Accompany, User, Image, Tag, accompany_member, ActivityScope, Category
 from domain.accompany.accompany_schema import AccompanyCreate, AccompanyUpdate, TagCreate, ImageCreate
 
 
@@ -31,12 +31,35 @@ def get_accompany_list(db: Session, search_keyword: str = None, sort_order: str 
     return accompany_list
 
 
+def get_accompany_filtered_list(db: Session, is_closed: bool, total_member: List[int],
+                                activity_scope: ActivityScope = None, city: str = None,
+                                category: List[Category] = None):
+    query = db.query(Accompany)
+
+    if not is_closed:
+        query = query.filter(Accompany.is_closed == is_closed)
+
+    if total_member is not None and len(total_member) == 2:
+        query = query.filter(and_(Accompany.total_member >= total_member[0], Accompany.total_member <= total_member[1]))
+
+    if activity_scope is not None:
+        query = query.filter(Accompany.activity_scope == activity_scope)
+
+    if city is not None:
+        query = query.filter(Accompany.city == city)
+
+    if category is not None:
+        query = query.filter(Accompany.category.in_(category))
+
+    return query.all()
+
+
 def get_accompany_by_id(db: Session, accompany_id: int):
     return db.query(Accompany).filter(Accompany.id == accompany_id).first()
 
 
 def get_members_by_accompany_id(db: Session, accompany_id: int):
-    return db.query(User).join(accompany_member, User.id == accompany_member.c.user_id)\
+    return db.query(User).join(accompany_member, User.id == accompany_member.c.user_id) \
         .filter(accompany_member.c.accompany_id == accompany_id).all()
 
 
@@ -141,7 +164,6 @@ def leave_accompany(db: Session, accompany_id: int, member_id: int):
         )
     ).delete(synchronize_session=False)
     db.commit()
-
 
 
 def assign_new_leader(db: Session, accompany_id: int, member_id: int):
