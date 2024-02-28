@@ -13,6 +13,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True)
     uuid = Column(String, nullable=False)
+    provider = Column(String, nullable=False)
     email = Column(String, nullable=False)
     nickName = Column(String, nullable=False)
     profile_img = Column(String, nullable=True)

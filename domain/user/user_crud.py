@@ -6,33 +6,36 @@ from jwt_token import ALGORITHM, SECRET_KEY
 from jose.exceptions import JWTError
 
 
-def create_user_kakao(db: Session, user_info: dict):
+def create_user_kakao(db: Session, user_info: dict, provider: str):
     db_user = User(
         uuid=user_info['sub'],
         email=user_info['email'],
         nickName=user_info['nickname'],
-        profile_img=user_info.get("picture", None)  # 'picture' 키가 없을 경우 None으로 처리
+        profile_img=user_info.get("picture", None),
+        provider=provider
     )
     db.add(db_user)
     db.commit()
 
 
-def create_user_google(db: Session, user_info: dict):
+def create_user_google(db: Session, user_info: dict, provider: str):
     db_user = User(
         uuid=user_info['sub'],
         email=user_info['email'],
         nickName=user_info['name'],
-        profile_img=user_info.get("picture", None)  # 'picture' 키가 없을 경우 None으로 처리
+        profile_img=user_info.get("picture", None),
+        provider=provider
     )
     db.add(db_user)
     db.commit()
 
 
-def create_user_apple(db: Session, user_info: dict, name: str):
+def create_user_apple(db: Session, user_info: dict, name: str, provider: str):
     db_user = User(
         uuid=user_info['sub'],
         email=user_info['email'],
         nickName=name,
+        provider=provider
     )
     db.add(db_user)
     db.commit()
@@ -55,13 +58,12 @@ def get_current_user(db: Session, token: str):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_email: str = payload.get("sub")
-        print(user_email)
         if user_email is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
     else:
-        user = get_user_by_email(db, user_email)
+        user = get_user_by_uuid(db, user_email)
         if user is None:
             raise credentials_exception
         return user

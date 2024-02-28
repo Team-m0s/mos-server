@@ -47,7 +47,7 @@ async def main():
 
 
 @app.get("/login/google/auth", tags=["Authentication"])
-async def google_auth(token: str = Header(), db: Session = Depends(get_db)):
+async def google_auth(provider: str, token: str = Header(), db: Session = Depends(get_db)):
     try:
         id_info = id_token.verify_oauth2_token(token, requests.Request(), os.getenv("GOOGLE_CLIENT_ID_IOS"))
 
@@ -62,7 +62,7 @@ async def google_auth(token: str = Header(), db: Session = Depends(get_db)):
     db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
 
     if db_user is None:
-        user_crud.create_user_google(db, user_info=user_info)
+        user_crud.create_user_google(db, user_info=user_info, provider=provider)
 
     access_token_expires = timedelta(minutes=15)  # 토큰 유효 시간 설정
     access_token = jwt_token.create_access_token(data={"sub": user_info['sub']},
@@ -73,14 +73,14 @@ async def google_auth(token: str = Header(), db: Session = Depends(get_db)):
 
 
 @app.get("/login/kakao/auth", tags=["Authentication"])
-async def kakao_auth(token: str = Header(), db: Session = Depends(get_db)):
+async def kakao_auth(provider: str, token: str = Header(), db: Session = Depends(get_db)):
     id_info = await jwt_token.verify_kakao_token(token)
 
     user_info = dict(id_info)
     db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
 
     if db_user is None:
-        user_crud.create_user_kakao(db, user_info=user_info)
+        user_crud.create_user_kakao(db, user_info=user_info, provider=provider)
 
     # 토큰 생성
     access_token = jwt_token.create_access_token(data={"sub": user_info['sub']}, expires_delta=timedelta(minutes=15))
@@ -90,14 +90,14 @@ async def kakao_auth(token: str = Header(), db: Session = Depends(get_db)):
 
 
 @app.get("/login/apple/auth", tags=["Authentication"])
-async def apple_auth(name: str, token: str = Header(), db: Session = Depends(get_db)):
+async def apple_auth(provider: str, name: str, token: str = Header(), db: Session = Depends(get_db)):
     id_info = await jwt_token.verify_apple_token(token)
 
     user_info = dict(id_info)
     db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
 
     if db_user is None:
-        user_crud.create_user_apple(db, user_info=user_info, name=name)
+        user_crud.create_user_apple(db, user_info=user_info, name=name, provider=provider)
 
     # 토큰 생성
     access_token = jwt_token.create_access_token(data={"sub": user_info['sub']}, expires_delta=timedelta(minutes=15))
