@@ -57,7 +57,6 @@ async def google_auth(provider: str, token: str = Header(), db: Session = Depend
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid token.")
 
-    print(id_info)
     user_info = dict(id_info)
     db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
 
@@ -112,13 +111,13 @@ async def token_refresh(token: str = Header(...), db: Session = Depends(get_db))
     if payload is None:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
-    user_email = payload.get("sub")
-    user = user_crud.get_user_by_email(db, user_email)
+    user_uuid = payload.get("sub")
+    user = user_crud.get_user_by_uuid(db, user_uuid)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
     access_token_expires = timedelta(minutes=15)  # Set the access token expiry time
-    new_access_token = jwt_token.create_access_token(data={"sub": user.email}, expires_delta=access_token_expires)
+    new_access_token = jwt_token.create_access_token(data={"sub": user.uuid}, expires_delta=access_token_expires)
 
     return {"access_token": new_access_token, "token_type": "bearer"}
 

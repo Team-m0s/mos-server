@@ -59,9 +59,7 @@ def get_current_user(db: Session, token: str):
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_email: str = payload.get("sub")
-        if user_email is None:
-            raise credentials_exception
+        user_uuid = payload.get("sub")
     except ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token has expired")
     except JWTError:
@@ -69,7 +67,7 @@ def get_current_user(db: Session, token: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail="An error occurred while verifying the token: " + str(e))
     else:
-        user = get_user_by_uuid(db, user_email)
+        user = get_user_by_uuid(db, user_uuid)
         if user is None:
             raise credentials_exception
         return user
