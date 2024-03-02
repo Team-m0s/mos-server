@@ -14,6 +14,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 import jwt_token
 from domain.user import user_crud
+from domain.user.user_schema import AuthSchema
 from domain.post import post_router
 from domain.comment import comment_router
 from domain.like import like_router
@@ -45,10 +46,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 @app.get("/", response_class=HTMLResponse)
 async def main():
     return HTMLResponse(content="<h1>환영합니다</h1>", status_code=200)
-
-
-class AuthSchema(BaseModel):
-    provider: str
 
 
 @app.post("/login/google/auth", tags=["Authentication"])

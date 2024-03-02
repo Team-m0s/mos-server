@@ -2,6 +2,10 @@ from pydantic import BaseModel, field_validator
 from typing import Dict
 
 
+class AuthSchema(BaseModel):
+    provider: str
+
+
 class LanguageLevel(BaseModel):
     level: Dict[str, int]
 

@@ -6,7 +6,7 @@ from fastapi import FastAPI, Request, HTTPException, status
 from jose import jwt
 from jwt_token import ALGORITHM, SECRET_KEY
 from jose.exceptions import JWTError, ExpiredSignatureError
-from main import AuthSchema
+from domain.user.user_schema import AuthSchema
 
 
 def create_user_kakao(db: Session, user_info: dict, provider: AuthSchema):
