@@ -6,9 +6,10 @@ from fastapi import FastAPI, Request, HTTPException, status
 from jose import jwt
 from jwt_token import ALGORITHM, SECRET_KEY
 from jose.exceptions import JWTError, ExpiredSignatureError
+from main import AuthSchema
 
 
-def create_user_kakao(db: Session, user_info: dict, provider: str):
+def create_user_kakao(db: Session, user_info: dict, provider: AuthSchema):
     db_user = User(
         uuid=user_info['sub'],
         email=user_info['email'],
@@ -20,7 +21,7 @@ def create_user_kakao(db: Session, user_info: dict, provider: str):
     db.commit()
 
 
-def create_user_google(db: Session, user_info: dict, provider: str):
+def create_user_google(db: Session, user_info: dict, provider: AuthSchema):
     db_user = User(
         uuid=user_info['sub'],
         email=user_info['email'],

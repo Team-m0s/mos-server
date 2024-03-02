@@ -1,9 +1,10 @@
 from datetime import timedelta
-from fastapi import FastAPI, Request, Depends, HTTPException, Header
+from fastapi import FastAPI, Request, Depends, HTTPException, Header, Body
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import HTMLResponse, JSONResponse
+from pydantic import BaseModel
 from google.oauth2 import id_token
 from google.auth.transport import requests
 import os
@@ -46,8 +47,12 @@ async def main():
     return HTMLResponse(content="<h1>환영합니다</h1>", status_code=200)
 
 
+class AuthSchema(BaseModel):
+    provider: str
+
+
 @app.post("/login/google/auth", tags=["Authentication"])
-async def google_auth(provider: str, token: str = Header(), db: Session = Depends(get_db)):
+async def google_auth(provider: AuthSchema = Body(...), token: str = Header(), db: Session = Depends(get_db)):
     try:
         id_info = id_token.verify_oauth2_token(token, requests.Request(), os.getenv("GOOGLE_CLIENT_ID_IOS"))
 
@@ -72,7 +77,7 @@ async def google_auth(provider: str, token: str = Header(), db: Session = Depend
 
 
 @app.post("/login/kakao/auth", tags=["Authentication"])
-async def kakao_auth(provider: str, token: str = Header(), db: Session = Depends(get_db)):
+async def kakao_auth(provider: AuthSchema = Body(...), token: str = Header(), db: Session = Depends(get_db)):
     id_info = await jwt_token.verify_kakao_token(token)
 
     user_info = dict(id_info)
@@ -89,7 +94,8 @@ async def kakao_auth(provider: str, token: str = Header(), db: Session = Depends
 
 
 @app.post("/login/apple/auth", tags=["Authentication"])
-async def apple_auth(provider: str, name: str, token: str = Header(), db: Session = Depends(get_db)):
+async def apple_auth(provider: str = Body(...), name: str = Body(...), token: str = Header(),
+                     db: Session = Depends(get_db)):
     id_info = await jwt_token.verify_apple_token(token)
 
     user_info = dict(id_info)
