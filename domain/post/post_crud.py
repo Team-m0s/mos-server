@@ -118,6 +118,11 @@ def update_post(db: Session, db_post: Post, post_update: PostUpdate):
 
     # Delete images
     for image in images_to_delete:
+        # 이미지가 다른 게시글에서 사용중이면 저장소에서는 삭제 X
+        other_image = get_image_by_hash(db, image_hash=image.image_hash)
+        if other_image and other_image.post_id != db_post.id:
+            continue
+
         file_utils.delete_image_file(image.image_url)
         db.delete(image)
 

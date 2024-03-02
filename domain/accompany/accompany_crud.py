@@ -84,7 +84,8 @@ def create_accompany(db: Session, accompany_create: AccompanyCreate, user: User)
                              introduce=accompany_create.introduce,
                              activity_scope=accompany_create.activity_scope,
                              create_date=datetime.now(),
-                             update_date=datetime.now())
+                             update_date=datetime.now(),
+                             qna=accompany_create.qna)
     db.add(db_accompany)
     db.commit()
     db.refresh(db_accompany)
@@ -107,6 +108,7 @@ def update_accompany(db: Session, db_accompany: Accompany, accompany_update: Acc
     db_accompany.activity_scope = accompany_update.activity_scope
     db_accompany.introduce = accompany_update.introduce
     db_accompany.total_member = accompany_update.total_member
+    db_accompany.update_date = datetime.now()
 
     current_images = get_image_by_accompany_id(db, accompany_id=db_accompany.id)
     submitted_images = accompany_update.images_accompany
@@ -126,6 +128,11 @@ def update_accompany(db: Session, db_accompany: Accompany, accompany_update: Acc
 
     # Delete images
     for image in images_to_delete:
+        # 이미지가 다른 accompany에서 사용중이면 저장소에서는 삭제 X
+        other_image = get_image_by_hash(db, image_hash=image.image_hash)
+        if other_image and other_image.accompany_id != db_accompany.id:
+            continue
+
         file_utils.delete_image_file(image.image_url)
         db.delete(image)
 

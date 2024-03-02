@@ -95,7 +95,7 @@ def accompany_create(token: str = Header(), category: accompany_schema.Category 
                      title: str = Form(...), activity_scope: accompany_schema.ActivityScope = Form(...),
                      images: List[UploadFile] = File(None), city: str = Form(None),
                      introduce: str = Form(...), total_member: int = Form(...),
-                     tags: List[str] = Form(None), db: Session = Depends(get_db)):
+                     tags: List[str] = Form(None), qna: str = Form(None), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
 
     image_creates = []
@@ -120,7 +120,7 @@ def accompany_create(token: str = Header(), category: accompany_schema.Category 
                                                              activity_scope=activity_scope,
                                                              images_accompany=image_creates,
                                                              city=city, introduce=introduce, total_member=total_member,
-                                                             tags_accompany=tag_creates)
+                                                             tags_accompany=tag_creates, qna=qna)
     accompany_crud.create_accompany(db, accompany_create=accompany_create_data, user=current_user)
 
 

@@ -129,6 +129,17 @@ class Accompany(Base):
     chat_count = Column(Integer, nullable=False, default=0)
     like_count = Column(Integer, nullable=False, default=0)
     is_closed = Column(Boolean, nullable=False, default=False)
+    qna = Column(String, nullable=True)
+
+
+class Application(Base):
+    __tablename__ = "application"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship('User', backref="application_users")
+    accompany_id = Column(Integer, ForeignKey('accompany.id'))
+    accompany = relationship('Accompany', backref="application_accompanies")
 
 
 class Image(Base):

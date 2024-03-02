@@ -46,7 +46,7 @@ async def main():
     return HTMLResponse(content="<h1>환영합니다</h1>", status_code=200)
 
 
-@app.get("/login/google/auth", tags=["Authentication"])
+@app.post("/login/google/auth", tags=["Authentication"])
 async def google_auth(provider: str, token: str = Header(), db: Session = Depends(get_db)):
     try:
         id_info = id_token.verify_oauth2_token(token, requests.Request(), os.getenv("GOOGLE_CLIENT_ID_IOS"))
@@ -71,7 +71,7 @@ async def google_auth(provider: str, token: str = Header(), db: Session = Depend
     return JSONResponse(content={"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"})
 
 
-@app.get("/login/kakao/auth", tags=["Authentication"])
+@app.post("/login/kakao/auth", tags=["Authentication"])
 async def kakao_auth(provider: str, token: str = Header(), db: Session = Depends(get_db)):
     id_info = await jwt_token.verify_kakao_token(token)
 
@@ -88,7 +88,7 @@ async def kakao_auth(provider: str, token: str = Header(), db: Session = Depends
     return {"access_token": access_token, "refresh_token": refresh_token}
 
 
-@app.get("/login/apple/auth", tags=["Authentication"])
+@app.post("/login/apple/auth", tags=["Authentication"])
 async def apple_auth(provider: str, name: str, token: str = Header(), db: Session = Depends(get_db)):
     id_info = await jwt_token.verify_apple_token(token)
 
@@ -117,7 +117,7 @@ async def token_refresh(token: str = Header(...), db: Session = Depends(get_db))
         raise HTTPException(status_code=404, detail="User not found")
 
     access_token_expires = timedelta(minutes=15)  # Set the access token expiry time
-    new_access_token = jwt_token.create_access_token(data={"sub": user.uuid}, expires_delta=access_token_expires)
+    new_access_token = jwt_token.create_access_token(data={"sub": user_uuid}, expires_delta=access_token_expires)
 
     return {"access_token": new_access_token, "token_type": "bearer"}
 

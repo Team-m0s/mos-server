@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from models import User
 from fastapi import FastAPI, Request, HTTPException, status
-import jwt
+from jose import jwt
 from jwt_token import ALGORITHM, SECRET_KEY
 from jose.exceptions import JWTError, ExpiredSignatureError
 

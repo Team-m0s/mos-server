@@ -1,6 +1,5 @@
 import json
 import os
-from jwt import PyJWTError
 from fastapi import HTTPException, status
 from datetime import datetime, timedelta
 from jose import jwt

@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 
 from domain.notice.notice_schema import NoticeCreate, NoticeUpdate
+from domain.accompany import accompany_crud
 from models import Notice
 
 
@@ -10,6 +11,10 @@ def get_notice_by_id(db: Session, notice_id: int):
 
 
 def create_accompany_notice(db: Session, accompany_id: int, notice_create: NoticeCreate):
+    db_accompany = accompany_crud.get_accompany_by_id(db, accompany_id=accompany_id)
+    db_accompany.update_date = datetime.now()
+    db.add(db_accompany)
+
     db_notice = Notice(content=notice_create.content,
                        create_date=datetime.now(),
                        accompany_id=accompany_id)

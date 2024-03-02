@@ -2,7 +2,6 @@ from pydantic import BaseModel, field_validator
 import datetime
 from enum import Enum
 from typing import List, Optional
-from models import ActivityScope, Tag, Image, Notice
 from domain.user.user_schema import UserBase
 from domain.notice.notice_schema import NoticeBase
 from models import ActivityScope, Category
@@ -61,10 +60,11 @@ class AccompanyCreate(BaseModel):
     title: str
     activity_scope: ActivityScope
     images_accompany: Optional[List[ImageCreate]] = None
-    city: str
+    city: Optional[str] = None
     introduce: str
     total_member: int
     tags_accompany: Optional[List[TagCreate]] = None
+    qna: Optional[str] = None
 
     @field_validator('title')
     def content_length(cls, v):
