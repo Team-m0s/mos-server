@@ -15,7 +15,7 @@ def create_user_kakao(db: Session, user_info: dict, provider: AuthSchema):
         email=user_info['email'],
         nickName=user_info['nickname'],
         profile_img=user_info.get("picture", None),
-        provider=provider
+        provider=provider.provider
     )
     db.add(db_user)
     db.commit()
@@ -27,7 +27,7 @@ def create_user_google(db: Session, user_info: dict, provider: AuthSchema):
         email=user_info['email'],
         nickName=user_info['name'],
         profile_img=user_info.get("picture", None),
-        provider=provider
+        provider=provider.provider
     )
     db.add(db_user)
     db.commit()

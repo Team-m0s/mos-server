@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 from typing import List
-from datetime import datetime
+from datetime import datetime, date
 
 from utils import file_utils
-from models import Accompany, User, Image, Tag, accompany_member, ActivityScope, Category
+from models import Accompany, User, Image, Tag, accompany_member, ActivityScope, Category, Application
 from domain.accompany.accompany_schema import AccompanyCreate, AccompanyUpdate, TagCreate, ImageCreate
 
 
@@ -52,6 +52,10 @@ def get_accompany_filtered_list(db: Session, is_closed: bool, total_member: List
         query = query.filter(Accompany.category.in_(category))
 
     return query.all()
+
+
+def get_application_list(db: Session, accompany_id: int):
+    return db.query(Application).filter(Application.accompany_id == accompany_id).all()
 
 
 def get_accompany_by_id(db: Session, accompany_id: int):
@@ -133,7 +137,18 @@ def update_accompany(db: Session, db_accompany: Accompany, accompany_update: Acc
         if other_image and other_image.accompany_id != db_accompany.id:
             continue
 
-        file_utils.delete_image_file(image.image_url)
+        # Check if the image exists in the database
+        image_in_db = db.query(Image).filter(Image.id == image.id).first()
+        if image_in_db is None:
+            continue
+
+        # Check if the image file deletion is successful
+        try:
+            file_utils.delete_image_file(image.image_url)
+        except Exception as e:
+            print(f"Failed to delete image file: {e}")
+            continue
+
         db.delete(image)
 
     # Add new images
@@ -151,6 +166,34 @@ def update_accompany(db: Session, db_accompany: Accompany, accompany_update: Acc
         db.add(db_tag)
 
     db.commit()
+
+
+def apply_accompany(db: Session, accompany_id: int, user_id: int, answer: str):
+    db_application = Application(accompany_id=accompany_id, user_id=user_id,
+                                 answer=answer, apply_date=date.today())
+    db.add(db_application)
+    db.commit()
+
+
+def get_application_by_id(db: Session, application_id: int):
+    return db.query(Application).filter(Application.id == application_id).all()
+
+
+def approve_application(db: Session, application_id: int):
+    application = db.query(Application).filter(Application.id == application_id).first()
+    if application:
+        db.execute(accompany_member.insert().values(user_id=application.user_id,
+                                                    application_id=application.accompany_id))
+        db.delete(application)
+        db.commit()
+
+
+def reject_application(db: Session, application_id: int):
+    application = db.query(Application).filter(Application.id == application_id).first()
+    if application:
+        # Delete the application
+        db.delete(application)
+        db.commit()
 
 
 def ban_accompany_member(db: Session, accompany_id: int, member_id: int):

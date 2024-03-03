@@ -123,7 +123,18 @@ def update_post(db: Session, db_post: Post, post_update: PostUpdate):
         if other_image and other_image.post_id != db_post.id:
             continue
 
-        file_utils.delete_image_file(image.image_url)
+        # Check if the image exists in the database
+        image_in_db = db.query(Image).filter(Image.id == image.id).first()
+        if image_in_db is None:
+            continue
+
+        # Check if the image file deletion is successful
+        try:
+            file_utils.delete_image_file(image.image_url)
+        except Exception as e:
+            print(f"Failed to delete image file: {e}")
+            continue
+
         db.delete(image)
 
     # Add new images
