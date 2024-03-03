@@ -175,6 +175,11 @@ def apply_accompany(db: Session, accompany_id: int, user_id: int, answer: str):
     db.commit()
 
 
+def register_accompany(db: Session, accompany_id: int, user_id: int):
+    db.execute(accompany_member.insert().values(user_id=user_id, accompany_id=accompany_id))
+    db.commit()
+
+
 def get_application_by_id(db: Session, application_id: int):
     return db.query(Application).filter(Application.id == application_id).all()
 
@@ -183,7 +188,7 @@ def approve_application(db: Session, application_id: int):
     application = db.query(Application).filter(Application.id == application_id).first()
     if application:
         db.execute(accompany_member.insert().values(user_id=application.user_id,
-                                                    application_id=application.accompany_id))
+                                                    accompany_id=application.accompany_id))
         db.delete(application)
         db.commit()
 

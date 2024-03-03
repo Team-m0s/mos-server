@@ -140,7 +140,7 @@ class Application(Base):
     user = relationship('User', backref="application_users")
     accompany_id = Column(Integer, ForeignKey('accompany.id'))
     accompany = relationship('Accompany', backref="application_accompanies")
-    answer = Column(String, nullable=False)
+    answer = Column(String, nullable=True)
     apply_date = Column(String, nullable=False)
 
 

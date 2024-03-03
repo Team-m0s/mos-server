@@ -48,6 +48,11 @@ class ApplicationBase(BaseModel):
         return v
 
 
+class ApplicationCreate(BaseModel):
+    accompany_id: int
+    answer: Optional[str] = None
+
+
 class AccompanyBase(BaseModel):
     id: int
     category: Category

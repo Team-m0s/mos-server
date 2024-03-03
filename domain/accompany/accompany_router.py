@@ -213,7 +213,8 @@ def accompany_delete_notice(_notice_delete: notice_schema.NoticeDelete, token: s
     notice_crud.delete_accompany_notice(db, db_notice=notice)
 
 
-@router.get("application/list/{accompany_id}", response_model=List[accompany_schema.ApplicationBase], tags=["Accompany"])
+@router.get("application/list/{accompany_id}", response_model=List[accompany_schema.ApplicationBase],
+            tags=["Accompany"])
 def accompany_application_list(accompany_id: int, token: str = Header(), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
     accompany = accompany_crud.get_accompany_by_id(db, accompany_id=accompany_id)
@@ -225,9 +226,15 @@ def accompany_application_list(accompany_id: int, token: str = Header(), db: Ses
 
 
 @router.post("/apply/{accompany_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
-def accompany_apply(accompany_id: int, answer: str, token: str = Header(), db: Session = Depends(get_db)):
+def accompany_apply(application_create: accompany_schema.ApplicationCreate, token: str = Header(),
+                    db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
-    accompany_crud.apply_accompany(db, accompany_id=accompany_id, user_id=current_user.id, answer=answer)
+
+    if application_create.answer is None:
+        accompany_crud.register_accompany(db, accompany_id=application_create.accompany_id, user_id=current_user.id)
+    else:
+        accompany_crud.apply_accompany(db, accompany_id=application_create.accompany_id,
+                                       user_id=current_user.id, answer=application_create.answer)
 
 
 @router.put("/application/approve/{application_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
