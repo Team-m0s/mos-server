@@ -11,6 +11,7 @@ import os
 from database import get_db
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
+from fastapi_sso.sso.kakao import KakaoSSO
 
 import jwt_token
 from domain.user import user_crud
@@ -41,6 +42,40 @@ app.add_middleware(
 )
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+sso = KakaoSSO(
+    client_id=os.getenv("KAKAO_CLIENT_ID"),
+    client_secret=os.getenv("KAKAO_CLIENT_SECRET"),
+    redirect_uri="http://ec2-13-125-254-93.ap-northeast-2.compute.amazonaws.com:8000/login/kakao/callback",
+    allow_insecure_http=True,
+)
+
+
+@app.get("/login/kakao", tags=["Test"])
+async def kakao_login():
+    """Initialize auth and redirect"""
+    with sso:
+        return await sso.get_login_redirect()
+
+
+@app.get("/login/kakao/callback", tags=["Test"])
+async def kakao_auth(request: Request, db: Session = Depends(get_db)):
+    """Verify login"""
+    with sso:
+        user = await sso.verify_and_process(request, params={"client_secret": os.getenv("KAKAO_CLIENT_SECRET")})
+
+    user_info = dict(user)
+    db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
+
+    if db_user is None:
+        user_crud.create_user_kakao(db, user_info=user_info)
+
+    # 토큰 생성
+    access_token = jwt_token.create_access_token(data={"sub": user_info['sub']}, expires_delta=timedelta(minutes=600))
+    refresh_token = jwt_token.create_refresh_token(data={"sub": user_info['sub']})
+
+    return {"access_token": access_token, "refresh_token": refresh_token}
 
 
 @app.get("/", response_class=HTMLResponse)
