@@ -22,6 +22,9 @@ def member_query_processor(total_member_min: int, total_member_max: int):
 
 
 def category_query_processor(category1: Category = None, category2: Category = None, category3: Category = None):
+    if category1 is None and category2 is None and category3 is None:
+        return None
+
     result = [category1, category2, category3]
     return result
 
@@ -40,6 +43,9 @@ def accompany_list(token: Optional[str] = Header(None), db: Session = Depends(ge
             leader.lang_level = {}
         accompany.leader = leader
         accompany.member = [member for member in accompany.member if member.id != accompany.leader_id]
+        for member in accompany.member:
+            if member.lang_level is None:
+                member.lang_level = {}
 
         images = accompany_crud.get_image_by_accompany_id(db, accompany_id=accompany.id)
         accompany.image_urls = [accompany_schema.ImageBase(id=image.id,
@@ -74,6 +80,9 @@ def accompany_filtered_list(is_closed: bool, total_member: List[int] = Depends(m
             leader.lang_level = {}
         accompany.leader = leader
         accompany.member = [member for member in accompany.member if member.id != accompany.leader_id]
+        for member in accompany.member:
+            if member.lang_level is None:
+                member.lang_level = {}
 
         images = accompany_crud.get_image_by_accompany_id(db, accompany_id=accompany.id)
         accompany.image_urls = [accompany_schema.ImageBase(id=image.id,
@@ -213,7 +222,7 @@ def accompany_delete_notice(_notice_delete: notice_schema.NoticeDelete, token: s
     notice_crud.delete_accompany_notice(db, db_notice=notice)
 
 
-@router.get("application/list/{accompany_id}", response_model=List[accompany_schema.ApplicationBase],
+@router.get("/application/list/{accompany_id}", response_model=List[accompany_schema.ApplicationBase],
             tags=["Accompany"])
 def accompany_application_list(accompany_id: int, token: str = Header(), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
@@ -229,11 +238,18 @@ def accompany_application_list(accompany_id: int, token: str = Header(), db: Ses
 def accompany_apply(application_create: accompany_schema.ApplicationCreate, token: str = Header(),
                     db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
+    accompany = accompany_crud.get_accompany_by_id(db, accompany_id=application_create.accompany_id)
+    if not accompany:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Accompany not found.")
 
     if application_create.answer is None:
-        accompany_crud.register_accompany(db, accompany_id=application_create.accompany_id, user_id=current_user.id)
+        if accompany.qna:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Answer should be required.")
+        accompany_crud.register_accompany(db, accompany_id=accompany.id, user_id=current_user.id)
     else:
-        accompany_crud.apply_accompany(db, accompany_id=application_create.accompany_id,
+        if accompany.qna is None:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Answer do not needed.")
+        accompany_crud.apply_accompany(db, accompany_id=accompany.id,
                                        user_id=current_user.id, answer=application_create.answer)
 
 

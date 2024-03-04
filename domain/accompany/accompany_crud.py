@@ -48,10 +48,11 @@ def get_accompany_filtered_list(db: Session, is_closed: bool, total_member: List
     if city is not None:
         query = query.filter(Accompany.city.ilike(f"%{city}%"))  # 수정된 부분
 
-    if category is not None:
+    if category is not None and len(category) > 0:
         query = query.filter(Accompany.category.in_(category))
 
-    return query.all()
+    accompany_list = query.all()
+    return accompany_list
 
 
 def get_application_list(db: Session, accompany_id: int):
