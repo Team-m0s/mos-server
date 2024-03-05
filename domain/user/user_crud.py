@@ -21,6 +21,18 @@ def create_user_kakao(db: Session, user_info: dict, provider: AuthSchema):
     db.commit()
 
 
+def create_test_user_kakao(db: Session, user_info: dict):
+    db_user = User(
+        uuid=user_info['email'],
+        email=user_info['email'],
+        nickName=user_info['display_name'],
+        profile_img=user_info.get("picture", None),
+        provider='kakao'
+    )
+    db.add(db_user)
+    db.commit()
+
+
 def create_user_google(db: Session, user_info: dict, provider: AuthSchema):
     db_user = User(
         uuid=user_info['sub'],
@@ -38,6 +50,7 @@ def create_user_apple(db: Session, user_info: dict, name: str, provider: str):
         uuid=user_info['sub'],
         email=user_info['email'],
         nickName=name,
+        profile_img=user_info.get("picture", None),
         provider=provider
     )
     db.add(db_user)

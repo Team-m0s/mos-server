@@ -47,6 +47,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 sso = KakaoSSO(
     client_id=os.getenv("KAKAO_CLIENT_ID"),
     client_secret=os.getenv("KAKAO_CLIENT_SECRET"),
+    #redirect_uri="http://127.0.0.1:8000/login/kakao/callback",
     redirect_uri="http://ec2-13-125-254-93.ap-northeast-2.compute.amazonaws.com:8000/login/kakao/callback",
     allow_insecure_http=True,
 )
@@ -66,14 +67,15 @@ async def kakao_auth(request: Request, db: Session = Depends(get_db)):
         user = await sso.verify_and_process(request, params={"client_secret": os.getenv("KAKAO_CLIENT_SECRET")})
 
     user_info = dict(user)
-    db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
+    db_user = user_crud.get_user_by_uuid(db, user_info['email'])
 
     if db_user is None:
-        user_crud.create_user_kakao(db, user_info=user_info)
+        print("회원가입 성공")
+        user_crud.create_test_user_kakao(db, user_info=user_info)
 
     # 토큰 생성
-    access_token = jwt_token.create_access_token(data={"sub": user_info['sub']}, expires_delta=timedelta(minutes=600))
-    refresh_token = jwt_token.create_refresh_token(data={"sub": user_info['sub']})
+    access_token = jwt_token.create_access_token(data={"sub": user_info['email']}, expires_delta=timedelta(minutes=600))
+    refresh_token = jwt_token.create_refresh_token(data={"sub": user_info['email']})
 
     return {"access_token": access_token, "refresh_token": refresh_token}
 

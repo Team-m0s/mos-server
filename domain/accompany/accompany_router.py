@@ -37,21 +37,7 @@ def accompany_list(token: Optional[str] = Header(None), db: Session = Depends(ge
         current_user = user_crud.get_current_user(db, token)
     _accompany_list = accompany_crud.get_accompany_list(db, search_keyword=search_keyword, sort_order=sort_order)
 
-    for accompany in _accompany_list:
-        leader = user_crud.get_user_by_id(db, user_id=accompany.leader_id)
-        if leader.lang_level is None:
-            leader.lang_level = {}
-        accompany.leader = leader
-        accompany.member = [member for member in accompany.member if member.id != accompany.leader_id]
-        for member in accompany.member:
-            if member.lang_level is None:
-                member.lang_level = {}
-
-        images = accompany_crud.get_image_by_accompany_id(db, accompany_id=accompany.id)
-        accompany.image_urls = [accompany_schema.ImageBase(id=image.id,
-                                                           image_url=f"https://www.mos-server.store/static/{image.image_url}")
-                                for
-                                image in images if image.image_url] if images else []
+    _accompany_list = accompany_crud.set_accompany_detail(db, _accompany_list)
 
     if current_user:
         for accompany in _accompany_list:
@@ -74,21 +60,7 @@ def accompany_filtered_list(is_closed: bool, total_member: List[int] = Depends(m
                                                                  activity_scope=activity_scope, city=city,
                                                                  category=category)
 
-    for accompany in _accompany_list:
-        leader = user_crud.get_user_by_id(db, user_id=accompany.leader_id)
-        if leader.lang_level is None:
-            leader.lang_level = {}
-        accompany.leader = leader
-        accompany.member = [member for member in accompany.member if member.id != accompany.leader_id]
-        for member in accompany.member:
-            if member.lang_level is None:
-                member.lang_level = {}
-
-        images = accompany_crud.get_image_by_accompany_id(db, accompany_id=accompany.id)
-        accompany.image_urls = [accompany_schema.ImageBase(id=image.id,
-                                                           image_url=f"https://www.mos-server.store/static/{image.image_url}")
-                                for
-                                image in images if image.image_url] if images else []
+    _accompany_list = accompany_crud.set_accompany_detail(db, _accompany_list)
 
     if current_user:
         for accompany in _accompany_list:
@@ -97,6 +69,15 @@ def accompany_filtered_list(is_closed: bool, total_member: List[int] = Depends(m
                 accompany.is_like_by_user = True
 
     return _accompany_list
+
+
+@router.get("/my/list", response_model=List[accompany_schema.AccompanyBase], tags=["Accompany"])
+def get_accompanies_by_user(token: str = Header(), db: Session = Depends(get_db)):
+    current_user = user_crud.get_current_user(db, token)
+    accompanies = accompany_crud.get_accompanies_by_user_id(db, user_id=current_user.id)
+
+    accompanies = accompany_crud.set_accompany_detail(db, accompanies)
+    return accompanies
 
 
 @router.post("/create", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
@@ -231,10 +212,17 @@ def accompany_application_list(accompany_id: int, token: str = Header(), db: Ses
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Accompany not found.")
     if current_user.id != accompany.leader_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only the leader can view applications.")
-    return accompany_crud.get_application_list(db, accompany_id=accompany_id)
+
+    application_list = accompany_crud.get_application_list(db, accompany_id=accompany_id)
+
+    for application in application_list:
+        user = user_crud.get_user_by_id(db, user_id=application.user_id)
+        if user.lang_level is None:
+            user.lang_level = {}
+    return application_list
 
 
-@router.post("/apply/{accompany_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
+@router.post("/apply", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
 def accompany_apply(application_create: accompany_schema.ApplicationCreate, token: str = Header(),
                     db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)

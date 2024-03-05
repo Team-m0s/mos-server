@@ -1,5 +1,5 @@
 from pydantic import BaseModel, field_validator
-from typing import Dict
+from typing import Dict, Optional
 
 
 class AuthSchema(BaseModel):
@@ -23,7 +23,7 @@ class CommentUser(BaseModel):
 class UserBase(BaseModel):
     id: int
     nickName: str
-    profile_img: str
+    profile_img: str | None
     lang_level: Dict[str, int]
 
     class Config:

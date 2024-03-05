@@ -35,6 +35,7 @@ class TagCreate(BaseModel):
 
 
 class ApplicationBase(BaseModel):
+    id: int
     user: UserBase
     answer: str
     apply_date: str

@@ -5,7 +5,8 @@ from datetime import datetime, date
 
 from utils import file_utils
 from models import Accompany, User, Image, Tag, accompany_member, ActivityScope, Category, Application
-from domain.accompany.accompany_schema import AccompanyCreate, AccompanyUpdate, TagCreate, ImageCreate
+from domain.accompany.accompany_schema import AccompanyCreate, AccompanyUpdate, ImageBase, TagCreate
+from domain.user.user_crud import get_user_by_id
 
 
 def get_accompany_list(db: Session, search_keyword: str = None, sort_order: str = 'latest'):
@@ -52,6 +53,40 @@ def get_accompany_filtered_list(db: Session, is_closed: bool, total_member: List
         query = query.filter(Accompany.category.in_(category))
 
     accompany_list = query.all()
+    return accompany_list
+
+
+def get_accompanies_by_user_id(db: Session, user_id: int):
+    # 사용자가 leader인 동행들 조회
+    leader_accompanies = db.query(Accompany).filter(Accompany.leader_id == user_id).all()
+
+    # 사용자가 member인 동행들 조회
+    member_accompanies = db.query(Accompany).join(accompany_member, Accompany.id == accompany_member.c.accompany_id) \
+        .filter(accompany_member.c.user_id == user_id).all()
+
+    # 두 결과를 합침
+    all_accompanies = leader_accompanies + member_accompanies
+
+    return all_accompanies
+
+
+def set_accompany_detail(db: Session, accompany_list: List[Accompany]):
+    for accompany in accompany_list:
+        leader = get_user_by_id(db, user_id=accompany.leader_id)
+        if leader.lang_level is None:
+            leader.lang_level = {}
+        accompany.leader = leader
+        accompany.member = [member for member in accompany.member if member.id != accompany.leader_id]
+        for member in accompany.member:
+            if member.lang_level is None:
+                member.lang_level = {}
+
+
+        # 이미지 설정
+        images = get_image_by_accompany_id(db, accompany_id=accompany.id)
+        accompany.image_urls = [ImageBase(id=image.id, image_url=f"https://www.mos-server.store/static/{image.image_url}")
+                                for image in images if image.image_url] if images else []
+
     return accompany_list
 
 
@@ -182,7 +217,7 @@ def register_accompany(db: Session, accompany_id: int, user_id: int):
 
 
 def get_application_by_id(db: Session, application_id: int):
-    return db.query(Application).filter(Application.id == application_id).all()
+    return db.query(Application).filter(Application.id == application_id).first()
 
 
 def approve_application(db: Session, application_id: int):
