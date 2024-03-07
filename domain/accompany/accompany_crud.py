@@ -9,8 +9,11 @@ from domain.accompany.accompany_schema import AccompanyCreate, AccompanyUpdate, 
 from domain.user.user_crud import get_user_by_id
 
 
-def get_accompany_list(db: Session, search_keyword: str = None, sort_order: str = 'latest'):
+def get_accompany_list(db: Session, is_closed: bool, search_keyword: str = None, sort_order: str = 'latest'):
     query = db.query(Accompany)
+
+    if is_closed is not None:
+        query = query.filter(Accompany.is_closed == is_closed)
 
     if search_keyword:
         # Accompany와 Tag를 연결하는 조인을 생성
@@ -64,8 +67,10 @@ def get_accompanies_by_user_id(db: Session, user_id: int):
     member_accompanies = db.query(Accompany).join(accompany_member, Accompany.id == accompany_member.c.accompany_id) \
         .filter(accompany_member.c.user_id == user_id).all()
 
-    # 두 결과를 합침
     all_accompanies = leader_accompanies + member_accompanies
+
+    # 결과를 modify_date 필드를 기준으로 정렬
+    all_accompanies.sort(key=lambda accompany: accompany.update_date, reverse=True)
 
     return all_accompanies
 
