@@ -81,6 +81,10 @@ def get_image_by_hash(db: Session, image_hash: str):
     return db.query(Image).filter(Image.image_hash == image_hash).first()
 
 
+def get_image_by_hash_all(db: Session, image_hash: str):
+    return db.query(Image).filter(Image.image_hash == image_hash).all()
+
+
 def create_post(db: Session, post_create: PostCreate, board: Board, user: User):
     db_post = Post(board=board,
                    subject=post_create.subject,
@@ -117,25 +121,25 @@ def update_post(db: Session, db_post: Post, post_update: PostUpdate):
                      if image.image_hash not in [img.image_hash for img in current_images]]
 
     # Delete images
-    for image in images_to_delete:
+    for now_image in images_to_delete:
         # 이미지가 다른 게시글에서 사용중이면 저장소에서는 삭제 X
-        other_image = get_image_by_hash(db, image_hash=image.image_hash)
-        if other_image and other_image.post_id != db_post.id:
+        other_images = get_image_by_hash_all(db, image_hash=now_image.image_hash)
+        if any(image.post_id != db_post.id for image in other_images):
+            db.delete(now_image)
             continue
 
         # Check if the image exists in the database
-        image_in_db = db.query(Image).filter(Image.id == image.id).first()
+        image_in_db = db.query(Image).filter(Image.id == now_image.id).first()
         if image_in_db is None:
             continue
 
         # Check if the image file deletion is successful
         try:
-            file_utils.delete_image_file(image.image_url)
+            file_utils.delete_image_file(now_image.image_url)
         except Exception as e:
             print(f"Failed to delete image file: {e}")
-            continue
-
-        db.delete(image)
+        else:
+            db.delete(now_image)
 
     # Add new images
     for image in images_to_add:
@@ -151,6 +155,7 @@ def delete_post(db: Session, db_post: Post):
         #이미지가 다른 게시글에서 사용중이면 저장소에서는 삭제 X
         other_image = get_image_by_hash(db, image_hash=image.image_hash)
         if other_image and other_image.post_id != db_post.id:
+            db.delete(image)
             continue
 
         file_utils.delete_image_file(image.image_url)

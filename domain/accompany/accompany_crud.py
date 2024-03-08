@@ -12,7 +12,7 @@ from domain.user.user_crud import get_user_by_id
 def get_accompany_list(db: Session, is_closed: bool, search_keyword: str = None, sort_order: str = 'latest'):
     query = db.query(Accompany)
 
-    if is_closed is not None:
+    if not is_closed:
         query = query.filter(Accompany.is_closed == is_closed)
 
     if search_keyword:
@@ -86,11 +86,11 @@ def set_accompany_detail(db: Session, accompany_list: List[Accompany]):
             if member.lang_level is None:
                 member.lang_level = {}
 
-
         # 이미지 설정
         images = get_image_by_accompany_id(db, accompany_id=accompany.id)
-        accompany.image_urls = [ImageBase(id=image.id, image_url=f"https://www.mos-server.store/static/{image.image_url}")
-                                for image in images if image.image_url] if images else []
+        accompany.image_urls = [
+            ImageBase(id=image.id, image_url=f"https://www.mos-server.store/static/{image.image_url}")
+            for image in images if image.image_url] if images else []
 
     return accompany_list
 
@@ -118,6 +118,10 @@ def get_image_by_accompany_id(db: Session, accompany_id: int):
 
 def get_image_by_hash(db: Session, image_hash: str):
     return db.query(Image).filter(Image.image_hash == image_hash).first()
+
+
+def get_image_by_hash_all(db: Session, image_hash: str):
+    return db.query(Image).filter(Image.image_hash == image_hash).all()
 
 
 def create_accompany(db: Session, accompany_create: AccompanyCreate, user: User):
@@ -172,25 +176,25 @@ def update_accompany(db: Session, db_accompany: Accompany, accompany_update: Acc
                    if tag.name not in [t.name for t in current_tags]]
 
     # Delete images
-    for image in images_to_delete:
+    for now_image in images_to_delete:
         # 이미지가 다른 accompany에서 사용중이면 저장소에서는 삭제 X
-        other_image = get_image_by_hash(db, image_hash=image.image_hash)
-        if other_image and other_image.accompany_id != db_accompany.id:
+        other_images = get_image_by_hash_all(db, image_hash=now_image.image_hash)
+        if any(image.accompany_id != db_accompany.id for image in other_images):
+            db.delete(now_image)
             continue
 
         # Check if the image exists in the database
-        image_in_db = db.query(Image).filter(Image.id == image.id).first()
+        image_in_db = db.query(Image).filter(Image.id == now_image.id).first()
         if image_in_db is None:
             continue
 
         # Check if the image file deletion is successful
         try:
-            file_utils.delete_image_file(image.image_url)
+            file_utils.delete_image_file(now_image.image_url)
         except Exception as e:
             print(f"Failed to delete image file: {e}")
-            continue
-
-        db.delete(image)
+        else:
+            db.delete(now_image)
 
     # Add new images
     for image in images_to_add:

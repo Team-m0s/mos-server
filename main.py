@@ -12,6 +12,7 @@ from database import get_db
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from fastapi_sso.sso.kakao import KakaoSSO
+from fastapi.templating import Jinja2Templates
 
 import jwt_token
 from domain.user import user_crud

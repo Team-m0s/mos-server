@@ -1,12 +1,13 @@
 from datetime import datetime
 
 from sqlalchemy.orm import Session
-from models import User
+from models import User, Image
 from fastapi import FastAPI, Request, HTTPException, status
 from jose import jwt
 from jwt_token import ALGORITHM, SECRET_KEY
 from jose.exceptions import JWTError, ExpiredSignatureError
-from domain.user.user_schema import AuthSchema
+from domain.user.user_schema import AuthSchema, UserUpdate
+from utils import file_utils
 
 
 def create_user_kakao(db: Session, user_info: dict, provider: AuthSchema):
@@ -61,8 +62,24 @@ def get_user_by_uuid(db: Session, uuid: str):
     return db.query(User).filter(User.uuid == uuid).first()
 
 
+def get_image_by_user_id(db: Session, user_id: int):
+    return db.query(Image).filter(Image.user_id == user_id).first()
+
+
+def get_image_by_hash(db: Session, image_hash: str):
+    return db.query(Image).filter(Image.image_hash == image_hash).first()
+
+
+def get_image_by_hash_all(db: Session, image_hash: str):
+    return db.query(Image).filter(Image.image_hash == image_hash).all()
+
+
 def get_user_by_id(db: Session, user_id: int):
     return db.query(User).filter(User.id == user_id).first()
+
+
+def get_all_users(db: Session):
+    return db.query(User).all()
 
 
 def get_current_user(db: Session, token: str):
@@ -85,3 +102,38 @@ def get_current_user(db: Session, token: str):
         if user is None:
             raise credentials_exception
         return user
+
+
+def update_user_profile(db: Session, db_user: User, user_update: UserUpdate):
+    db_user.nickName = user_update.nickName
+    db_user.lang_level = user_update.lang_level
+    db_user.introduce = user_update.introduce
+
+    current_image = get_image_by_user_id(db, user_id=db_user.id)
+    submitted_image = user_update.images_user
+
+    # If a new image is submitted, and it's different from the current image
+    if submitted_image and (not current_image or submitted_image.image_hash != current_image.image_hash):
+        # 이미지가 다른 곳에서 사용중이면 저장소에서는 삭제 X
+        other_images = get_image_by_hash_all(db, image_hash=submitted_image.image_hash)
+        if any(image.user_id != db_user.id for image in other_images):
+            db.delete(current_image)
+            db.commit()
+            current_image = None
+
+        # Delete the current image
+        if current_image:
+            # Check if the image file deletion is successful
+            try:
+                file_utils.delete_image_file(current_image.image_url)
+            except Exception as e:
+                print(f"Failed to delete image file: {e}")
+            else:
+                db.delete(current_image)
+
+        # Add the new image
+        db_image = Image(image_url=submitted_image.image_url, image_hash=submitted_image.image_hash, user_id=db_user.id)
+        db.add(db_image)
+
+    db_user.profile_img = f"https://www.mos-server.store/static/{submitted_image.image_url}"
+    db.commit()

@@ -17,9 +17,20 @@ class User(Base):
     email = Column(String, nullable=False)
     nickName = Column(String, nullable=False)
     profile_img = Column(String, nullable=True)
+    introduce = Column(String, nullable=True)
     point = Column(Integer, nullable=False, default=0)
     lang_level = Column(JSON, nullable=True)
     report_count = Column(Integer, nullable=False, default=0)
+    last_nickname_change = Column(DateTime, nullable=True)
+    suspension_period = Column(DateTime, nullable=True)
+
+
+class Admin(Base):
+    __tablename__ = 'admin'
+
+    id = Column(Integer, primary_key=True)
+    username = Column(String, nullable=False)
+    password = Column(String, nullable=False)
 
 
 class Post(Base):
@@ -153,6 +164,8 @@ class Image(Base):
     post = relationship("Post", backref="images_post")
     accompany_id = Column(Integer, ForeignKey("accompany.id"))
     accompany = relationship("Accompany", backref="images_accompany")
+    user_id = Column(Integer, ForeignKey("user.id"))
+    user = relationship("User", backref="images_user")
 
 
 class Tag(Base):
