@@ -96,11 +96,12 @@ def create_post(db: Session, post_create: PostCreate, board: Board, user: User):
     db.commit()
     db.refresh(db_post)
 
-    for image in post_create.images_post:
+    unique_images = {img.image_hash: img for img in post_create.images_post}.values()
+
+    for image in unique_images:
         db_image = Image(image_url=image.image_url, image_hash=image.image_hash, post_id=db_post.id)
         db.add(db_image)
 
-    user.point += 5
     db.commit()
 
 

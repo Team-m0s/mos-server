@@ -92,16 +92,21 @@ def post_create(token: str = Header(), board_id: int = Form(...),
         raise HTTPException(status_code=404, detail="Board not found")
 
     image_creates = []
+    image_hashes = set()
     if images:
         for image in images:
             image_hash = file_utils.calculate_image_hash(image)
+            if image_hash in image_hashes:
+                continue  # 이미 처리된 이미지는 건너뛰기
+            image_hashes.add(image_hash)  # 이미지 해시 세트에 추가
+
             existing_image = post_crud.get_image_by_hash(db, image_hash)
             if existing_image:
                 image_creates.append(
-                    accompany_schema.ImageCreate(image_url=existing_image.image_url, image_hash=image_hash))
+                    post_schema.ImageCreate(image_url=existing_image.image_url, image_hash=image_hash))
             else:
                 image_path = file_utils.save_image_file(image)
-                image_creates.append(accompany_schema.ImageCreate(image_url=image_path, image_hash=image_hash))
+                image_creates.append(post_schema.ImageCreate(image_url=image_path, image_hash=image_hash))
 
     post_create_data = post_schema.PostCreate(subject=subject, content=content,
                                               is_anonymous=is_anonymous, images_post=image_creates)
@@ -124,17 +129,21 @@ def post_update(token: str = Header(), post_id: int = Form(...),
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="권한이 없습니다.")
 
     image_creates = []
+    image_hashes = set()
     if images:
         for image in images:
             image_hash = file_utils.calculate_image_hash(image)
+            if image_hash in image_hashes:
+                continue  # 이미 처리된 이미지는 건너뛰기
+            image_hashes.add(image_hash)  # 이미지 해시 세트에 추가
+
             existing_image = post_crud.get_image_by_hash(db, image_hash)
-            # 기존에 저장된 이미지와 hash 비교, 이미 존재하는 이미지면 다시 저장 X
             if existing_image:
                 image_creates.append(
-                    accompany_schema.ImageCreate(image_url=existing_image.image_url, image_hash=image_hash))
+                    post_schema.ImageCreate(image_url=existing_image.image_url, image_hash=image_hash))
             else:
                 image_path = file_utils.save_image_file(image)
-                image_creates.append(accompany_schema.ImageCreate(image_url=image_path, image_hash=image_hash))
+                image_creates.append(post_schema.ImageCreate(image_url=image_path, image_hash=image_hash))
 
     post_update_data = post_schema.PostUpdate(subject=subject, content=content,
                                               is_anonymous=is_anonymous, images_post=image_creates, post_id=post_id)

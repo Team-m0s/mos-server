@@ -144,7 +144,10 @@ def create_accompany(db: Session, accompany_create: AccompanyCreate, user: User)
     db.commit()
     db.refresh(db_accompany)
 
-    for image in accompany_create.images_accompany:
+    # 중복된 이미지 제거
+    unique_images = {img.image_hash: img for img in accompany_create.images_accompany}.values()
+
+    for image in unique_images:
         db_image = Image(image_url=image.image_url, image_hash=image.image_hash, accompany_id=db_accompany.id)
         db.add(db_image)
 
