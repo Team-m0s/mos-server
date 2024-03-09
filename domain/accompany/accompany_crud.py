@@ -170,9 +170,11 @@ def update_accompany(db: Session, db_accompany: Accompany, accompany_update: Acc
     current_tags = get_tag_by_accompany_id(db, accompany_id=db_accompany.id)
     submitted_tags = accompany_update.tags_accompany
 
-    # 해시 세트로 변환하여 효율적인 비교를 위한 준비
+    # 중복 이미지 해시 제거 (동일한 image_hash를 가진 이미지는 하나만 남김)
+    unique_submitted_images = {img.image_hash: img for img in submitted_images}.values()
+
     current_image_hashes = {img.image_hash for img in current_images}
-    submitted_image_hashes = {img.image_hash for img in submitted_images}
+    submitted_image_hashes = {img.image_hash for img in unique_submitted_images}
 
     current_tag_names = {tag.name for tag in current_tags}
     submitted_tag_names = {tag.name for tag in submitted_tags}
@@ -199,7 +201,7 @@ def update_accompany(db: Session, db_accompany: Accompany, accompany_update: Acc
                 db.delete(now_image)
 
     # 새로운 이미지 추가
-    for image in submitted_images:
+    for image in unique_submitted_images:
         if image.image_hash not in current_image_hashes:
             db_image = Image(image_url=image.image_url, image_hash=image.image_hash, accompany_id=db_accompany.id)
             db.add(db_image)
