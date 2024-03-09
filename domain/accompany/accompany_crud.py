@@ -170,49 +170,47 @@ def update_accompany(db: Session, db_accompany: Accompany, accompany_update: Acc
     current_tags = get_tag_by_accompany_id(db, accompany_id=db_accompany.id)
     submitted_tags = accompany_update.tags_accompany
 
-    images_to_delete = [image for image in current_images
-                        if image.image_hash not in [img.image_hash for img in submitted_images]]
-    images_to_add = [image for image in submitted_images
-                     if image.image_hash not in [img.image_hash for img in current_images]]
+    # 해시 세트로 변환하여 효율적인 비교를 위한 준비
+    current_image_hashes = {img.image_hash for img in current_images}
+    submitted_image_hashes = {img.image_hash for img in submitted_images}
 
-    tags_to_delete = [tag for tag in current_tags
-                      if tag.name not in [t.name for t in submitted_tags]]
-    tags_to_add = [tag for tag in submitted_tags
-                   if tag.name not in [t.name for t in current_tags]]
+    current_tag_names = {tag.name for tag in current_tags}
+    submitted_tag_names = {tag.name for tag in submitted_tags}
 
-    # Delete images
-    for now_image in images_to_delete:
-        # 이미지가 다른 accompany에서 사용중이면 저장소에서는 삭제 X
-        other_images = get_image_by_hash_all(db, image_hash=now_image.image_hash)
-        if any(image.accompany_id != db_accompany.id for image in other_images):
-            db.delete(now_image)
-            continue
+    # 이미지 처리
+    for now_image in current_images:
+        if now_image.image_hash not in submitted_image_hashes:
+            # 다른 accompany에서 사용 여부 확인
+            other_images = get_image_by_hash_all(db, image_hash=now_image.image_hash)
+            if any(image.accompany_id != db_accompany.id for image in other_images):
+                db.delete(now_image)
+                continue
 
-        # Check if the image exists in the database
-        image_in_db = db.query(Image).filter(Image.id == now_image.id).first()
-        if image_in_db is None:
-            continue
+            image_in_db = db.query(Image).filter(Image.id == now_image.id).first()
+            if image_in_db is None:
+                continue
 
-        # Check if the image file deletion is successful
-        try:
-            file_utils.delete_image_file(now_image.image_url)
-        except Exception as e:
-            print(f"Failed to delete image file: {e}")
-        else:
-            db.delete(now_image)
+            # 이미지 파일 삭제 시도
+            try:
+                file_utils.delete_image_file(now_image.image_url)
+            except Exception as e:
+                print(f"Failed to delete image file: {e}")
+            else:
+                db.delete(now_image)
 
-    # Add new images
-    for image in images_to_add:
-        db_image = Image(image_url=image.image_url, image_hash=image.image_hash, accompany_id=db_accompany.id)
-        db.add(db_image)
+    # 새로운 이미지 추가
+    for image in submitted_images:
+        if image.image_hash not in current_image_hashes:
+            db_image = Image(image_url=image.image_url, image_hash=image.image_hash, accompany_id=db_accompany.id)
+            db.add(db_image)
 
-    # Delete tags
-    for tag in tags_to_delete:
-        db.delete(tag)
+    # 태그 처리
+    for now_tag in current_tags:
+        if now_tag.name not in submitted_tag_names:
+            db.delete(now_tag)
 
-    # Add new tags
-    for tag in tags_to_add:
-        db_tag = Tag(name=tag.name, accompany_id=db_accompany.id)
+    for tag_name in submitted_tag_names - current_tag_names:
+        db_tag = Tag(name=tag_name, accompany_id=db_accompany.id)
         db.add(db_tag)
 
     db.commit()

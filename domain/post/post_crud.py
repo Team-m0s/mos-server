@@ -116,36 +116,37 @@ def update_post(db: Session, db_post: Post, post_update: PostUpdate):
     current_images = get_image_by_post_id(db, post_id=db_post.id)
     submitted_images = post_update.images_post
 
-    images_to_delete = [image for image in current_images
-                        if image.image_hash not in [img.image_hash for img in submitted_images]]
-    images_to_add = [image for image in submitted_images
-                     if image.image_hash not in [img.image_hash for img in current_images]]
+    # 이미지 해시 세트 생성
+    current_image_hashes = {img.image_hash for img in current_images}
+    submitted_image_hashes = {img.image_hash for img in submitted_images}
 
-    # Delete images
-    for now_image in images_to_delete:
-        # 이미지가 다른 게시글에서 사용중이면 저장소에서는 삭제 X
-        other_images = get_image_by_hash_all(db, image_hash=now_image.image_hash)
-        if any(image.post_id != db_post.id for image in other_images):
-            db.delete(now_image)
-            continue
+    # 삭제할 이미지 결정
+    for now_image in current_images:
+        if now_image.image_hash not in submitted_image_hashes:
+            # 다른 게시글에서 사용 중인 이미지는 저장소에서 삭제하지 않음
+            other_images = get_image_by_hash_all(db, image_hash=now_image.image_hash)
+            if any(image.post_id != db_post.id for image in other_images):
+                db.delete(now_image)
+                continue
 
-        # Check if the image exists in the database
-        image_in_db = db.query(Image).filter(Image.id == now_image.id).first()
-        if image_in_db is None:
-            continue
+            # 데이터베이스에서 이미지 존재 여부 확인
+            image_in_db = db.query(Image).filter(Image.id == now_image.id).first()
+            if image_in_db is None:
+                continue
 
-        # Check if the image file deletion is successful
-        try:
-            file_utils.delete_image_file(now_image.image_url)
-        except Exception as e:
-            print(f"Failed to delete image file: {e}")
-        else:
-            db.delete(now_image)
+            # 이미지 파일 삭제 시도
+            try:
+                file_utils.delete_image_file(now_image.image_url)
+            except Exception as e:
+                print(f"Failed to delete image file: {e}")
+            else:
+                db.delete(now_image)
 
-    # Add new images
-    for image in images_to_add:
-        db_image = Image(image_url=image.image_url, image_hash=image.image_hash, post_id=db_post.id)  # Modify this line
-        db.add(db_image)
+    # 새로운 이미지 추가
+    for image in submitted_images:
+        if image.image_hash not in current_image_hashes:
+            db_image = Image(image_url=image.image_url, image_hash=image.image_hash, post_id=db_post.id)
+            db.add(db_image)
 
     db.commit()
 
