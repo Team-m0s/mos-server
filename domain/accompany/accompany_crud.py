@@ -59,6 +59,11 @@ def get_accompany_filtered_list(db: Session, is_closed: bool, total_member: List
     return accompany_list
 
 
+def get_accompany_detail(db: Session, accompany_id: int):
+    accompany = db.query(Accompany).get(accompany_id)
+    return accompany
+
+
 def get_accompanies_by_user_id(db: Session, user_id: int):
     # 사용자가 leader인 동행들 조회
     leader_accompanies = db.query(Accompany).filter(Accompany.leader_id == user_id).all()

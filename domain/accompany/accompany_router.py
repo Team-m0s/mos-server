@@ -49,6 +49,22 @@ def accompany_list(is_closed: bool, token: Optional[str] = Header(None), db: Ses
     return _accompany_list
 
 
+@router.get("/detail/{accompany_id}", response_model=accompany_schema.AccompanyBase, tags=["Accompany"])
+def accompany_detail(accompany_id: int, token: Optional[str] = Header(None), db: Session = Depends(get_db)):
+    current_user = None
+    if token:
+        current_user = user_crud.get_current_user(db, token)
+    _accompany = accompany_crud.get_accompany_detail(db, accompany_id=accompany_id)
+    _accompany = accompany_crud.set_accompany_detail(db, [_accompany])[0]
+
+    if current_user:
+        accompany_like = like_crud.get_accompany_like(db, accompany_id=_accompany.id, user=current_user)
+        if accompany_like:
+            _accompany.is_like_by_user = True
+
+    return _accompany
+
+
 @router.get("/filtered/list", response_model=list[accompany_schema.AccompanyBase], tags=["Accompany"])
 def accompany_filtered_list(is_closed: bool, total_member: List[int] = Depends(member_query_processor),
                             token: Optional[str] = Header(None), db: Session = Depends(get_db),

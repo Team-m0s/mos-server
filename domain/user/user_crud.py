@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from sqlalchemy.orm import Session
 from models import User, Image
@@ -105,9 +105,14 @@ def get_current_user(db: Session, token: str):
 
 
 def update_user_profile(db: Session, db_user: User, user_update: UserUpdate):
+    if db_user.nickName != user_update.nickName:
+        if db_user.last_nickname_change and datetime.now() - db_user.last_nickname_change < timedelta(days=30):
+            raise HTTPException(status_code=400, detail="30일이 지나지 않아 닉네임을 변경할 수 없습니다.")
+
     db_user.nickName = user_update.nickName
     db_user.lang_level = user_update.lang_level
     db_user.introduce = user_update.introduce
+    db_user.last_nickname_change = datetime.now()
 
     current_image = get_image_by_user_id(db, user_id=db_user.id)
     submitted_image = user_update.images_user

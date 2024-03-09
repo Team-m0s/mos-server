@@ -100,6 +100,7 @@ def create_post(db: Session, post_create: PostCreate, board: Board, user: User):
         db_image = Image(image_url=image.image_url, image_hash=image.image_hash, post_id=db_post.id)
         db.add(db_image)
 
+    user.point += 5
     db.commit()
 
 

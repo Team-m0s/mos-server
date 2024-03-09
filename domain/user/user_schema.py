@@ -17,7 +17,7 @@ class LanguageLevel(BaseModel):
 
 class PostUser(BaseModel):
     nickName: str
-    profile_img: str
+    profile_img: str | None
 
 
 class CommentUser(BaseModel):
