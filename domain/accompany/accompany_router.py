@@ -31,11 +31,11 @@ def category_query_processor(category1: Category = None, category2: Category = N
 
 @router.get("/list", response_model=list[accompany_schema.AccompanyBase], tags=["Accompany"])
 def accompany_list(is_closed: bool, token: Optional[str] = Header(None), db: Session = Depends(get_db),
-                   search_keyword: str = None, sort_order: str = 'latest'):
+                   page: int = 0, size: int = 10, search_keyword: str = None, sort_order: str = 'latest'):
     current_user = None
     if token:
         current_user = user_crud.get_current_user(db, token)
-    _accompany_list = accompany_crud.get_accompany_list(db, is_closed=is_closed,
+    _accompany_list = accompany_crud.get_accompany_list(db, is_closed=is_closed, start_index=page * size, limit=size,
                                                         search_keyword=search_keyword, sort_order=sort_order)
 
     _accompany_list = accompany_crud.set_accompany_detail(db, _accompany_list)

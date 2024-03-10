@@ -9,7 +9,8 @@ from domain.accompany.accompany_schema import AccompanyCreate, AccompanyUpdate, 
 from domain.user.user_crud import get_user_by_id
 
 
-def get_accompany_list(db: Session, is_closed: bool, search_keyword: str = None, sort_order: str = 'latest'):
+def get_accompany_list(db: Session, is_closed: bool, start_index: int = 0, limit: int = 10,
+                       search_keyword: str = None, sort_order: str = 'latest'):
     query = db.query(Accompany)
 
     if not is_closed:
@@ -31,7 +32,7 @@ def get_accompany_list(db: Session, is_closed: bool, search_keyword: str = None,
     else:
         query = query.order_by(Accompany.create_date.desc())
 
-    accompany_list = query.all()
+    accompany_list = query.offset(start_index).limit(limit).all()
     return accompany_list
 
 

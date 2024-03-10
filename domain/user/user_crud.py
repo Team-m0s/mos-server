@@ -140,5 +140,9 @@ def update_user_profile(db: Session, db_user: User, user_update: UserUpdate):
         db_image = Image(image_url=submitted_image.image_url, image_hash=submitted_image.image_hash, user_id=db_user.id)
         db.add(db_image)
 
-    db_user.profile_img = f"https://www.mos-server.store/static/{submitted_image.image_url}"
+    if submitted_image is None:
+        db_user.profile_img = None
+    else:
+        db_user.profile_img = f"https://www.mos-server.store/static/{submitted_image.image_url}"
+
     db.commit()
