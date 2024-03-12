@@ -1,3 +1,5 @@
+import math
+
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 from typing import List
@@ -5,12 +7,12 @@ from datetime import datetime, date
 
 from utils import file_utils
 from models import Accompany, User, Image, Tag, accompany_member, ActivityScope, Category, Application
-from domain.accompany.accompany_schema import AccompanyCreate, AccompanyUpdate, ImageBase, TagCreate
+from domain.accompany.accompany_schema import AccompanyCreate, AccompanyUpdate, ImageBase, TagCreate, Category
 from domain.user.user_crud import get_user_by_id
 
 
 def get_accompany_list(db: Session, is_closed: bool, start_index: int = 0, limit: int = 10,
-                       search_keyword: str = None, sort_order: str = 'latest'):
+                       search_keyword: str = None, category: Category = None, sort_order: str = 'latest'):
     query = db.query(Accompany)
 
     if not is_closed:
@@ -25,6 +27,9 @@ def get_accompany_list(db: Session, is_closed: bool, start_index: int = 0, limit
 
         query = query.group_by(Accompany.id)
 
+    if category is not None:
+        query = query.filter(Accompany.category == category)
+
     if sort_order == 'oldest':
         query = query.order_by(Accompany.create_date.asc())
     elif sort_order == 'popularity':
@@ -32,8 +37,11 @@ def get_accompany_list(db: Session, is_closed: bool, start_index: int = 0, limit
     else:
         query = query.order_by(Accompany.create_date.desc())
 
+    total = query.count()
+    total_pages = math.ceil(total / limit)
+
     accompany_list = query.offset(start_index).limit(limit).all()
-    return accompany_list
+    return total_pages, accompany_list
 
 
 def get_accompany_filtered_list(db: Session, is_closed: bool, total_member: List[int],

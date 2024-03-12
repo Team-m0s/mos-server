@@ -1,4 +1,5 @@
 from datetime import datetime
+import math
 
 from domain.post.post_schema import PostCreate, PostUpdate
 from models import Post, User, Board, Comment, Image
@@ -25,11 +26,13 @@ def get_post_list(db: Session, board_id: int = 0, start_index: int = 0, limit: i
         query = query.order_by(Post.create_date.desc())
 
     total = query.count()
+    total_pages = math.ceil(total / limit)
+
     _post_list = query.offset(start_index).limit(limit).all()
 
     for post in _post_list:
         post.comment_count = db.query(Comment).filter(Comment.post_id == post.id).count()
-    return total, _post_list
+    return total_pages, _post_list
 
 
 def get_post(db: Session, post_id: int, start_index: int = 0, limit: int = 10, sort_order: str = 'latest'):

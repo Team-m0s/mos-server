@@ -26,13 +26,14 @@ def post_list(token: Optional[str] = Header(None), db: Session = Depends(get_db)
     current_user = None
     if token:
         current_user = get_current_user(db, token)
-    total, _post_list = post_crud.get_post_list(db, board_id=board_id, start_index=page * size, limit=size,
-                                                search_keyword=search_keyword, sort_order=sort_order)
+    total_pages, _post_list = post_crud.get_post_list(db, board_id=board_id, start_index=page * size, limit=size,
+                                                      search_keyword=search_keyword, sort_order=sort_order)
 
     for post in _post_list:
         images = post_crud.get_image_by_post_id(db, post_id=post.id)
         post.image_urls = [accompany_schema.ImageBase(id=image.id,
-                                                      image_url=f"https://www.mos-server.store/static/{image.image_url}") for
+                                                      image_url=f"https://www.mos-server.store/static/{image.image_url}")
+                           for
                            image in images if image.image_url] if images else []
 
     if current_user:
@@ -42,7 +43,7 @@ def post_list(token: Optional[str] = Header(None), db: Session = Depends(get_db)
                 post.is_liked_by_user = True
 
     return {
-        'total': total,
+        'total': total_pages,
         'post_list': _post_list,
     }
 

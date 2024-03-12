@@ -38,7 +38,7 @@ class Post(BaseModel):
 
 
 class PostList(BaseModel):
-    total: int = 0
+    total_pages: int = 0
     post_list: list[Post] = []
 
 

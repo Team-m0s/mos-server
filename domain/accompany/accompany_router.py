@@ -29,14 +29,16 @@ def category_query_processor(category1: Category = None, category2: Category = N
     return result
 
 
-@router.get("/list", response_model=list[accompany_schema.AccompanyBase], tags=["Accompany"])
+@router.get("/list", response_model=accompany_schema.AccompanyList, tags=["Accompany"])
 def accompany_list(is_closed: bool, token: Optional[str] = Header(None), db: Session = Depends(get_db),
-                   page: int = 0, size: int = 10, search_keyword: str = None, sort_order: str = 'latest'):
+                   page: int = 0, size: int = 10, search_keyword: str = None,
+                   category: accompany_schema.Category = None, sort_order: str = 'latest'):
     current_user = None
     if token:
         current_user = user_crud.get_current_user(db, token)
-    _accompany_list = accompany_crud.get_accompany_list(db, is_closed=is_closed, start_index=page * size, limit=size,
-                                                        search_keyword=search_keyword, sort_order=sort_order)
+    total_pages, _accompany_list = accompany_crud.get_accompany_list(db, is_closed=is_closed, start_index=page * size,
+                                                                     limit=size, search_keyword=search_keyword,
+                                                                     category=category, sort_order=sort_order)
 
     _accompany_list = accompany_crud.set_accompany_detail(db, _accompany_list)
 
@@ -46,7 +48,10 @@ def accompany_list(is_closed: bool, token: Optional[str] = Header(None), db: Ses
             if accompany_like:
                 accompany.is_like_by_user = True
 
-    return _accompany_list
+    return {
+        'total_pages': total_pages,
+        'accompany_list': _accompany_list,
+    }
 
 
 @router.get("/detail/{accompany_id}", response_model=accompany_schema.AccompanyBase, tags=["Accompany"])

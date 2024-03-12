@@ -74,6 +74,11 @@ class AccompanyBase(BaseModel):
     qna: str | None
 
 
+class AccompanyList(BaseModel):
+    total_pages: int = 0
+    accompany_list: list[AccompanyBase] = []
+
+
 class AccompanyCreate(BaseModel):
     category: Category
     title: str
