@@ -29,7 +29,7 @@ def category_query_processor(category1: Category = None, category2: Category = N
     return result
 
 
-@router.get("/list", response_model=accompany_schema.AccompanyList, tags=["Accompany"])
+@router.get("/list", response_model=list[accompany_schema.AccompanyBase], tags=["Accompany"])
 def accompany_list(is_closed: bool, token: Optional[str] = Header(None), db: Session = Depends(get_db),
                    page: int = 0, size: int = 10, search_keyword: str = None,
                    category: accompany_schema.Category = None, sort_order: str = 'latest'):
@@ -48,10 +48,10 @@ def accompany_list(is_closed: bool, token: Optional[str] = Header(None), db: Ses
             if accompany_like:
                 accompany.is_like_by_user = True
 
-    return {
-        'total_pages': total_pages,
-        'accompany_list': _accompany_list,
-    }
+    for accompany in _accompany_list:
+        accompany.total_pages = total_pages
+
+    return _accompany_list
 
 
 @router.get("/detail/{accompany_id}", response_model=accompany_schema.AccompanyBase, tags=["Accompany"])

@@ -18,7 +18,7 @@ router = APIRouter(
 )
 
 
-@router.get("/list", response_model=post_schema.PostList, tags=["Post"],
+@router.get("/list", response_model=list[post_schema.Post], tags=["Post"],
             description="board_id가 0이면 전체 게시글 조회, page는 시작 index, size는 조회 개수입니다. keyword를 사용해 검색 가능합니다."
                         "\n정렬 순서는 기본 최신순이며, 과거순은 'oldest' 좋아요순은 'popularity'를 넣어서 요청하시면 됩니다.")
 def post_list(token: Optional[str] = Header(None), db: Session = Depends(get_db),
@@ -42,10 +42,10 @@ def post_list(token: Optional[str] = Header(None), db: Session = Depends(get_db)
             if post_like:
                 post.is_liked_by_user = True
 
-    return {
-        'total': total_pages,
-        'post_list': _post_list,
-    }
+    for post in _post_list:
+        post.total_pages = total_pages
+
+    return _post_list
 
 
 @router.get("/detail/{post_id}", response_model=post_schema.PostDetail, tags=["Post"])

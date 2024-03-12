@@ -71,12 +71,8 @@ class AccompanyBase(BaseModel):
     chat_count: int
     like_count: int
     is_like_by_user: bool = False
-    qna: str | None
-
-
-class AccompanyList(BaseModel):
     total_pages: int = 0
-    accompany_list: list[AccompanyBase] = []
+    qna: str | None
 
 
 class AccompanyCreate(BaseModel):

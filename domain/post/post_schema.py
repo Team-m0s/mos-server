@@ -35,6 +35,7 @@ class Post(BaseModel):
     create_date: datetime.datetime
     modify_date: datetime.datetime | None
     comment_count: int
+    total_pages: int = 0
 
 
 class PostList(BaseModel):
