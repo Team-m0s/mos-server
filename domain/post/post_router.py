@@ -61,6 +61,12 @@ def post_detail(post_id: int, token: Optional[str] = Header(None), comment_sort_
     if token:
         current_user = get_current_user(db, token)
 
+    images = post_crud.get_image_by_post_id(db, post_id=_post.id)
+    _post.image_urls = [accompany_schema.ImageBase(id=image.id,
+                                                   image_url=f"https://www.mos-server.store/static/{image.image_url}")
+                        for
+                        image in images if image.image_url] if images else []
+
     if current_user:
         post_like = like_crud.get_post_like(db, post_id=_post.id, user=current_user)
         if post_like:

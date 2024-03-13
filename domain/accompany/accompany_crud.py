@@ -2,11 +2,11 @@ import math
 
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
-from typing import List
+from typing import List, Optional
 from datetime import datetime, date
 
 from utils import file_utils
-from models import Accompany, User, Image, Tag, accompany_member, ActivityScope, Category, Application
+from models import Accompany, User, Image, Tag, accompany_member, ActivityScope, Application
 from domain.accompany.accompany_schema import AccompanyCreate, AccompanyUpdate, ImageBase, TagCreate, Category
 from domain.user.user_crud import get_user_by_id
 
@@ -27,7 +27,7 @@ def get_accompany_list(db: Session, is_closed: bool, start_index: int = 0, limit
 
         query = query.group_by(Accompany.id)
 
-    if category is not None:
+    if category is not None and category.value != '전체':
         query = query.filter(Accompany.category == category)
 
     if sort_order == 'oldest':

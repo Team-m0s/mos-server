@@ -112,6 +112,7 @@ class Category(enum.Enum):
     booksSelfImprovement = '책 ･ 자기계발'
     dating = '연애'
     others = '기타'
+    all = '전체'
 
 
 accompany_member = Table(

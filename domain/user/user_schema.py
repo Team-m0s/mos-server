@@ -16,6 +16,7 @@ class LanguageLevel(BaseModel):
 
 
 class PostUser(BaseModel):
+    uuid: str
     nickName: str
     profile_img: str | None
 

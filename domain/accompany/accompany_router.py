@@ -32,7 +32,7 @@ def category_query_processor(category1: Category = None, category2: Category = N
 @router.get("/list", response_model=list[accompany_schema.AccompanyBase], tags=["Accompany"])
 def accompany_list(is_closed: bool, token: Optional[str] = Header(None), db: Session = Depends(get_db),
                    page: int = 0, size: int = 10, search_keyword: str = None,
-                   category: accompany_schema.Category = None, sort_order: str = 'latest'):
+                   category: Category = None, sort_order: str = 'latest'):
     current_user = None
     if token:
         current_user = user_crud.get_current_user(db, token)
