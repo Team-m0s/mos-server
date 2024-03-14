@@ -52,8 +52,8 @@ def post_list(token: Optional[str] = Header(None), db: Session = Depends(get_db)
 def post_detail(post_id: int, token: Optional[str] = Header(None), comment_sort_order: str = 'oldest',
                 page: int = 0, size: int = 10, db: Session = Depends(get_db)):
     current_user = None
-    _post = post_crud.get_post(db, post_id=post_id, start_index=page * size, limit=size,
-                               sort_order=comment_sort_order)
+    total_pages, _post = post_crud.get_post(db, post_id=post_id, start_index=page * size, limit=size,
+                                            sort_order=comment_sort_order)
 
     if not _post:
         raise HTTPException(status_code=404, detail="Post not found")
@@ -75,6 +75,7 @@ def post_detail(post_id: int, token: Optional[str] = Header(None), comment_sort_
     top_level_comments = []
 
     for comment in _post.comment_posts:
+        comment.total_pages = total_pages
         if current_user:
             comment_like = like_crud.get_comment_like(db, comment_id=comment.id, user=current_user)
             if comment_like:

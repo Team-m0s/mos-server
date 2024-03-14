@@ -22,8 +22,9 @@ class PostUser(BaseModel):
 
 
 class CommentUser(BaseModel):
+    uuid: str
     nickName: str
-    profile_img: str
+    profile_img: str | None
 
 
 class UserBase(BaseModel):

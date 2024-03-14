@@ -1,3 +1,4 @@
+import math
 from datetime import datetime
 
 from sqlalchemy.orm import Session
@@ -44,8 +45,14 @@ def get_comment(db: Session, comment_id: int):
 
 
 def get_sub_comments(db: Session, comment_id: int, start_index: int = 0, limit: int = 10):
-    sub_comments = db.query(Comment).filter(Comment.parent_id == comment_id).offset(start_index).limit(limit).all()
-    return sub_comments
+    sub_comments_query = db.query(Comment).filter(Comment.parent_id == comment_id)
+
+    total = sub_comments_query.count()
+    total_pages = math.ceil(total / limit)
+
+    sub_comments = sub_comments_query.offset(start_index).limit(limit).all()
+
+    return total_pages, sub_comments
 
 
 def update_comment(db: Session, db_comment: Comment, comment_update: CommentUpdate):

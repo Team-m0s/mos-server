@@ -41,6 +41,7 @@ class Comment(BaseModel):
     modify_date: datetime.datetime | None
     post_id: int
     sub_comments_count: Optional[int] = None
+    total_pages: int = 0
 
 
 class NoticeComment(BaseModel):

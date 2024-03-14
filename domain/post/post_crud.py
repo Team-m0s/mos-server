@@ -76,7 +76,10 @@ def get_post(db: Session, post_id: int, start_index: int = 0, limit: int = 10, s
             comment.sub_comments_count = sub_comments_count[comment.id]
 
     post.comment_posts = paginated_comments
-    return post
+
+    total_comments = len(top_level_comments)
+    total_pages = math.ceil(total_comments / limit)
+    return total_pages, post
 
 
 def get_post_by_post_id(db: Session, post_id: int):
