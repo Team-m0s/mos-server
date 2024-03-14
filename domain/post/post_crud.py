@@ -78,7 +78,7 @@ def get_post(db: Session, post_id: int, start_index: int = 0, limit: int = 10, s
     post.comment_posts = paginated_comments
 
     total_comments = len(top_level_comments)
-    total_pages = math.ceil(total_comments / limit)
+    total_pages = math.ceil(total_comments / limit) if limit > 0 else 0
     return total_pages, post
 
 

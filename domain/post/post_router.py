@@ -129,7 +129,7 @@ def post_update(token: str = Header(), post_id: int = Form(...),
                 images: List[UploadFile] = File(None),
                 db: Session = Depends(get_db)):
     current_user = get_current_user(db, token)
-    post = post_crud.get_post(db, post_id=post_id)
+    post = post_crud.get_post_by_post_id(db, post_id=post_id)
     if not post:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="데이터를 찾을수 없습니다.")
@@ -162,7 +162,7 @@ def post_update(token: str = Header(), post_id: int = Form(...),
 @router.delete("/delete", status_code=status.HTTP_204_NO_CONTENT, tags=["Post"])
 def delete_post(_post_delete: post_schema.PostDelete, token: str = Header(), db: Session = Depends(get_db)):
     current_user = get_current_user(db, token)
-    post = post_crud.get_post(db, post_id=_post_delete.post_id)
+    post = post_crud.get_post_by_post_id(db, post_id=_post_delete.post_id)
     if not post:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="데이터를 찾을수 없습니다.")

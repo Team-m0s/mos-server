@@ -17,7 +17,7 @@ router = APIRouter(
 @router.post("/post/{post_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Like"])
 def like_post(post_id: int, token: str = Header(), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
-    post = post_crud.get_post(db, post_id=post_id)
+    post = post_crud.get_post_by_post_id(db, post_id=post_id)
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
     like = like_crud.get_post_like(db, post_id=post_id, user=current_user)

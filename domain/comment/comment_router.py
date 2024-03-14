@@ -23,7 +23,7 @@ def comment_detail(comment_id: int, token: Optional[str] = Header(None),
     total_pages, _sub_comments = comment_crud.get_sub_comments(db, comment_id=comment_id, start_index=page * size, limit=size)
 
     if not _sub_comments:
-        raise HTTPException(status_code=404, detail="Comment not found")
+        raise HTTPException(status_code=404, detail="Sub_comments not found")
 
     if token:
         current_user = user_crud.get_current_user(db, token)
