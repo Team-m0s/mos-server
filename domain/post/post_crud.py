@@ -65,7 +65,10 @@ def get_post(db: Session, post_id: int, start_index: int = 0, limit: int = 10, s
     else:
         top_level_comments.sort(key=lambda x: x.create_date, reverse=True)
 
-    # Apply pagination to the sorted comments
+    # Ensure all comments are included in the range
+    if start_index + limit > len(top_level_comments):
+        limit = len(top_level_comments) - start_index
+
     paginated_comments = top_level_comments[start_index:start_index + limit]
 
     for comment in paginated_comments:
@@ -74,6 +77,10 @@ def get_post(db: Session, post_id: int, start_index: int = 0, limit: int = 10, s
 
     post.comment_posts = paginated_comments
     return post
+
+
+def get_post_by_post_id(db: Session, post_id: int):
+    return db.query(Post).get(post_id)
 
 
 def get_image_by_post_id(db: Session, post_id: int):

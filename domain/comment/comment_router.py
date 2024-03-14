@@ -41,7 +41,7 @@ def comment_detail(comment_id: int, token: Optional[str] = Header(None),
 def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, token: str = Header(),
                    db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
-    post = post_crud.get_post(db, post_id=post_id)
+    post = post_crud.get_post_by_post_id(db, post_id=post_id)
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
     comment_crud.create_comment(db, post=post, comment_create=_comment_create, user=current_user)
