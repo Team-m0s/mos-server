@@ -16,6 +16,8 @@ def create_comment(db: Session, post: Post, comment_create: CommentCreate, user:
                          user=user)
     db.add(db_comment)
     db.commit()
+    db.refresh(db_comment)
+    return db_comment
 
 
 def create_sub_comment(db: Session, comment: Comment, sub_comment_create: SubCommentCreate, user: User):
@@ -27,6 +29,8 @@ def create_sub_comment(db: Session, comment: Comment, sub_comment_create: SubCom
                              user=user)
     db.add(db_sub_comment)
     db.commit()
+    db.refresh(db_sub_comment)
+    return db_sub_comment
 
 
 def create_notice_comment(db: Session, notice: Notice, notice_comment_create: NoticeCommentCreate, user: User):

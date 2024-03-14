@@ -38,14 +38,15 @@ def comment_detail(comment_id: int, token: Optional[str] = Header(None),
     return _sub_comments
 
 
-@router.post("/create/post/{post_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Comment"])
+@router.post("/create/post/{post_id}", status_code=status.HTTP_201_CREATED, tags=["Comment"])
 def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, token: str = Header(),
                    db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
     post = post_crud.get_post_by_post_id(db, post_id=post_id)
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
-    comment_crud.create_comment(db, post=post, comment_create=_comment_create, user=current_user)
+    created_comment = comment_crud.create_comment(db, post=post, comment_create=_comment_create, user=current_user)
+    return created_comment
 
 
 @router.post("/create/accompany/notice/{notice_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Comment"])
@@ -65,7 +66,7 @@ def notice_comment_create(notice_id: int, _comment_create: comment_schema.Notice
     comment_crud.create_notice_comment(db, notice=notice, notice_comment_create=_comment_create, user=current_user)
 
 
-@router.post("/create/comment/{comment_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Comment"])
+@router.post("/create/comment/{comment_id}", status_code=status.HTTP_201_CREATED, tags=["Comment"])
 def sub_comment_create(comment_id: int, _comment_create: comment_schema.SubCommentCreate, token: str = Header(),
                        db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
@@ -74,7 +75,9 @@ def sub_comment_create(comment_id: int, _comment_create: comment_schema.SubComme
         raise HTTPException(status_code=404, detail="Comment not found")
     elif comment.parent_id:
         raise HTTPException(status_code=404, detail="Can not create comment")
-    comment_crud.create_sub_comment(db, comment=comment, sub_comment_create=_comment_create, user=current_user)
+    created_comment = comment_crud.create_sub_comment(db, comment=comment, sub_comment_create=_comment_create,
+                                                      user=current_user)
+    return created_comment
 
 
 @router.put("/update", status_code=status.HTTP_204_NO_CONTENT, tags=["Comment"])
