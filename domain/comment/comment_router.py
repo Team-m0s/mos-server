@@ -73,7 +73,7 @@ def notice_comment_create(notice_id: int, _comment_create: comment_schema.Notice
 def sub_comment_create(comment_id: int, _comment_create: comment_schema.SubCommentCreate, token: str = Header(),
                        db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
-    comment = comment_crud.get_comment(db, comment_id=comment_id)
+    comment = comment_crud.get_comment_by_id(db, comment_id=comment_id)
     if not comment:
         raise HTTPException(status_code=404, detail="Comment not found")
     elif comment.parent_id:
@@ -106,7 +106,7 @@ def comment_update(_comment_update: comment_schema.CommentUpdate, token: str = H
 def comment_delete(_comment_delete: comment_schema.CommentDelete, token: str = Header(),
                    db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
-    comment = comment_crud.get_comment(db, _comment_delete.comment_id)
+    comment = comment_crud.get_comment_by_id(db, _comment_delete.comment_id)
     if not comment:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="데이터를 찾을수 없습니다.")

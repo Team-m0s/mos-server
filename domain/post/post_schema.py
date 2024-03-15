@@ -19,6 +19,7 @@ class PostDetail(BaseModel):
     is_anonymous: bool
     create_date: datetime.datetime
     modify_date: datetime.datetime | None
+    comment_count: int
     comment_posts: list[Comment] = []
 
 
