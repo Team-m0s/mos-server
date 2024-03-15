@@ -20,7 +20,8 @@ router = APIRouter(
 def comment_detail(comment_id: int, token: Optional[str] = Header(None),
                    page: int = 0, size: int = 10, db: Session = Depends(get_db)):
     current_user = None
-    total_pages, _sub_comments = comment_crud.get_sub_comments(db, comment_id=comment_id, start_index=page * size, limit=size)
+    total_pages, _sub_comments = comment_crud.get_sub_comments(db, comment_id=comment_id, start_index=page * size,
+                                                               limit=size)
 
     if not _sub_comments:
         raise HTTPException(status_code=404, detail="Sub_comments not found")
@@ -38,7 +39,8 @@ def comment_detail(comment_id: int, token: Optional[str] = Header(None),
     return _sub_comments
 
 
-@router.post("/create/post/{post_id}", status_code=status.HTTP_201_CREATED, tags=["Comment"])
+@router.post("/create/post/{post_id}", response_model=comment_schema.Comment,
+             status_code=status.HTTP_201_CREATED, tags=["Comment"])
 def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, token: str = Header(),
                    db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
@@ -66,7 +68,8 @@ def notice_comment_create(notice_id: int, _comment_create: comment_schema.Notice
     comment_crud.create_notice_comment(db, notice=notice, notice_comment_create=_comment_create, user=current_user)
 
 
-@router.post("/create/comment/{comment_id}", status_code=status.HTTP_201_CREATED, tags=["Comment"])
+@router.post("/create/comment/{comment_id}", response_model=comment_schema.Comment,
+             status_code=status.HTTP_201_CREATED, tags=["Comment"])
 def sub_comment_create(comment_id: int, _comment_create: comment_schema.SubCommentCreate, token: str = Header(),
                        db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
@@ -75,12 +78,14 @@ def sub_comment_create(comment_id: int, _comment_create: comment_schema.SubComme
         raise HTTPException(status_code=404, detail="Comment not found")
     elif comment.parent_id:
         raise HTTPException(status_code=404, detail="Can not create comment")
+
     created_comment = comment_crud.create_sub_comment(db, comment=comment, sub_comment_create=_comment_create,
                                                       user=current_user)
     return created_comment
 
 
-@router.put("/update", status_code=status.HTTP_204_NO_CONTENT, tags=["Comment"])
+@router.put("/update", response_model=comment_schema.Comment,
+            status_code=status.HTTP_201_CREATED, tags=["Comment"])
 def comment_update(_comment_update: comment_schema.CommentUpdate, token: str = Header(),
                    db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
@@ -90,7 +95,9 @@ def comment_update(_comment_update: comment_schema.CommentUpdate, token: str = H
                             detail="데이터를 찾을수 없습니다.")
     if current_user != comment.user:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="권한이 없습니다.")
-    comment_crud.update_comment(db, db_comment=comment, comment_update=_comment_update)
+
+    updated_comment = comment_crud.update_comment(db, db_comment=comment, comment_update=_comment_update)
+    return updated_comment
 
 
 @router.delete("/delete", status_code=status.HTTP_204_NO_CONTENT, tags=["Comment"])

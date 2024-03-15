@@ -1,5 +1,5 @@
 from pydantic import BaseModel, field_validator
-from domain.user.user_schema import CommentUser
+from domain.user.user_schema import CommentUser, UserBase
 from typing import Optional
 import datetime
 

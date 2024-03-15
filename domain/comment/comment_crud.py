@@ -64,6 +64,8 @@ def update_comment(db: Session, db_comment: Comment, comment_update: CommentUpda
     db_comment.modify_date = datetime.now()
     db.add(db_comment)
     db.commit()
+    db.refresh(db_comment)
+    return db_comment
 
 
 def delete_comment(db: Session, db_comment: Comment):
