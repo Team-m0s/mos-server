@@ -89,14 +89,16 @@ def sub_comment_create(comment_id: int, _comment_create: comment_schema.SubComme
 def comment_update(_comment_update: comment_schema.CommentUpdate, token: str = Header(),
                    db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
-    comment = comment_crud.get_comment(db, comment_id=_comment_update.comment_id)
+    comment = comment_crud.get_comment_by_id(db, comment_id=_comment_update.comment_id)
     if not comment:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="데이터를 찾을수 없습니다.")
     if current_user != comment.user:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="권한이 없습니다.")
 
-    updated_comment = comment_crud.update_comment(db, db_comment=comment, comment_update=_comment_update)
+    sub_comments_count, updated_comment = comment_crud.update_comment(db, db_comment=comment,
+                                                                      comment_update=_comment_update)
+    updated_comment.sub_comments_count = sub_comments_count
     return updated_comment
 
 

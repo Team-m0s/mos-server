@@ -43,8 +43,10 @@ def create_notice_comment(db: Session, notice: Notice, notice_comment_create: No
     db.commit()
 
 
-def get_comment(db: Session, comment_id: int):
+def get_comment_by_id(db: Session, comment_id: int):
     comment = db.query(Comment).get(comment_id)
+    if comment:
+        comment.sub_comments_count = db.query(Comment).filter(Comment.parent_id == comment.id).count()
     return comment
 
 
@@ -65,7 +67,10 @@ def update_comment(db: Session, db_comment: Comment, comment_update: CommentUpda
     db.add(db_comment)
     db.commit()
     db.refresh(db_comment)
-    return db_comment
+
+    sub_comments_query = db.query(Comment).filter(Comment.parent_id == db_comment.id)
+    sub_comments_count = sub_comments_query.count()
+    return sub_comments_count, db_comment
 
 
 def delete_comment(db: Session, db_comment: Comment):
