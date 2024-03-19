@@ -50,6 +50,10 @@ def get_comment_by_id(db: Session, comment_id: int):
     return comment
 
 
+def get_post_comment_count(db: Session, post_id: int):
+    return db.query(Comment).filter(Comment.post_id == post_id).count()
+
+
 def get_sub_comments(db: Session, comment_id: int, start_index: int = 0, limit: int = 10):
     sub_comments_query = db.query(Comment).filter(Comment.parent_id == comment_id)
 

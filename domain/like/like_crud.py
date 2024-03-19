@@ -1,7 +1,4 @@
-from datetime import datetime
-
 from sqlalchemy.orm import Session
-
 from models import Post, Comment, Like, User, Accompany
 
 

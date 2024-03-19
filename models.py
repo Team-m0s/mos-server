@@ -82,6 +82,17 @@ class Like(Base):
     accompany = relationship("Accompany", backref="like_accompanies")
 
 
+class Bookmark(Base):
+    __tablename__ = "bookmark"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("user.id"))
+    user = relationship("User", backref="bookmark_users")
+    post_id = Column(Integer, ForeignKey("post.id"))
+    post = relationship("Post", backref="bookmark_posts")
+    create_date = Column(DateTime, nullable=False)
+
+
 class Board(Base):
     __tablename__ = "board"
 
