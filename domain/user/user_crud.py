@@ -105,21 +105,6 @@ def get_current_user(db: Session, token: str):
         return user
 
 
-def get_my_post_list(db: Session, user: User, start_index: int = 0, limit: int = 10):
-    query = db.query(Post).filter(Post.user_id == user.id)
-
-    query = query.order_by(Post.create_date.desc())
-
-    total = query.count()
-    total_pages = math.ceil(total / limit)
-
-    my_post_list = query.offset(start_index).limit(limit).all()
-
-    for post in my_post_list:
-        post.comment_count = db.query(Comment).filter(Comment.post_id == post.id).count()
-    return total_pages, my_post_list
-
-
 def update_user_profile(db: Session, db_user: User, user_update: UserUpdate):
     if db_user.nickName != user_update.nickName:
         if db_user.last_nickname_change and datetime.now() - db_user.last_nickname_change < timedelta(days=30):

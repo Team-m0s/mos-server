@@ -6,7 +6,7 @@ from typing import List, Optional
 from datetime import datetime, date
 
 from utils import file_utils
-from models import Accompany, User, Image, Tag, accompany_member, ActivityScope, Application
+from models import Accompany, User, Image, Tag, accompany_member, ActivityScope, Application, Like
 from domain.accompany.accompany_schema import AccompanyCreate, AccompanyUpdate, ImageBase, TagCreate, Category
 from domain.user.user_crud import get_user_by_id
 

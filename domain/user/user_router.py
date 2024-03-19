@@ -26,26 +26,6 @@ def user_create(user_info: dict, user_create_: UserCreate, db: Session = Depends
     user_crud.create_user(db, user_info=user_info, user_create=user_create_)
 
 
-@router.get("/my/post/list", response_model=list[post_schema.Post], tags=["User"])
-def my_post_list(token: str = Header(), db: Session = Depends(get_db), page: int = 0, size: int = 10):
-    current_user = user_crud.get_current_user(db, token)
-    total_pages, _my_post_list = user_crud.get_my_post_list(db, user=current_user, start_index=page * size, limit=size)
-
-    for post in _my_post_list:
-        images = post_crud.get_image_by_post_id(db, post_id=post.id)
-        post.image_urls = [accompany_schema.ImageBase(id=image.id,
-                                                      image_url=f"https://www.mos-server.store/static/{image.image_url}")
-                           for
-                           image in images if image.image_url] if images else []
-
-        post_like = like_crud.get_post_like(db, post_id=post.id, user=current_user)
-        if post_like:
-            post.is_liked_by_user = True
-        post.total_pages = total_pages
-
-    return _my_post_list
-
-
 @router.put("/update/profile", status_code=status.HTTP_204_NO_CONTENT, tags=["User"])
 def user_profile_update(token: str = Header(), user_id: int = Form(...),
                         nickname: str = Form(...), lang_level: dict = Form(None),

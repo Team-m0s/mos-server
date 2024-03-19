@@ -93,6 +93,21 @@ def accompany_filtered_list(is_closed: bool, total_member: List[int] = Depends(m
     return _accompany_list
 
 
+@router.get("/liked/list", response_model=list[accompany_schema.AccompanyBase], tags=["Accompany"])
+def get_liked_accompanies(token: str = Header(), db: Session = Depends(get_db)):
+    current_user = user_crud.get_current_user(db, token)
+    liked_list = like_crud.get_user_like(db, user=current_user)
+
+    liked_accompany_list = []
+    for like in liked_list:
+        accompany = accompany_crud.get_accompany_by_id(db, accompany_id=like.accompany_id)
+        if accompany:
+            liked_accompany_list.append(accompany)
+
+    liked_accompany_list = accompany_crud.set_accompany_detail(db, liked_accompany_list)
+    return liked_accompany_list
+
+
 @router.get("/my/list", response_model=List[accompany_schema.AccompanyBase], tags=["Accompany"])
 def get_accompanies_by_user(token: str = Header(), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)

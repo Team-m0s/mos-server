@@ -34,6 +34,21 @@ def get_post_list(db: Session, board_id: int = 0, start_index: int = 0, limit: i
     return total_pages, _post_list
 
 
+def get_my_post_list(db: Session, user: User, start_index: int = 0, limit: int = 10):
+    query = db.query(Post).filter(Post.user_id == user.id)
+
+    query = query.order_by(Post.create_date.desc())
+
+    total = query.count()
+    total_pages = math.ceil(total / limit)
+
+    my_post_list = query.offset(start_index).limit(limit).all()
+
+    for post in my_post_list:
+        post.comment_count = db.query(Comment).filter(Comment.post_id == post.id).count()
+    return total_pages, my_post_list
+
+
 def get_post(db: Session, post_id: int, start_index: int = 0, limit: int = 10, sort_order: str = 'latest'):
     post = db.query(Post).get(post_id)
 

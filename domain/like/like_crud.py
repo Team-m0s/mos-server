@@ -21,6 +21,10 @@ def get_post_like(db: Session, post_id: int, user: User):
     return like
 
 
+def get_user_like(db: Session, user: User):
+    return db.query(Like).filter(Like.user_id == user.id).all()
+
+
 def plus_post_like(db: Session, post: Post, user: User):
     db_like = Like(post_id=post.id,
                    user_id=user.id)
