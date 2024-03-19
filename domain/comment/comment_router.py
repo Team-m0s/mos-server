@@ -32,7 +32,7 @@ def comment_detail(comment_id: int, token: Optional[str] = Header(None),
     for comment in _sub_comments:
         comment.total_pages = total_pages
         if current_user:
-            comment_like = like_crud.get_comment_like(db, comment_id=comment_id, user=current_user)
+            comment_like = like_crud.get_comment_like(db, comment_id=comment.id, user=current_user)
             if comment_like:
                 comment.is_liked_by_user = True
 

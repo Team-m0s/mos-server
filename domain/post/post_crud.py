@@ -6,7 +6,6 @@ from models import Post, User, Board, Comment, Image
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from utils import file_utils
-import domain.accompany.accompany_crud
 
 
 def get_post_list(db: Session, board_id: int = 0, start_index: int = 0, limit: int = 10,

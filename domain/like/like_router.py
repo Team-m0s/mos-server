@@ -30,7 +30,7 @@ def like_post(post_id: int, token: str = Header(), db: Session = Depends(get_db)
 @router.post("/comment/{comment_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Like"])
 def like_comment(comment_id: int, token: str = Header(), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
-    comment = comment_crud.get_comment(db, comment_id)
+    comment = comment_crud.get_comment_by_id(db, comment_id)
     if not comment:
         raise HTTPException(status_code=404, detail="Comment not found")
     like = like_crud.get_comment_like(db, comment_id=comment_id, user=current_user)

@@ -1,7 +1,8 @@
+import math
 from datetime import datetime, timedelta
 
 from sqlalchemy.orm import Session
-from models import User, Image
+from models import User, Image, Post, Comment
 from fastapi import FastAPI, Request, HTTPException, status
 from jose import jwt
 from jwt_token import ALGORITHM, SECRET_KEY
@@ -102,6 +103,21 @@ def get_current_user(db: Session, token: str):
         if user is None:
             raise credentials_exception
         return user
+
+
+def get_my_post_list(db: Session, user: User, start_index: int = 0, limit: int = 10):
+    query = db.query(Post).filter(Post.user_id == user.id)
+
+    query = query.order_by(Post.create_date.desc())
+
+    total = query.count()
+    total_pages = math.ceil(total / limit)
+
+    my_post_list = query.offset(start_index).limit(limit).all()
+
+    for post in my_post_list:
+        post.comment_count = db.query(Comment).filter(Comment.post_id == post.id).count()
+    return total_pages, my_post_list
 
 
 def update_user_profile(db: Session, db_user: User, user_update: UserUpdate):
