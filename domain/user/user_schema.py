@@ -9,6 +9,7 @@ class ImageCreate(BaseModel):
 
 class AuthSchema(BaseModel):
     provider: str
+    nick_name: str | None
 
 
 class LanguageLevel(BaseModel):

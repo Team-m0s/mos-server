@@ -35,25 +35,25 @@ def create_test_user_kakao(db: Session, user_info: dict):
     db.commit()
 
 
-def create_user_google(db: Session, user_info: dict, provider: AuthSchema):
+def create_user_google(db: Session, user_info: dict, auth_schema: AuthSchema):
     db_user = User(
         uuid=user_info['sub'],
         email=user_info['email'],
-        nickName=user_info['name'],
+        nickName=auth_schema.nick_name,
         profile_img=user_info.get("picture", None),
-        provider=provider.provider
+        provider=auth_schema.provider
     )
     db.add(db_user)
     db.commit()
 
 
-def create_user_apple(db: Session, user_info: dict, name: str, provider: str):
+def create_user_apple(db: Session, user_info: dict, auth_schema: AuthSchema):
     db_user = User(
         uuid=user_info['sub'],
         email=user_info['email'],
-        nickName=name,
+        nickName=auth_schema.nick_name,
         profile_img=user_info.get("picture", None),
-        provider=provider
+        provider=auth_schema.provider
     )
     db.add(db_user)
     db.commit()

@@ -45,12 +45,11 @@ app.add_middleware(
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-
 sso = KakaoSSO(
     client_id=os.getenv("KAKAO_CLIENT_ID"),
     client_secret=os.getenv("KAKAO_CLIENT_SECRET"),
     redirect_uri="http://127.0.0.1:8000/login/kakao/callback",
-    #redirect_uri="http://ec2-13-125-254-93.ap-northeast-2.compute.amazonaws.com:8000/login/kakao/callback",
+    # redirect_uri="http://ec2-13-125-254-93.ap-northeast-2.compute.amazonaws.com:8000/login/kakao/callback",
     allow_insecure_http=True,
 )
 
@@ -88,7 +87,7 @@ async def main():
 
 
 @app.post("/login/google/auth", tags=["Authentication"])
-async def google_auth(provider: AuthSchema = Body(...), token: str = Header(), db: Session = Depends(get_db)):
+async def google_auth(auth_schema: AuthSchema = Body(...), token: str = Header(), db: Session = Depends(get_db)):
     try:
         id_info = id_token.verify_oauth2_token(token, requests.Request(), os.getenv("GOOGLE_CLIENT_ID_IOS"))
 
@@ -101,8 +100,12 @@ async def google_auth(provider: AuthSchema = Body(...), token: str = Header(), d
     user_info = dict(id_info)
     db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
 
-    if db_user is None:
-        user_crud.create_user_google(db, user_info=user_info, provider=provider)
+    if auth_schema.nickName:
+        user_crud.create_user_google(db, user_info=user_info, auth_schema=auth_schema)
+
+    else:
+        if db_user is None:
+            raise HTTPException(status_code=404, detail="User not found")
 
     access_token_expires = timedelta(minutes=15)  # 토큰 유효 시간 설정
     access_token = jwt_token.create_access_token(data={"sub": user_info['sub']},
@@ -130,15 +133,18 @@ async def kakao_auth(provider: AuthSchema = Body(...), token: str = Header(), db
 
 
 @app.post("/login/apple/auth", tags=["Authentication"])
-async def apple_auth(provider: str = Body(...), name: str = Body(...), token: str = Header(),
-                     db: Session = Depends(get_db)):
+async def apple_auth(auth_schema: AuthSchema = Body(...), token: str = Header(), db: Session = Depends(get_db)):
     id_info = await jwt_token.verify_apple_token(token)
 
     user_info = dict(id_info)
     db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
 
-    if db_user is None:
-        user_crud.create_user_apple(db, user_info=user_info, name=name, provider=provider)
+    if auth_schema.nickName:
+        user_crud.create_user_apple(db, user_info=user_info, auth_schema=auth_schema)
+
+    else:
+        if db_user is None:
+            raise HTTPException(status_code=404, detail="User not found")
 
     # 토큰 생성
     access_token = jwt_token.create_access_token(data={"sub": user_info['sub']}, expires_delta=timedelta(minutes=15))
