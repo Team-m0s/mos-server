@@ -68,6 +68,22 @@ def get_accompany_filtered_list(db: Session, is_closed: bool, total_member: List
     return accompany_list
 
 
+def get_accompany_liked_list(db: Session, user: User, start_index: int = 0, limit: int = 10):
+    liked_list = db.query(Like).filter(Like.user_id == user.id).all()
+
+    liked_accompany_list = []
+    for like in liked_list:
+        accompany = db.query(Accompany).filter(Accompany.id == like.accompany_id).first()
+        if accompany:
+            liked_accompany_list.append(accompany)
+
+    total = len(liked_accompany_list)
+    total_pages = math.ceil(total / limit)
+    paginated_accompanies = liked_accompany_list[start_index:start_index + limit]
+
+    return total_pages, paginated_accompanies
+
+
 def get_accompany_detail(db: Session, accompany_id: int):
     accompany = db.query(Accompany).get(accompany_id)
     return accompany

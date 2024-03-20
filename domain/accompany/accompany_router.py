@@ -1,3 +1,5 @@
+import math
+
 from fastapi import APIRouter, Depends, Form, File, UploadFile, HTTPException, Header
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -94,18 +96,17 @@ def accompany_filtered_list(is_closed: bool, total_member: List[int] = Depends(m
 
 
 @router.get("/liked/list", response_model=list[accompany_schema.AccompanyBase], tags=["Accompany"])
-def get_liked_accompanies(token: str = Header(), db: Session = Depends(get_db)):
+def get_liked_accompanies(token: str = Header(), page: int = 0, size: int = 10, db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
-    liked_list = like_crud.get_user_like(db, user=current_user)
+    total_pages, liked_accompanies = accompany_crud.get_accompany_liked_list(db, user=current_user,
+                                                                            start_index=page * size, limit=size)
 
-    liked_accompany_list = []
-    for like in liked_list:
-        accompany = accompany_crud.get_accompany_by_id(db, accompany_id=like.accompany_id)
-        if accompany:
-            liked_accompany_list.append(accompany)
+    liked_accompanies = accompany_crud.set_accompany_detail(db, liked_accompanies)
 
-    liked_accompany_list = accompany_crud.set_accompany_detail(db, liked_accompany_list)
-    return liked_accompany_list
+    for accompany in liked_accompanies:
+        accompany.total_pages = total_pages
+
+    return liked_accompanies
 
 
 @router.get("/my/list", response_model=List[accompany_schema.AccompanyBase], tags=["Accompany"])
