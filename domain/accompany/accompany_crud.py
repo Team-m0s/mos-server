@@ -73,7 +73,7 @@ def get_accompany_detail(db: Session, accompany_id: int):
     return accompany
 
 
-def get_accompanies_by_user_id(db: Session, user_id: int):
+def get_accompanies_by_user_id(db: Session, user_id: int, start_index: int = 0, limit: int = 10):
     # 사용자가 leader인 동행들 조회
     leader_accompanies = db.query(Accompany).filter(Accompany.leader_id == user_id).all()
 
@@ -86,7 +86,12 @@ def get_accompanies_by_user_id(db: Session, user_id: int):
     # 결과를 modify_date 필드를 기준으로 정렬
     all_accompanies.sort(key=lambda accompany: accompany.update_date, reverse=True)
 
-    return all_accompanies
+    # Pagination 적용
+    total = len(all_accompanies)
+    total_pages = math.ceil(total / limit)
+    paginated_accompanies = all_accompanies[start_index:start_index + limit]
+
+    return total_pages, paginated_accompanies
 
 
 def set_accompany_detail(db: Session, accompany_list: List[Accompany]):

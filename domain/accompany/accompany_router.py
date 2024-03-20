@@ -109,11 +109,15 @@ def get_liked_accompanies(token: str = Header(), db: Session = Depends(get_db)):
 
 
 @router.get("/my/list", response_model=List[accompany_schema.AccompanyBase], tags=["Accompany"])
-def get_accompanies_by_user(token: str = Header(), db: Session = Depends(get_db)):
+def get_accompanies_by_user(token: str = Header(), page: int = 0, size: int = 10, db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
-    accompanies = accompany_crud.get_accompanies_by_user_id(db, user_id=current_user.id)
+    total_pages, accompanies = accompany_crud.get_accompanies_by_user_id(db, user_id=current_user.id,
+                                                                         start_index=page * size, limit=size)
 
     accompanies = accompany_crud.set_accompany_detail(db, accompanies)
+
+    for accompany in accompanies:
+        accompany.total_pages = total_pages
     return accompanies
 
 
