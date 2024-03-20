@@ -28,6 +28,7 @@ def bookmark_list(token: str = Header(), db: Session = Depends(get_db), page: in
         post = post_crud.get_post_by_post_id(db, post_id=bookmark.post_id)
         post.comment_count = comment_crud.get_post_comment_count(db, post_id=post.id)
         bookmark.post = post
+        bookmark.total_pages = total_pages
 
     return _my_bookmark_list
 

@@ -9,6 +9,7 @@ from database import get_db
 from utils import file_utils
 from domain.post import post_schema, post_crud
 from domain.like import like_crud
+from domain.bookmark import bookmark_crud
 from domain.user.user_crud import get_current_user
 from domain.board import board_crud
 from domain.accompany import accompany_schema
@@ -91,6 +92,9 @@ def post_detail(post_id: int, token: Optional[str] = Header(None), comment_sort_
         post_like = like_crud.get_post_like(db, post_id=_post.id, user=current_user)
         if post_like:
             _post.is_liked_by_user = True
+        post_bookmark = bookmark_crud.get_post_bookmark(db, post_id=_post.id, user=current_user)
+        if post_bookmark:
+            _post.is_bookmarked_by_user = True
 
     top_level_comments = []
 

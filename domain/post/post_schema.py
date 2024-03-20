@@ -15,6 +15,7 @@ class PostDetail(BaseModel):
     content: str
     like_count: int
     is_liked_by_user: bool = False
+    is_bookmarked_by_user: bool = False
     image_urls: List[ImageBase] = []
     is_anonymous: bool
     create_date: datetime.datetime
