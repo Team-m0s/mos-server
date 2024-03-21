@@ -68,7 +68,8 @@ def get_apple_access_token(client_secret: str, auth_code: str):
     data = {
         "client_id": os.getenv("APPLE_CLIENT_ID"),
         "client_secret": client_secret,
-        "grant_type": auth_code,
+        "code": auth_code,
+        "grant_type": "authorization_code",
     }
 
     response = requests.post(url, headers=headers, data=data)

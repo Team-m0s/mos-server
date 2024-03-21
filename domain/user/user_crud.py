@@ -23,6 +23,11 @@ def create_user_kakao(db: Session, user_info: dict, auth_schema: AuthSchema):
     db.commit()
 
 
+def delete_user_kakao(db:Session, db_user: User):
+    db.delete(db_user)
+    db.commit()
+
+
 def create_test_user_kakao(db: Session, user_info: dict):
     db_user = User(
         uuid=user_info['email'],
