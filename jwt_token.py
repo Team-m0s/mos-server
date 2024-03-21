@@ -1,5 +1,6 @@
 import json
 import os
+import requests
 from fastapi import HTTPException, status
 from datetime import datetime, timedelta
 from jose import jwt
@@ -53,6 +54,47 @@ async def get_apple_jwks(force_update=False):
         jwks = response.json()
         apple_jwks_cache['jwks'] = jwks
         return jwks
+
+
+def get_apple_access_token(client_secret: str, auth_code: str):
+    url = "https://appleid.apple.com/auth/token"
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+    data = {
+        "client_id": os.getenv("APPLE_CLIENT_ID"),
+        "client_secret": client_secret,
+        "grant_type": auth_code,
+    }
+
+    response = requests.post(url, headers=headers, data=data)
+
+    if response.status_code == 200:
+        tokens = response.json()
+        access_token = tokens.get("access_token", None)
+        return access_token
+    else:
+        print("Error:", response.text)
+
+
+async def revoke_apple_token(auth_code: str):
+    client_secret = create_apple_client_secret()
+    access_token = get_apple_access_token(client_secret, auth_code)
+
+    url = "https://appleid.apple.com/auth/revoke"
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+    data = {
+        "client_id": os.getenv("APPLE_CLIENT_ID"),
+        "client_secret": client_secret,
+        "token": access_token,
+        "token_type_hint": "access_token",
+    }
+
+    response = requests.post(url, headers=headers, data=data)
+
+    return response.status_code
 
 
 async def find_apple_key_by_kid(kid):
@@ -119,8 +161,6 @@ async def verify_apple_token(token: str):
     except (ValueError, JWTError):
         raise HTTPException(status_code=400, detail="Payload decoding failed")
 
-    print(payload_data)
-
     if payload_data.get('iss') != "https://appleid.apple.com":
         raise HTTPException(status_code=401, detail="Invalid issuer")
 
@@ -145,7 +185,6 @@ async def verify_apple_token(token: str):
     except JWTError as e:
         raise HTTPException(status_code=401, detail="Signature verification failed: " + str(e))
 
-    print(decoded_payload)
     return decoded_payload
 
 
@@ -159,6 +198,25 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode.update({"exp": expire, "iat": now})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+
+def create_apple_client_secret():
+    header = {
+        "alg": "ES256",
+        "kid": os.getenv("APPLE_KEY_ID")
+    }
+
+    payload = {
+        "iss": os.getenv("APPLE_TEAM_ID"),
+        "iat": datetime.utcnow(),
+        "exp": datetime.utcnow() + timedelta(minutes=60),
+        "aud": "https://appleid.apple.com",
+        "sub": os.getenv("APPLE_CLIENT_ID")
+    }
+
+    client_secret = jwt.encode(payload, SECRET_KEY, algorithm="ES256", headers=header)
+
+    return client_secret
 
 
 def create_refresh_token(data: dict):

@@ -11,13 +11,13 @@ from domain.user.user_schema import AuthSchema, UserUpdate
 from utils import file_utils
 
 
-def create_user_kakao(db: Session, user_info: dict, provider: AuthSchema):
+def create_user_kakao(db: Session, user_info: dict, auth_schema: AuthSchema):
     db_user = User(
         uuid=user_info['sub'],
         email=user_info['email'],
-        nickName=user_info['nickname'],
+        nickName=auth_schema.nick_name,
         profile_img=user_info.get("picture", None),
-        provider=provider.provider
+        provider=auth_schema.provider
     )
     db.add(db_user)
     db.commit()
@@ -56,6 +56,11 @@ def create_user_apple(db: Session, user_info: dict, auth_schema: AuthSchema):
         provider=auth_schema.provider
     )
     db.add(db_user)
+    db.commit()
+
+
+def delete_user_apple(db: Session, db_user: User):
+    db.delete(db_user)
     db.commit()
 
 

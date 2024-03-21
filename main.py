@@ -100,7 +100,7 @@ async def google_auth(auth_schema: AuthSchema = Body(...), token: str = Header()
     user_info = dict(id_info)
     db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
 
-    if auth_schema.nickName:
+    if auth_schema.nick_name:
         user_crud.create_user_google(db, user_info=user_info, auth_schema=auth_schema)
 
     else:
@@ -116,14 +116,18 @@ async def google_auth(auth_schema: AuthSchema = Body(...), token: str = Header()
 
 
 @app.post("/login/kakao/auth", tags=["Authentication"])
-async def kakao_auth(provider: AuthSchema = Body(...), token: str = Header(), db: Session = Depends(get_db)):
+async def kakao_auth(auth_schema: AuthSchema = Body(...), token: str = Header(), db: Session = Depends(get_db)):
     id_info = await jwt_token.verify_kakao_token(token)
 
     user_info = dict(id_info)
     db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
 
-    if db_user is None:
-        user_crud.create_user_kakao(db, user_info=user_info, provider=provider)
+    if auth_schema.nick_name:
+        user_crud.create_user_kakao(db, user_info=user_info, auth_schema=auth_schema)
+
+    else:
+        if db_user is None:
+            raise HTTPException(status_code=404, detail="User not found")
 
     # 토큰 생성
     access_token = jwt_token.create_access_token(data={"sub": user_info['sub']}, expires_delta=timedelta(minutes=15))
@@ -139,7 +143,7 @@ async def apple_auth(auth_schema: AuthSchema = Body(...), token: str = Header(),
     user_info = dict(id_info)
     db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
 
-    if auth_schema.nickName:
+    if auth_schema.nick_name:
         user_crud.create_user_apple(db, user_info=user_info, auth_schema=auth_schema)
 
     else:
@@ -151,6 +155,24 @@ async def apple_auth(auth_schema: AuthSchema = Body(...), token: str = Header(),
     refresh_token = jwt_token.create_refresh_token(data={"sub": user_info['sub']})
 
     return {"access_token": access_token, "refresh_token": refresh_token}
+
+
+@app.delete("account/apple/delete", tags=["Authentication"])
+async def apple_revoke(token: str = Header(), auth_code: str = Header(), db: Session = Depends(get_db)):
+    id_info = await jwt_token.verify_apple_token(token)
+
+    user_info = dict(id_info)
+    db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
+
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user_crud.delete_user_apple(db, db_user=db_user)
+
+    response_code = await jwt_token.revoke_apple_token(auth_code)
+
+    if response_code != 200:
+        raise HTTPException(status_code=400, detail="Failed to revoke token")
 
 
 @app.post("/token/refresh", tags=["Authentication"])
