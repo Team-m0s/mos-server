@@ -157,7 +157,7 @@ async def apple_auth(auth_schema: AuthSchema = Body(...), token: str = Header(),
     return {"access_token": access_token, "refresh_token": refresh_token}
 
 
-@app.delete("account/apple/delete", tags=["Authentication"])
+@app.delete("/account/apple/delete", tags=["Authentication"])
 async def apple_revoke(token: str = Header(), auth_code: str = Header(), db: Session = Depends(get_db)):
     id_info = await jwt_token.verify_apple_token(token)
 
@@ -167,11 +167,11 @@ async def apple_revoke(token: str = Header(), auth_code: str = Header(), db: Ses
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    user_crud.delete_user_apple(db, db_user=db_user)
-
     response_code = await jwt_token.revoke_apple_token(auth_code)
 
-    if response_code != 200:
+    if response_code == 200:
+        user_crud.delete_user_apple(db, db_user=db_user)
+    else:
         raise HTTPException(status_code=400, detail="Failed to revoke token")
 
 

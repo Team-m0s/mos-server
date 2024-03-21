@@ -16,6 +16,10 @@ ALGORITHM = os.getenv("ALGORITHM")
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID_IOS")
 KAKAO_CLIENT_ID = os.getenv("KAKAO_CLIENT_ID_IOS")
 APPLE_CLIENT_ID = os.getenv("APPLE_CLIENT_ID")
+PRIVATE_KEY_PATH = "/AuthKey_62928X3S83.p8"
+
+with open(PRIVATE_KEY_PATH, "r") as file:
+    private_key = file.read()
 
 kakao_jwks_cache = {}
 apple_jwks_cache = {}
@@ -214,7 +218,7 @@ def create_apple_client_secret():
         "sub": os.getenv("APPLE_CLIENT_ID")
     }
 
-    client_secret = jwt.encode(payload, SECRET_KEY, algorithm="ES256", headers=header)
+    client_secret = jwt.encode(payload, private_key, algorithm="ES256", headers=header)
 
     return client_secret
 
