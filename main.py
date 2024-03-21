@@ -157,7 +157,7 @@ async def apple_auth(auth_schema: AuthSchema = Body(...), token: str = Header(),
     return {"access_token": access_token, "refresh_token": refresh_token}
 
 
-@app.delete("account/kakao/delete", tags=["Authentication"])
+@app.delete("/account/kakao/delete", tags=["Authentication"])
 def kakao_revoke(uuid: str = Header(), db: Session = Depends(get_db)):
     db_user = user_crud.get_user_by_uuid(db, uuid=uuid)
 

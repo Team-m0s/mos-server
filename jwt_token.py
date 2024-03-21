@@ -16,7 +16,7 @@ ALGORITHM = os.getenv("ALGORITHM")
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID_IOS")
 KAKAO_CLIENT_ID = os.getenv("KAKAO_CLIENT_ID_IOS")
 APPLE_CLIENT_ID = os.getenv("APPLE_CLIENT_ID")
-PRIVATE_KEY_PATH = "/AuthKey_62928X3S83.p8"
+PRIVATE_KEY_PATH = "AuthKey_62928X3S83.p8"
 
 with open(PRIVATE_KEY_PATH, "r") as file:
     private_key = file.read()
@@ -60,7 +60,7 @@ async def get_apple_jwks(force_update=False):
         return jwks
 
 
-def get_apple_access_token(client_secret: str, auth_code: str):
+def get_apple_token(client_secret: str, auth_code: str):
     url = "https://appleid.apple.com/auth/token"
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -76,15 +76,16 @@ def get_apple_access_token(client_secret: str, auth_code: str):
 
     if response.status_code == 200:
         tokens = response.json()
-        access_token = tokens.get("access_token", None)
-        return access_token
+        return tokens
     else:
         print("Error:", response.text)
 
 
 async def revoke_apple_token(auth_code: str):
     client_secret = create_apple_client_secret()
-    access_token = get_apple_access_token(client_secret, auth_code)
+    tokens = get_apple_token(client_secret, auth_code)
+    access_token = tokens.get("access_token", None)
+    refresh_token = tokens.get("refresh_token", None)
 
     url = "https://appleid.apple.com/auth/revoke"
     headers = {
@@ -98,6 +99,25 @@ async def revoke_apple_token(auth_code: str):
     }
 
     response = requests.post(url, headers=headers, data=data)
+
+    if response.status_code != 200:
+        raise HTTPException(status_code=response.status_code, detail="Failed to revoke access token")
+
+    url = "https://appleid.apple.com/auth/revoke"
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+    data = {
+        "client_id": os.getenv("APPLE_CLIENT_ID"),
+        "client_secret": client_secret,
+        "token": refresh_token,
+        "token_type_hint": "refresh_token",
+    }
+
+    response = requests.post(url, headers=headers, data=data)
+
+    if response.status_code != 200:
+        raise HTTPException(status_code=response.status_code, detail="Failed to revoke refresh token")
 
     return response.status_code
 
