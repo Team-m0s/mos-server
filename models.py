@@ -60,6 +60,7 @@ class Comment(Base):
     create_date = Column(DateTime, nullable=False)
     modify_date = Column(DateTime, nullable=True)
     is_anonymous = Column(Boolean, nullable=False, default=True)
+    report_count = Column(Integer, nullable=False, default=0)
     user_id = Column(Integer, ForeignKey("user.id"))
     user = relationship("User", backref="comment_users")
     post_id = Column(Integer, ForeignKey("post.id"))
@@ -91,6 +92,35 @@ class Bookmark(Base):
     post_id = Column(Integer, ForeignKey("post.id"))
     post = relationship("Post", backref="bookmark_posts")
     create_date = Column(DateTime, nullable=False)
+
+
+class ReportReason(enum.Enum):
+    hateSpeech = "욕설 / 비하발언"
+    offTopic = "주제에 맞지 않는 글"
+    repeatedPosts = "같은 내용 반복 게시"
+    promotionalContent = "홍보성 콘텐츠"
+    inappropriateProfile = "부적절한 닉네임 / 프로필 사진"
+    privacyViolation = "개인 사생활 침해"
+    adultContent = "19+ 음란성, 만남 유도"
+    other = "기타"
+
+
+class Report(Base):
+    __tablename__ = "report"
+
+    id = Column(Integer, primary_key=True)
+    report_reason_enum = Column(Enum(ReportReason), nullable=True)
+    report_reason_string = Column(String, nullable=True)
+    reporter_id = Column(Integer, ForeignKey("user.id"))
+    reporter = relationship("User", backref="report_users")
+    post_id = Column(Integer, ForeignKey("post.id"))
+    post = relationship("Post", backref="report_posts")
+    comment_id = Column(Integer, ForeignKey("comment.id"))
+    comment = relationship("Comment", backref="report_comments")
+    accompany_id = Column(Integer, ForeignKey("accompany.id"))
+    accompany = relationship("Accompany", backref="report_accompanies")
+    notice_id = Column(Integer, ForeignKey("notice.id"))
+    notice = relationship("Notice", backref="report_notices")
 
 
 class Board(Base):
@@ -148,6 +178,7 @@ class Accompany(Base):
     activity_scope = Column(Enum(ActivityScope), nullable=False)
     create_date = Column(String, nullable=False)
     update_date = Column(String, nullable=False)
+    report_count = Column(Integer, nullable=False, default=0)
     category = Column(Enum(Category), nullable=False)
     chat_count = Column(Integer, nullable=False, default=0)
     like_count = Column(Integer, nullable=False, default=0)
@@ -194,5 +225,6 @@ class Notice(Base):
     content = Column(String, nullable=False)
     create_date = Column(DateTime, nullable=False)
     update_date = Column(DateTime, nullable=True)
+    report_count = Column(Integer, nullable=False, default=0)
     accompany_id = Column(Integer, ForeignKey("accompany.id"))
     accompany = relationship("Accompany", backref="notices_accompany")
