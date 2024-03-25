@@ -20,12 +20,9 @@ router = APIRouter(
 def comment_detail(comment_id: int, token: Optional[str] = Header(None),
                    page: int = 0, size: int = 10, db: Session = Depends(get_db)):
     current_user = None
+    _sub_comments = []
     total_pages, _sub_comments = comment_crud.get_sub_comments(db, comment_id=comment_id, start_index=page * size,
                                                                limit=size)
-
-    if not _sub_comments:
-        raise HTTPException(status_code=404, detail="Sub_comments not found")
-
     if token:
         current_user = user_crud.get_current_user(db, token)
 
