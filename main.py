@@ -157,6 +157,16 @@ async def apple_auth(auth_schema: AuthSchema = Body(...), token: str = Header(),
     return {"access_token": access_token, "refresh_token": refresh_token}
 
 
+@app.delete("/account/google/delete", tags=["Authentication"])
+def google_revoke(uuid: str = Header(), db: Session = Depends(get_db)):
+    db_user = user_crud.get_user_by_uuid(db, uuid=uuid)
+
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user_crud.delete_user_google(db, db_user=db_user)
+
+
 @app.delete("/account/kakao/delete", tags=["Authentication"])
 def kakao_revoke(uuid: str = Header(), db: Session = Depends(get_db)):
     db_user = user_crud.get_user_by_uuid(db, uuid=uuid)
