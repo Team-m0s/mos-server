@@ -164,7 +164,7 @@ def google_revoke(uuid: str = Header(), db: Session = Depends(get_db)):
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    user_crud.delete_user_google(db, db_user=db_user)
+    user_crud.delete_user_sso(db, db_user=db_user)
 
 
 @app.delete("/account/kakao/delete", tags=["Authentication"])
@@ -174,7 +174,7 @@ def kakao_revoke(uuid: str = Header(), db: Session = Depends(get_db)):
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    user_crud.delete_user_kakao(db, db_user=db_user)
+    user_crud.delete_user_sso(db, db_user=db_user)
 
 
 @app.delete("/account/apple/delete", tags=["Authentication"])
@@ -190,7 +190,7 @@ async def apple_revoke(token: str = Header(), auth_code: str = Header(), db: Ses
     response_code = await jwt_token.revoke_apple_token(auth_code)
 
     if response_code == 200:
-        user_crud.delete_user_apple(db, db_user=db_user)
+        user_crud.delete_user_sso(db, db_user=db_user)
     else:
         raise HTTPException(status_code=400, detail="Failed to revoke token")
 

@@ -23,22 +23,6 @@ def create_user_kakao(db: Session, user_info: dict, auth_schema: AuthSchema):
     db.commit()
 
 
-def delete_user_kakao(db: Session, db_user: User):
-    db_user.nickName = '알수없음'
-    db_user.uuid = None
-    db_user.provider = None
-    db_user.email = None
-    db_user.profile_img = None
-    db_user.introduce = None
-    db_user.point = 0
-    db_user.lang_level = None
-    db_user.report_count = 0
-    db_user.last_nickname_change = None
-    db_user.suspension_period = None
-
-    db.commit()
-
-
 def create_test_user_kakao(db: Session, user_info: dict):
     db_user = User(
         uuid=user_info['email'],
@@ -63,22 +47,6 @@ def create_user_google(db: Session, user_info: dict, auth_schema: AuthSchema):
     db.commit()
 
 
-def delete_user_google(db: Session, db_user: User):
-    db_user.nickName = '알수없음'
-    db_user.uuid = None
-    db_user.provider = None
-    db_user.email = None
-    db_user.profile_img = None
-    db_user.introduce = None
-    db_user.point = 0
-    db_user.lang_level = None
-    db_user.report_count = 0
-    db_user.last_nickname_change = None
-    db_user.suspension_period = None
-
-    db.commit()
-
-
 def create_user_apple(db: Session, user_info: dict, auth_schema: AuthSchema):
     db_user = User(
         uuid=user_info['sub'],
@@ -91,7 +59,7 @@ def create_user_apple(db: Session, user_info: dict, auth_schema: AuthSchema):
     db.commit()
 
 
-def delete_user_apple(db: Session, db_user: User):
+def delete_user_sso(db: Session, db_user: User):
     db_user.nickName = '알수없음'
     db_user.uuid = None
     db_user.provider = None
