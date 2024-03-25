@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, status
 from sqlalchemy.orm import Session
 from database import get_db
 
@@ -9,11 +9,11 @@ from domain.report import report_schema
 from domain.report import report_crud
 
 router = APIRouter(
-    prefix="/api/post",
+    prefix="/api/report",
 )
 
 
-@router.post("/post/{post_id}")
+@router.post("/post/{post_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Report"])
 def report_post(report: report_schema.PostReport, token: str = Header(), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
 
@@ -23,7 +23,7 @@ def report_post(report: report_schema.PostReport, token: str = Header(), db: Ses
     report_crud.post_report(db, reporter=current_user, post_report_create=report)
 
 
-@router.post("/comment/{comment_id}")
+@router.post("/comment/{comment_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Report"])
 def report_post(report: report_schema.CommentReport, token: str = Header(), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
 

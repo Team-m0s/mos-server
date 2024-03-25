@@ -24,6 +24,7 @@ from domain.user import user_router
 from domain.board import board_router
 from domain.accompany import accompany_router
 from domain.bookmark import bookmark_router
+from domain.report import report_router
 
 load_dotenv()
 
@@ -219,3 +220,4 @@ app.include_router(user_router.router)
 app.include_router(board_router.router)
 app.include_router(accompany_router.router)
 app.include_router(bookmark_router.router)
+app.include_router(report_router.router)
