@@ -9,6 +9,7 @@ from jwt_token import ALGORITHM, SECRET_KEY
 from jose.exceptions import JWTError, ExpiredSignatureError
 from domain.user.user_schema import AuthSchema, UserUpdate
 from utils import file_utils
+from firebase_admin import auth
 
 
 def create_user_kakao(db: Session, user_info: dict, auth_schema: AuthSchema):
@@ -48,6 +49,12 @@ def create_user_google(db: Session, user_info: dict, auth_schema: AuthSchema):
 
 
 def create_user_apple(db: Session, user_info: dict, auth_schema: AuthSchema):
+    auth.create_user(
+        email=user_info['email'],
+        email_verified=True,
+        display_name=auth_schema.nick_name
+    )
+
     db_user = User(
         uuid=user_info['sub'],
         email=user_info['email'],

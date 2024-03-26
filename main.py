@@ -1,4 +1,6 @@
 from datetime import timedelta
+
+import firebase_admin
 from fastapi import FastAPI, Request, Depends, HTTPException, Header, Body
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
@@ -12,7 +14,7 @@ from database import get_db
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from fastapi_sso.sso.kakao import KakaoSSO
-from fastapi.templating import Jinja2Templates
+from firebase_admin import credentials, firestore
 
 import jwt_token
 from domain.user import user_crud
@@ -31,6 +33,10 @@ load_dotenv()
 origins = [
     "*",
 ]
+
+cred = credentials.Certificate("mos-flutter-firebase-adminsdk-1j061-57d40e5d57.json")
+firebase_admin.initialize_app(cred)
+firebase_db = firestore.client()
 
 app = FastAPI()
 
