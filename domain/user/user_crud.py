@@ -9,7 +9,21 @@ from jwt_token import ALGORITHM, SECRET_KEY
 from jose.exceptions import JWTError, ExpiredSignatureError
 from domain.user.user_schema import AuthSchema, UserUpdate
 from utils import file_utils
-from firebase_admin import auth
+from firebase_admin import auth, firestore
+
+firebase_db = firestore.client()
+
+
+def add_user_to_firestore(uid: str, user_info: dict, auth_schema: AuthSchema):
+    user_data = {
+        'nickname': auth_schema.nick_name,
+        'profile_img': user_info.get("picture", None),
+        'introduce': None,
+        'lang_level': None
+    }
+
+    users_collection = firebase_db.collection('users')
+    users_collection.document(uid).set(user_data)
 
 
 def create_user_kakao(db: Session, user_info: dict, auth_schema: AuthSchema):
@@ -49,11 +63,13 @@ def create_user_google(db: Session, user_info: dict, auth_schema: AuthSchema):
 
 
 def create_user_apple(db: Session, user_info: dict, auth_schema: AuthSchema):
-    auth.create_user(
+    firebase_user = auth.create_user(
         email=user_info['email'],
         email_verified=True,
         display_name=auth_schema.nick_name
     )
+
+    add_user_to_firestore(uid=firebase_user.uid, user_info=user_info, auth_schema=auth_schema)
 
     db_user = User(
         uuid=user_info['sub'],
@@ -67,14 +83,15 @@ def create_user_apple(db: Session, user_info: dict, auth_schema: AuthSchema):
 
 
 def delete_user_sso(db: Session, db_user: User):
+    auth.delete_user()
     db_user.nickName = '알수없음'
-    db_user.uuid = None
-    db_user.provider = None
-    db_user.email = None
-    db_user.profile_img = None
-    db_user.introduce = None
+    db_user.uuid = ""
+    db_user.provider = ""
+    db_user.email = ""
+    db_user.profile_img = ""
+    db_user.introduce = ""
     db_user.point = 0
-    db_user.lang_level = None
+    db_user.lang_level = ""
     db_user.report_count = 0
     db_user.last_nickname_change = None
     db_user.suspension_period = None
