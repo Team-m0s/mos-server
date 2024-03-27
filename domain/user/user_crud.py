@@ -78,7 +78,8 @@ def create_user_apple(db: Session, user_info: dict, auth_schema: AuthSchema):
     add_user_to_firestore(uid=firebase_user.uid, user_info=user_info, auth_schema=auth_schema)
 
     db_user = User(
-        uuid=firebase_user.uid,
+        uuid=user_info['sub'],
+        firebase_uuid=firebase_user.uid,
         email=user_info['email'],
         nickName=auth_schema.nick_name,
         profile_img=user_info.get("picture", None),
@@ -148,7 +149,7 @@ def get_current_user(db: Session, token: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail="An error occurred while verifying the token: " + str(e))
     else:
-        user = get_user_by_uuid(db, user_uuid)
+        user = get_user_by_email(db, user_uuid)
         if user is None:
             raise credentials_exception
         return user

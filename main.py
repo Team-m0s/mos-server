@@ -143,7 +143,7 @@ async def apple_auth(auth_schema: AuthSchema = Body(...), token: str = Header(),
     id_info = await jwt_token.verify_apple_token(token)
 
     user_info = dict(id_info)
-    db_user = user_crud.get_user_by_email(db, user_info['email'])
+    db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
 
     if auth_schema.nick_name:
         user_crud.create_user_apple(db, user_info=user_info, auth_schema=auth_schema)
@@ -155,7 +155,7 @@ async def apple_auth(auth_schema: AuthSchema = Body(...), token: str = Header(),
     # 토큰 생성
     access_token = jwt_token.create_access_token(data={"sub": user_info['sub']}, expires_delta=timedelta(minutes=15))
     refresh_token = jwt_token.create_refresh_token(data={"sub": user_info['sub']})
-    firebase_token = auth.create_custom_token(db_user.uuid)
+    firebase_token = auth.create_custom_token(db_user.firebase_uuid)
 
     return {"access_token": access_token, "refresh_token": refresh_token, "firebase_token": firebase_token}
 
