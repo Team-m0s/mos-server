@@ -1,6 +1,7 @@
 import math
 from datetime import datetime, timedelta
 
+import firebase_admin
 from sqlalchemy.orm import Session
 from models import User, Image, Post, Comment
 from fastapi import FastAPI, Request, HTTPException, status
@@ -9,7 +10,12 @@ from jwt_token import ALGORITHM, SECRET_KEY
 from jose.exceptions import JWTError, ExpiredSignatureError
 from domain.user.user_schema import AuthSchema, UserUpdate
 from utils import file_utils
-from firebase_admin import auth, firestore
+from firebase_admin import auth, firestore, credentials
+
+# Check if the default app already exists
+if not firebase_admin._apps:
+    cred = credentials.Certificate("mos-flutter-firebase-adminsdk-1j061-57d40e5d57.json")
+    firebase_admin.initialize_app(cred)
 
 firebase_db = firestore.client()
 
@@ -72,7 +78,7 @@ def create_user_apple(db: Session, user_info: dict, auth_schema: AuthSchema):
     add_user_to_firestore(uid=firebase_user.uid, user_info=user_info, auth_schema=auth_schema)
 
     db_user = User(
-        uuid=user_info['sub'],
+        uuid=firebase_user.uid,
         email=user_info['email'],
         nickName=auth_schema.nick_name,
         profile_img=user_info.get("picture", None),
@@ -83,7 +89,6 @@ def create_user_apple(db: Session, user_info: dict, auth_schema: AuthSchema):
 
 
 def delete_user_sso(db: Session, db_user: User):
-    auth.delete_user()
     db_user.nickName = '알수없음'
     db_user.uuid = ""
     db_user.provider = ""
@@ -101,6 +106,10 @@ def delete_user_sso(db: Session, db_user: User):
 
 def get_user_by_uuid(db: Session, uuid: str):
     return db.query(User).filter(User.uuid == uuid).first()
+
+
+def get_user_by_email(db: Session, email: str):
+    return db.query(User).filter(User.email == email).first()
 
 
 def get_image_by_user_id(db: Session, user_id: int):

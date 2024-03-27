@@ -1,6 +1,5 @@
 from datetime import timedelta
 
-import firebase_admin
 from fastapi import FastAPI, Request, Depends, HTTPException, Header, Body
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
@@ -14,7 +13,7 @@ from database import get_db
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from fastapi_sso.sso.kakao import KakaoSSO
-from firebase_admin import credentials, firestore
+from firebase_admin import auth
 
 import jwt_token
 from domain.user import user_crud
@@ -33,10 +32,6 @@ load_dotenv()
 origins = [
     "*",
 ]
-
-cred = credentials.Certificate("mos-flutter-firebase-adminsdk-1j061-57d40e5d57.json")
-firebase_admin.initialize_app(cred)
-firebase_db = firestore.client()
 
 app = FastAPI()
 
@@ -148,7 +143,7 @@ async def apple_auth(auth_schema: AuthSchema = Body(...), token: str = Header(),
     id_info = await jwt_token.verify_apple_token(token)
 
     user_info = dict(id_info)
-    db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
+    db_user = user_crud.get_user_by_email(db, user_info['email'])
 
     if auth_schema.nick_name:
         user_crud.create_user_apple(db, user_info=user_info, auth_schema=auth_schema)
@@ -160,8 +155,9 @@ async def apple_auth(auth_schema: AuthSchema = Body(...), token: str = Header(),
     # 토큰 생성
     access_token = jwt_token.create_access_token(data={"sub": user_info['sub']}, expires_delta=timedelta(minutes=15))
     refresh_token = jwt_token.create_refresh_token(data={"sub": user_info['sub']})
+    firebase_token = auth.create_custom_token(db_user.uuid)
 
-    return {"access_token": access_token, "refresh_token": refresh_token}
+    return {"access_token": access_token, "refresh_token": refresh_token, "firebase_token": firebase_token}
 
 
 @app.delete("/account/google/delete", tags=["Authentication"])
