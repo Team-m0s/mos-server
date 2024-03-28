@@ -149,7 +149,7 @@ def get_current_user(db: Session, token: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail="An error occurred while verifying the token: " + str(e))
     else:
-        user = get_user_by_email(db, user_uuid)
+        user = get_user_by_uuid(db, user_uuid)
         if user is None:
             raise credentials_exception
         return user

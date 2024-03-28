@@ -155,7 +155,10 @@ async def apple_auth(auth_schema: AuthSchema = Body(...), token: str = Header(),
     # 토큰 생성
     access_token = jwt_token.create_access_token(data={"sub": user_info['sub']}, expires_delta=timedelta(minutes=15))
     refresh_token = jwt_token.create_refresh_token(data={"sub": user_info['sub']})
-    firebase_token = auth.create_custom_token(db_user.firebase_uuid)
+
+    firebase_token = None
+    if db_user:
+        firebase_token = auth.create_custom_token(db_user.firebase_uuid)
 
     return {"access_token": access_token, "refresh_token": refresh_token, "firebase_token": firebase_token}
 
