@@ -2,6 +2,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from models import User, Accompany
 
+from firebase_admin import firestore
 from domain.user import user_crud
 
 
@@ -13,12 +14,10 @@ def create_accompany_chat(accompany: Accompany, user: User, message: str):
 
     message_content = {
         "isLeader": is_leader,
-        "sendTime": datetime.now(),
+        "sendTime": datetime.utcnow(),
         "text": message,
         "userUid": user.firebase_uuid
     }
 
-    doc_ref = user_crud.firebase_db.collection('chats').document(accompany.id)
-    doc_ref.set({
-        "message": message_content
-    })
+    chat_ref = user_crud.firebase_db.collection('chats').document(str(accompany.id))
+    chat_ref.set({"messages": [message_content]}, merge=True)
