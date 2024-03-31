@@ -42,7 +42,7 @@ class Post(Base):
     content = Column(Text, nullable=False)
     like_count = Column(Integer, default=0)
     is_anonymous = Column(Boolean, nullable=False, default=True)
-    is_blinded = Column(Boolean, nullable=True, default=False)
+    is_blinded = Column(Boolean, nullable=False, default=False)
     report_count = Column(Integer, nullable=False, default=0)
     create_date = Column(DateTime, nullable=False)
     modify_date = Column(DateTime, nullable=True)
@@ -62,7 +62,7 @@ class Comment(Base):
     create_date = Column(DateTime, nullable=False)
     modify_date = Column(DateTime, nullable=True)
     is_anonymous = Column(Boolean, nullable=False, default=True)
-    is_blinded = Column(Boolean, nullable=True, default=False)
+    is_blinded = Column(Boolean, nullable=False, default=False)
     report_count = Column(Integer, nullable=False, default=0)
     user_id = Column(Integer, ForeignKey("user.id"))
     user = relationship("User", backref="comment_users")
@@ -124,6 +124,8 @@ class Report(Base):
     accompany = relationship("Accompany", backref="report_accompanies")
     notice_id = Column(Integer, ForeignKey("notice.id"))
     notice = relationship("Notice", backref="report_notices")
+    reported_user_id = Column(Integer, ForeignKey("user.id"), nullable=True)
+    reported_user = relationship("User", backref="report_reported_users", uselist=False)
 
 
 class Board(Base):
