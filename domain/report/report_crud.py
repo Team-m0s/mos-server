@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from datetime import datetime, timedelta
 from models import Report, User, Post, Comment
 
 from domain.report.report_schema import PostReport, CommentReport, UserReport
@@ -45,6 +46,16 @@ def user_report(db: Session, reporter: User, user_report_create: UserReport):
     db.add(db_report)
 
     user.report_count += 1
+
+    if 15 <= user.report_count < 30:
+        user.suspension_period = datetime.now() + timedelta(days=3)
+    elif 30 <= user.report_count < 60:
+        user.suspension_period = datetime.now() + timedelta(days=7)
+    elif 60 <= user.report_count < 100:
+        user.suspension_period = datetime.now() + timedelta(days=30)
+    elif user.report_count >= 100:
+        user.suspension_period = datetime.now() + timedelta(days=30000)
+
     db.commit()
 
 

@@ -115,7 +115,7 @@ class Report(Base):
     report_reason_enum = Column(Enum(ReportReason), nullable=True)
     report_reason_string = Column(String, nullable=True)
     reporter_id = Column(Integer, ForeignKey("user.id"))
-    reporter = relationship("User", backref="report_users")
+    reporter = relationship("User", backref="report_users", foreign_keys=[reporter_id])
     post_id = Column(Integer, ForeignKey("post.id"))
     post = relationship("Post", backref="report_posts")
     comment_id = Column(Integer, ForeignKey("comment.id"))
@@ -125,7 +125,7 @@ class Report(Base):
     notice_id = Column(Integer, ForeignKey("notice.id"))
     notice = relationship("Notice", backref="report_notices")
     reported_user_id = Column(Integer, ForeignKey("user.id"), nullable=True)
-    reported_user = relationship("User", backref="report_reported_users", uselist=False)
+    reported_user = relationship("User", backref="report_reported_users", uselist=False, foreign_keys=[reported_user_id])
 
 
 class Board(Base):
