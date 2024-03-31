@@ -115,7 +115,11 @@ async def google_auth(auth_schema: AuthSchema = Body(...), token: str = Header()
                                                  expires_delta=access_token_expires)
     refresh_token = jwt_token.create_refresh_token(data={"sub": user_info['sub']})
 
-    return JSONResponse(content={"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"})
+    firebase_token = None
+    if db_user:
+        firebase_token = auth.create_custom_token(db_user.firebase_uuid)
+
+    return {"access_token": access_token, "refresh_token": refresh_token, "firebase_token": firebase_token}
 
 
 @app.post("/login/kakao/auth", tags=["Authentication"])
@@ -136,7 +140,11 @@ async def kakao_auth(auth_schema: AuthSchema = Body(...), token: str = Header(),
     access_token = jwt_token.create_access_token(data={"sub": user_info['sub']}, expires_delta=timedelta(minutes=15))
     refresh_token = jwt_token.create_refresh_token(data={"sub": user_info['sub']})
 
-    return {"access_token": access_token, "refresh_token": refresh_token}
+    firebase_token = None
+    if db_user:
+        firebase_token = auth.create_custom_token(db_user.firebase_uuid)
+
+    return {"access_token": access_token, "refresh_token": refresh_token, "firebase_token": firebase_token}
 
 
 @app.post("/login/apple/auth", tags=["Authentication"])

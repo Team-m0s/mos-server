@@ -33,6 +33,14 @@ def add_user_to_firestore(uid: str, user_info: dict, auth_schema: AuthSchema):
 
 
 def create_user_kakao(db: Session, user_info: dict, auth_schema: AuthSchema):
+    firebase_user = auth.create_user(
+        email=user_info['email'],
+        email_verified=True,
+        display_name=auth_schema.nick_name
+    )
+
+    add_user_to_firestore(uid=firebase_user.uid, user_info=user_info, auth_schema=auth_schema)
+
     db_user = User(
         uuid=user_info['sub'],
         email=user_info['email'],
@@ -57,6 +65,14 @@ def create_test_user_kakao(db: Session, user_info: dict):
 
 
 def create_user_google(db: Session, user_info: dict, auth_schema: AuthSchema):
+    firebase_user = auth.create_user(
+        email=user_info['email'],
+        email_verified=True,
+        display_name=auth_schema.nick_name
+    )
+
+    add_user_to_firestore(uid=firebase_user.uid, user_info=user_info, auth_schema=auth_schema)
+
     db_user = User(
         uuid=user_info['sub'],
         email=user_info['email'],
