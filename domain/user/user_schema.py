@@ -33,6 +33,7 @@ class UserBase(BaseModel):
     nickName: str
     profile_img: str | None
     lang_level: Dict[str, int]
+    firebase_uuid: str
 
     class Config:
         from_attributes = True
