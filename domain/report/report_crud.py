@@ -13,6 +13,10 @@ def post_report(db: Session, reporter: User, post_report_create: PostReport):
     db.add(db_report)
 
     post.report_count += 1
+
+    if post.report_count >= 5:
+        post.is_blinded = True
+
     db.commit()
 
 
@@ -25,6 +29,10 @@ def comment_report(db: Session, reporter: User, comment_report_create: CommentRe
     db.add(db_report)
 
     comment.report_count += 1
+
+    if comment.report_count >= 5:
+        comment.is_blinded = True
+
     db.commit()
 
 
