@@ -43,6 +43,7 @@ def create_user_kakao(db: Session, user_info: dict, auth_schema: AuthSchema):
 
     db_user = User(
         uuid=user_info['sub'],
+        firebase_uuid=firebase_user.uid,
         email=user_info['email'],
         nickName=auth_schema.nick_name,
         profile_img=user_info.get("picture", None),
@@ -75,6 +76,7 @@ def create_user_google(db: Session, user_info: dict, auth_schema: AuthSchema):
 
     db_user = User(
         uuid=user_info['sub'],
+        firebase_uuid=firebase_user.uid,
         email=user_info['email'],
         nickName=auth_schema.nick_name,
         profile_img=user_info.get("picture", None),

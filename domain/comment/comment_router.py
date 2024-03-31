@@ -48,7 +48,8 @@ def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, 
     return created_comment
 
 
-@router.post("/create/accompany/notice/{notice_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Comment"])
+@router.post("/create/accompany/notice/{notice_id}", response_model=comment_schema.NoticeComment,
+             status_code=status.HTTP_201_CREATED, tags=["Comment"])
 def notice_comment_create(notice_id: int, _comment_create: comment_schema.NoticeCommentCreate, token: str = Header(),
                           db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
@@ -59,10 +60,12 @@ def notice_comment_create(notice_id: int, _comment_create: comment_schema.Notice
 
     accompany = accompany_crud.get_accompany_by_id(db, notice.accompany_id)
     # 멤버 목록 중 current_user의 id를 가진 멤버가 있는지 직접 확인
-    if not any(member.id == current_user.id for member in accompany.member):
+    if not any(member.id == current_user.id for member in accompany.member) and accompany.leader_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="권한이 없습니다.")
 
-    comment_crud.create_notice_comment(db, notice=notice, notice_comment_create=_comment_create, user=current_user)
+    created_comment = comment_crud.create_notice_comment(db, notice=notice, notice_comment_create=_comment_create,
+                                                         user=current_user)
+    return created_comment
 
 
 @router.post("/create/comment/{comment_id}", response_model=comment_schema.Comment,
