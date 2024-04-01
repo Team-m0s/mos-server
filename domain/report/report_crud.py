@@ -17,6 +17,7 @@ def post_report(db: Session, reporter: User, post_report_create: PostReport):
 
     if post.report_count >= 5:
         post.is_blinded = True
+        post.blind_date = datetime.now()
 
     db.commit()
 
@@ -33,6 +34,7 @@ def comment_report(db: Session, reporter: User, comment_report_create: CommentRe
 
     if comment.report_count >= 5:
         comment.is_blinded = True
+        comment.blind_date = datetime.now()
 
     db.commit()
 

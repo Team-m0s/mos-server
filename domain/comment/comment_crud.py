@@ -41,6 +41,8 @@ def create_notice_comment(db: Session, notice: Notice, notice_comment_create: No
                                 user=user)
     db.add(db_notice_comment)
     db.commit()
+    db.refresh(db_notice_comment)
+    return db_notice_comment
 
 
 def get_comment_by_id(db: Session, comment_id: int):

@@ -18,6 +18,7 @@ class PostDetail(BaseModel):
     is_bookmarked_by_user: bool = False
     image_urls: List[ImageBase] = []
     is_anonymous: bool
+    is_blinded: bool
     create_date: datetime.datetime
     modify_date: datetime.datetime | None
     comment_count: int
@@ -34,6 +35,7 @@ class Post(BaseModel):
     is_liked_by_user: bool = False
     image_urls: List[ImageBase] = []
     is_anonymous: bool
+    is_blinded: bool
     create_date: datetime.datetime
     modify_date: datetime.datetime | None
     comment_count: int

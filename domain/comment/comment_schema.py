@@ -36,6 +36,7 @@ class Comment(BaseModel):
     like_count: int
     is_liked_by_user: bool = False
     is_anonymous: bool
+    is_blinded: bool
     user: CommentUser | None
     create_date: datetime.datetime
     modify_date: datetime.datetime | None
@@ -51,6 +52,7 @@ class NoticeComment(BaseModel):
     like_count: int
     is_liked_by_user: bool = False
     is_anonymous: bool
+    is_blinded: bool
     user: CommentUser | None
     create_date: datetime.datetime
     modify_date: datetime.datetime | None
