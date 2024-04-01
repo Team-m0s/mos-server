@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Header, Form, Fil
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import RedirectResponse
+import json
 
 from models import User
 from database import get_db
@@ -18,6 +19,13 @@ router = APIRouter(
 )
 
 
+def parse_lang_level(lang_level_str: str = Form(None)):
+    try:
+        return json.loads(lang_level_str)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid lang_level format")
+
+
 @router.post("/create", status_code=status.HTTP_204_NO_CONTENT, tags=["User"])
 def user_create(user_info: dict, user_create_: UserCreate, db: Session = Depends(get_db)):
     existing_user = user_crud.get_user_by_email(db, user_info['email'])
@@ -28,7 +36,7 @@ def user_create(user_info: dict, user_create_: UserCreate, db: Session = Depends
 
 @router.put("/update/profile", status_code=status.HTTP_204_NO_CONTENT, tags=["User"])
 def user_profile_update(token: str = Header(), user_id: int = Form(...),
-                        nickname: str = Form(...), lang_level: dict = Form(None),
+                        nickname: str = Form(...), lang_level: dict = Depends(parse_lang_level),
                         introduce: str = Form(None), profile_image: UploadFile = File(None),
                         db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
