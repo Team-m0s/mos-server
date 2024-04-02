@@ -8,6 +8,7 @@ from database import get_db
 
 from utils import file_utils
 from domain.post import post_schema, post_crud
+from domain.comment import comment_crud
 from domain.like import like_crud
 from domain.bookmark import bookmark_crud
 from domain.user.user_crud import get_current_user
@@ -67,6 +68,26 @@ def my_post_list(token: str = Header(), db: Session = Depends(get_db), page: int
         post.total_pages = total_pages
 
     return _my_post_list
+
+
+@router.get("/my/commented/list", response_model=list[post_schema.Post], tags=["Post"])
+def my_commented_posts_list(token: str = Header(), page: int = 0, size: int = 10, db: Session = Depends(get_db)):
+    current_user = get_current_user(db, token)
+    total_pages, _my_commented_posts_list = comment_crud.get_my_commented_posts(db, user=current_user,
+                                                                                start_index=page * size, limit=size)
+
+    for post in _my_commented_posts_list:
+        images = post_crud.get_image_by_post_id(db, post_id=post.id)
+        post.image_urls = [accompany_schema.ImageBase(id=image.id,
+                                                      image_url=f"https://www.mos-server.store/static/{image.image_url}")
+                           for
+                           image in images if image.image_url] if images else []
+
+        post_like = like_crud.get_post_like(db, post_id=post.id, user=current_user)
+        if post_like:
+            post.is_liked_by_user = True
+
+    return _my_commented_posts_list
 
 
 @router.get("/detail/{post_id}", response_model=post_schema.PostDetail, tags=["Post"])

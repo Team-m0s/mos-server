@@ -52,6 +52,29 @@ def get_comment_by_id(db: Session, comment_id: int):
     return comment
 
 
+def get_my_commented_posts(db: Session, user: User, start_index: int = 0, limit: int = 10):
+    # Query to get all comments made by the user
+    user_comments_query = db.query(Comment).filter(Comment.user_id == user.id)
+
+    # Get all unique posts associated with these comments
+    post_ids = {comment.post_id for comment in user_comments_query.all()}
+
+    # Query to get these posts
+    query = db.query(Post).filter(Post.id.in_(post_ids))
+
+    # Order by creation date and apply pagination
+    query = query.order_by(Post.create_date.desc())
+    total = query.count()
+    total_pages = math.ceil(total / limit)
+    my_commented_posts = query.offset(start_index).limit(limit).all()
+
+    for post in my_commented_posts:
+        post.comment_count = db.query(Comment).filter(Comment.post_id == post.id).count()
+        post.total_pages = total_pages
+
+    return total_pages, my_commented_posts
+
+
 def get_post_comment_count(db: Session, post_id: int):
     return db.query(Comment).filter(Comment.post_id == post_id).count()
 
