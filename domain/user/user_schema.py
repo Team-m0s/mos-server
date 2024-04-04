@@ -33,6 +33,7 @@ class UserBase(BaseModel):
     uuid: str
     nickName: str
     profile_img: str | None
+    introduce: str | None
     lang_level: Dict[str, int]
     firebase_uuid: str
 
