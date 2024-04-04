@@ -127,7 +127,22 @@ class Report(Base):
     notice_id = Column(Integer, ForeignKey("notice.id"))
     notice = relationship("Notice", backref="report_notices")
     reported_user_id = Column(Integer, ForeignKey("user.id"), nullable=True)
-    reported_user = relationship("User", backref="report_reported_users", uselist=False, foreign_keys=[reported_user_id])
+    reported_user = relationship("User", backref="report_reported_users", uselist=False,
+                                 foreign_keys=[reported_user_id])
+
+
+class Block(Base):
+    __tablename__ = "block"
+
+    id = Column(Integer, primary_key=True)
+    blocker_id = Column(Integer, ForeignKey("user.id"))
+    blocker = relationship("User", backref="blocker_users", foreign_keys=[blocker_id])
+    blocked_id = Column(Integer, ForeignKey("user.id"))
+    blocked = relationship("User", backref="blocked_users", uselist=False, foreign_keys=[blocked_id])
+    post_id = Column(Integer, ForeignKey("post.id"))
+    post = relationship("Post", backref="block_posts")
+    accompany_id = Column(Integer, ForeignKey("accompany.id"))
+    accompany = relationship("Accompany", backref="block_accompanies")
 
 
 class Board(Base):
@@ -186,6 +201,7 @@ class Accompany(Base):
     create_date = Column(String, nullable=False)
     update_date = Column(String, nullable=False)
     report_count = Column(Integer, nullable=False, default=0)
+    is_blinded = Column(Boolean, nullable=False, default=False)
     category = Column(Enum(Category), nullable=False)
     chat_count = Column(Integer, nullable=False, default=0)
     like_count = Column(Integer, nullable=False, default=0)
@@ -233,5 +249,6 @@ class Notice(Base):
     create_date = Column(DateTime, nullable=False)
     update_date = Column(DateTime, nullable=True)
     report_count = Column(Integer, nullable=False, default=0)
+    is_blinded = Column(Boolean, nullable=False, default=False)
     accompany_id = Column(Integer, ForeignKey("accompany.id"))
     accompany = relationship("Accompany", backref="notices_accompany")

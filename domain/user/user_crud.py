@@ -127,6 +127,10 @@ def get_user_by_uuid(db: Session, uuid: str):
     return db.query(User).filter(User.uuid == uuid).first()
 
 
+def get_user_by_firebase_uuid(db: Session, uuid: str):
+    return db.query(User).filter(User.firebase_uuid == uuid).first()
+
+
 def get_user_by_email(db: Session, email: str):
     return db.query(User).filter(User.email == email).first()
 
