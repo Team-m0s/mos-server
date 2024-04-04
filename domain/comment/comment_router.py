@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from starlette import status
 from typing import Optional, List
+from datetime import datetime
 
 from database import get_db
 from domain.comment import comment_schema, comment_crud
@@ -41,6 +42,10 @@ def comment_detail(comment_id: int, token: Optional[str] = Header(None),
 def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, token: str = Header(),
                    db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
+
+    if current_user.suspension_period and current_user.suspension_period > datetime.now():
+        raise HTTPException(status_code=403, detail="User is currently suspended")
+
     post = post_crud.get_post_by_post_id(db, post_id=post_id)
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
@@ -53,6 +58,9 @@ def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, 
 def notice_comment_create(notice_id: int, _comment_create: comment_schema.NoticeCommentCreate, token: str = Header(),
                           db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
+
+    if current_user.suspension_period and current_user.suspension_period > datetime.now():
+        raise HTTPException(status_code=403, detail="User is currently suspended")
 
     notice = notice_crud.get_notice_by_id(db, notice_id=notice_id)
     if not notice:
@@ -73,6 +81,10 @@ def notice_comment_create(notice_id: int, _comment_create: comment_schema.Notice
 def sub_comment_create(comment_id: int, _comment_create: comment_schema.SubCommentCreate, token: str = Header(),
                        db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
+
+    if current_user.suspension_period and current_user.suspension_period > datetime.now():
+        raise HTTPException(status_code=403, detail="User is currently suspended")
+
     comment = comment_crud.get_comment_by_id(db, comment_id=comment_id)
     if not comment:
         raise HTTPException(status_code=404, detail="Comment not found")
@@ -89,6 +101,10 @@ def sub_comment_create(comment_id: int, _comment_create: comment_schema.SubComme
 def comment_update(_comment_update: comment_schema.CommentUpdate, token: str = Header(),
                    db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
+
+    if current_user.suspension_period and current_user.suspension_period > datetime.now():
+        raise HTTPException(status_code=403, detail="User is currently suspended")
+
     comment = comment_crud.get_comment_by_id(db, comment_id=_comment_update.comment_id)
     if not comment:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,

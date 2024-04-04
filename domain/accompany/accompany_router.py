@@ -3,6 +3,7 @@ import math
 from fastapi import APIRouter, Depends, Form, File, UploadFile, HTTPException, Header
 from sqlalchemy.orm import Session
 from typing import List, Optional
+from datetime import datetime
 from starlette import status
 
 from database import get_db
@@ -130,6 +131,9 @@ def accompany_create(token: str = Header(), category: accompany_schema.Category 
                      tags: List[str] = Form(None), qna: str = Form(None), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
 
+    if current_user.suspension_period and current_user.suspension_period > datetime.now():
+        raise HTTPException(status_code=403, detail="User is currently suspended")
+
     image_creates = []
     image_hashes = set()
     if images:
@@ -169,6 +173,10 @@ def accompany_update(token: str = Header(), accompany_id: int = Form(...),
                      introduce: str = Form(...), total_member: int = Form(...),
                      tags: List[str] = Form(None), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
+
+    if current_user.suspension_period and current_user.suspension_period > datetime.now():
+        raise HTTPException(status_code=403, detail="User is currently suspended")
+
     accompany = accompany_crud.get_accompany_by_id(db, accompany_id=accompany_id)
     if not accompany:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
@@ -212,6 +220,9 @@ def accompany_create_notice(accompany_id: int, _notice_create: notice_schema.Not
                             db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
 
+    if current_user.suspension_period and current_user.suspension_period > datetime.now():
+        raise HTTPException(status_code=403, detail="User is currently suspended")
+
     accompany = accompany_crud.get_accompany_by_id(db, accompany_id=accompany_id)
     if not accompany:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"동행을 찾을 수 없습니다.")
@@ -226,6 +237,9 @@ def accompany_create_notice(accompany_id: int, _notice_create: notice_schema.Not
 def accompany_update_notice(_notice_update: notice_schema.NoticeUpdate, token: str = Header(),
                             db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
+
+    if current_user.suspension_period and current_user.suspension_period > datetime.now():
+        raise HTTPException(status_code=403, detail="User is currently suspended")
 
     notice = notice_crud.get_notice_by_id(db, notice_id=_notice_update.notice_id)
     if not notice:

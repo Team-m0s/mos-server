@@ -1,9 +1,8 @@
-from typing import Optional, List, Annotated
+from typing import Optional, List
+from datetime import datetime
 from fastapi import APIRouter, Depends, Header, HTTPException, Form, UploadFile, File
 from sqlalchemy.orm import Session
 from starlette import status
-from uuid import uuid4
-from models import User
 from database import get_db
 
 from utils import file_utils
@@ -140,6 +139,10 @@ def post_create(token: str = Header(), board_id: int = Form(...),
                 images: List[UploadFile] = File(None),
                 db: Session = Depends(get_db)):
     current_user = get_current_user(db, token)
+
+    if current_user.suspension_period and current_user.suspension_period > datetime.now():
+        raise HTTPException(status_code=403, detail="User is currently suspended")
+
     board = board_crud.get_board(db, board_id)
     if not board:
         raise HTTPException(status_code=404, detail="Board not found")
@@ -174,6 +177,10 @@ def post_update(token: str = Header(), post_id: int = Form(...),
                 images: List[UploadFile] = File(None),
                 db: Session = Depends(get_db)):
     current_user = get_current_user(db, token)
+
+    if current_user.suspension_period and current_user.suspension_period > datetime.now():
+        raise HTTPException(status_code=403, detail="User is currently suspended")
+
     post = post_crud.get_post_by_post_id(db, post_id=post_id)
     if not post:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,

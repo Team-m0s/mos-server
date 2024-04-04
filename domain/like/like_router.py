@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from starlette import status
+from datetime import datetime
 
 from database import get_db
 from domain.like import like_crud
@@ -17,6 +18,10 @@ router = APIRouter(
 @router.post("/post/{post_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Like"])
 def like_post(post_id: int, token: str = Header(), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
+
+    if current_user.suspension_period and current_user.suspension_period > datetime.now():
+        raise HTTPException(status_code=403, detail="User is currently suspended")
+
     post = post_crud.get_post_by_post_id(db, post_id=post_id)
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
@@ -30,6 +35,10 @@ def like_post(post_id: int, token: str = Header(), db: Session = Depends(get_db)
 @router.post("/comment/{comment_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Like"])
 def like_comment(comment_id: int, token: str = Header(), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
+
+    if current_user.suspension_period and current_user.suspension_period > datetime.now():
+        raise HTTPException(status_code=403, detail="User is currently suspended")
+
     comment = comment_crud.get_comment_by_id(db, comment_id)
     if not comment:
         raise HTTPException(status_code=404, detail="Comment not found")
@@ -43,6 +52,10 @@ def like_comment(comment_id: int, token: str = Header(), db: Session = Depends(g
 @router.post("/accompany/{accompany_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Like"])
 def like_accompany(accompany_id: int, token: str = Header(), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
+
+    if current_user.suspension_period and current_user.suspension_period > datetime.now():
+        raise HTTPException(status_code=403, detail="User is currently suspended")
+
     accompany = accompany_crud.get_accompany_by_id(db, accompany_id=accompany_id)
     if not accompany:
         raise HTTPException(status_code=404, detail="Accompany not found")
