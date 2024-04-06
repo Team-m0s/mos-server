@@ -105,14 +105,14 @@ def user_report(db: Session, reporter: User, user_report_create: UserReport):
 
     user.report_count += 1
 
-    if 15 <= user.report_count < 30:
+    if user.report_count % 10 == 0 and user.report_count < 40:
         user.suspension_period = datetime.now() + timedelta(days=3)
-    elif 30 <= user.report_count < 60:
+    elif user.report_count % 10 == 0 and 40 <= user.report_count < 70:
         user.suspension_period = datetime.now() + timedelta(days=7)
-    elif 60 <= user.report_count < 100:
+    elif (user.report_count - 70) % 15 == 0 and 70 <= user.report_count < 100:
         user.suspension_period = datetime.now() + timedelta(days=30)
     elif user.report_count >= 100:
-        user.suspension_period = datetime.now() + timedelta(days=30000)
+        user.suspension_period = datetime.now() + timedelta(days=3650)
 
     db.commit()
 
