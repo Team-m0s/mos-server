@@ -116,6 +116,7 @@ class Report(Base):
     id = Column(Integer, primary_key=True)
     report_reason_enum = Column(Enum(ReportReason), nullable=True)
     report_reason_string = Column(String, nullable=True)
+    report_date = Column(DateTime, nullable=False)
     reporter_id = Column(Integer, ForeignKey("user.id"))
     reporter = relationship("User", backref="report_users", foreign_keys=[reporter_id])
     post_id = Column(Integer, ForeignKey("post.id"))

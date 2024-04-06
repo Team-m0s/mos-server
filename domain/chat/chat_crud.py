@@ -17,7 +17,9 @@ def create_accompany_chat(accompany: Accompany, user: User, message: str):
         "isLeader": is_leader,
         "sendTime": datetime.utcnow(),
         "text": message,
-        "userUid": user.firebase_uuid
+        "userUid": user.firebase_uuid,
+        "reportCount": 0,
+        "isBlinded": False
     }
 
     chat_ref = user_crud.firebase_db.collection('chats').document(str(accompany.id)).collection('messages')
@@ -34,20 +36,22 @@ def create_personal_chat(sender: User, receiver: User, message: str):
 
     talk_content = {
         "lastMessage": message,
-        "sendTime": datetime.utcnow(),
+        "lastMessageTime": datetime.utcnow(),
         "participants": participants,
         "chatName": receiver.nickName
     }
 
     talk_ref = user_crud.firebase_db.collection('talks').document(hex_dig)
-    talk_ref.update(talk_content)
+    talk_ref.set(talk_content, merge=True)
 
     message_content = {
         "text": message,
-        "sender_uid": sender.firebase_uuid,
-        "sender_profile_img": sender.profile_img,
-        "sender_nickname": sender.nickName,
-        "sendTime": datetime.utcnow()
+        "userUid": sender.firebase_uuid,
+        "profileImg": sender.profile_img,
+        "nickName": sender.nickName,
+        "sendTime": datetime.utcnow(),
+        "reportCount": 0,
+        "isBlinded": False
     }
 
     message_ref = user_crud.firebase_db.collection('talks').document(hex_dig).collection('messages')

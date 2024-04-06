@@ -18,3 +18,17 @@ class UserReport(BaseModel):
     reported_user_id: int
     report_reason: ReportReason
     other: str | None
+
+
+class AccompanyChatReport(BaseModel):
+    accompany_id: int
+    message_id: str
+    report_reason: ReportReason
+    other: str | None
+
+
+class PersonalChatReport(BaseModel):
+    talk_id: str
+    message_id: str
+    report_reason: ReportReason
+    other: str | None

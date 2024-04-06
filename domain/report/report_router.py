@@ -43,8 +43,36 @@ def report_comment(report: report_schema.CommentReport, token: str = Header(), d
     report_crud.comment_report(db, reporter=current_user, comment_report_create=report)
 
 
+@router.post("/accompany/chat", status_code=status.HTTP_204_NO_CONTENT, tags=["Report"])
+def report_accompany_chat(report: report_schema.AccompanyChatReport, token: str = Header(), db: Session = Depends(get_db)):
+    current_user = user_crud.get_current_user(db, token)
+
+    # Create a reference to the report document
+    report_id = f"{current_user.firebase_uuid}_{report.message_id}"
+    report_ref = user_crud.firebase_db.collection('reports').document(report_id)
+
+    # Check if the report already exists
+    if report_ref.get().exists:
+        raise HTTPException(status_code=400, detail="You have already reported this chat")
+
+    report_crud.accompany_chat_report(reporter=current_user, chat_report_create=report)
+
+
+@router.post("/personal/chat", status_code=status.HTTP_204_NO_CONTENT, tags=["Report"])
+def report_personal_chat(report: report_schema.PersonalChatReport, token: str = Header(), db: Session = Depends(get_db)):
+    current_user = user_crud.get_current_user(db, token)
+
+    report_id = f"{current_user.firebase_uuid}_{report.message_id}"
+    report_ref = user_crud.firebase_db.collection('reports').document(report_id)
+
+    if report_ref.get().exists:
+        raise HTTPException(status_code=400, detail="You have already reported this chat")
+
+    report_crud.personal_chat_report(reporter=current_user, talk_report_create=report)
+
+
 @router.post("/user/{user_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Report"])
-def report_comment(report: report_schema.UserReport, token: str = Header(), db: Session = Depends(get_db)):
+def report_user(report: report_schema.UserReport, token: str = Header(), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
 
     user = user_crud.get_user_by_id(db, user_id=report.reported_user_id)
