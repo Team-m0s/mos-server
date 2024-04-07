@@ -1,9 +1,10 @@
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
-from models import Report, User, Post, Comment
+from models import Report, User, Post, Comment, Accompany, Notice
 from google.cloud import firestore
 
-from domain.report.report_schema import PostReport, CommentReport, UserReport, AccompanyChatReport, PersonalChatReport
+from domain.report.report_schema import PostReport, CommentReport, UserReport, AccompanyChatReport, \
+    PersonalChatReport, AccompanyReport, NoticeReport
 from domain.user import user_crud
 
 
@@ -39,6 +40,42 @@ def comment_report(db: Session, reporter: User, comment_report_create: CommentRe
     if comment.report_count >= 5:
         comment.is_blinded = True
         comment.blind_date = datetime.now()
+
+    db.commit()
+
+
+def accompany_report(db: Session, reporter: User, accompany_report_create: AccompanyReport):
+    accompany = db.query(Accompany).filter(Accompany.id == accompany_report_create.accompany_id).first()
+    db_report = Report(reporter_id=reporter.id,
+                       report_reason_enum=accompany_report_create.report_reason,
+                       report_reason_string=accompany_report_create.other,
+                       report_date=datetime.now(),
+                       accompany_id=accompany_report_create.accompany_id)
+    db.add(db_report)
+
+    accompany.report_count += 1
+
+    if accompany.report_count >= 15:
+        accompany.is_blinded = True
+        accompany.blind_date = datetime.now()
+
+    db.commit()
+
+
+def accompany_notice_report(db: Session, reporter: User, notice_report_create: NoticeReport):
+    notice = db.query(Notice).filter(Notice.id == notice_report_create.notice_id).first()
+    db_report = Report(reporter_id=reporter.id,
+                       report_reason_enum=notice_report_create.report_reason,
+                       report_reason_string=notice_report_create.other,
+                       report_date=datetime.now(),
+                       accompany_id=notice_report_create.accompany_id)
+    db.add(db_report)
+
+    notice.report_count += 1
+
+    if notice.report_count >= 10:
+        notice.is_blinded = True
+        notice.blind_date = datetime.now()
 
     db.commit()
 
@@ -124,6 +161,16 @@ def get_post_report(db: Session, user: User, post_id: int):
 
 def get_comment_report(db: Session, user: User, comment_id: int):
     db_report = db.query(Report).filter(Report.reporter_id == user.id, Report.comment_id == comment_id).first()
+    return db_report
+
+
+def get_accompany_report(db: Session, user: User, accompany_id: int):
+    db_report = db.query(Report).filter(Report.reporter_id == user.id, Report.accompany_id == accompany_id).first()
+    return db_report
+
+
+def get_notice_report(db: Session, user: User, notice_id: int):
+    db_report = db.query(Report).filter(Report.reporter_id == user.id, Report.notice_id == notice_id).first()
     return db_report
 
 

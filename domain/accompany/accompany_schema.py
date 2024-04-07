@@ -71,6 +71,7 @@ class AccompanyBase(BaseModel):
     chat_count: int
     like_count: int
     is_like_by_user: bool = False
+    is_blinded: bool | None
     total_pages: int = 0
     qna: str | None
 

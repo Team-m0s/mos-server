@@ -14,6 +14,18 @@ class CommentReport(BaseModel):
     other: str | None
 
 
+class AccompanyReport(BaseModel):
+    accompany_id: int
+    report_reason: ReportReason
+    other: str | None
+
+
+class NoticeReport(BaseModel):
+    notice_id: int
+    report_reason: ReportReason
+    other: str | None
+
+
 class UserReport(BaseModel):
     reported_user_id: int
     report_reason: ReportReason

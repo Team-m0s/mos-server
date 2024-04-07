@@ -9,6 +9,7 @@ class NoticeBase(BaseModel):
     create_date: datetime.datetime
     update_date: datetime.datetime | None
     comment_notices: list[NoticeComment] = []
+    is_blinded: bool | None
 
 
 class NoticeCreate(BaseModel):

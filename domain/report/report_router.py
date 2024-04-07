@@ -5,6 +5,8 @@ from database import get_db
 from domain.user import user_crud
 from domain.post import post_crud
 from domain.comment import comment_crud
+from domain.accompany import accompany_crud
+from domain.notice import notice_crud
 from domain.report import report_schema
 from domain.report import report_crud
 
@@ -41,6 +43,36 @@ def report_comment(report: report_schema.CommentReport, token: str = Header(), d
         raise HTTPException(status_code=400, detail="You have already reported this comment")
 
     report_crud.comment_report(db, reporter=current_user, comment_report_create=report)
+
+
+@router.post("/accompany/{accompany_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Report"])
+def report_accompany(report: report_schema.AccompanyReport, token: str = Header(), db: Session = Depends(get_db)):
+    current_user = user_crud.get_current_user(db, token)
+
+    accompany = accompany_crud.get_accompany_by_id(db, accompany_id=report.accompany_id)
+    if not accompany:
+        raise HTTPException(status_code=404, detail="Accompany not found")
+
+    existing_report = report_crud.get_accompany_report(db, user=current_user, accompany_id=accompany.id)
+    if existing_report:
+        raise HTTPException(status_code=400, detail="You have already reported this accompany")
+
+    report_crud.accompany_report(db, reporter=current_user, accompany_report_create=report)
+
+
+@router.post("/accompany/notice/{notice_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Report"])
+def report_accompany_notice(report: report_schema.NoticeReport, token: str = Header(), db: Session = Depends(get_db)):
+    current_user = user_crud.get_current_user(db, token)
+
+    notice = notice_crud.get_notice_by_id(db, notice_id=report.notice_id)
+    if not notice:
+        raise HTTPException(status_code=404, detail="Notice not found")
+
+    existing_report = report_crud.get_notice_report(db, user=current_user, notice_id=notice.id)
+    if existing_report:
+        raise HTTPException(status_code=400, detail="You have already reported this notice")
+
+    report_crud.accompany_notice_report(db, reporter=current_user, notice_report_create=report)
 
 
 @router.post("/accompany/chat", status_code=status.HTTP_204_NO_CONTENT, tags=["Report"])
