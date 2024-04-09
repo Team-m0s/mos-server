@@ -101,6 +101,11 @@ def get_post_by_post_id(db: Session, post_id: int):
     return db.query(Post).get(post_id)
 
 
+def get_post_author(db: Session, post_id: int):
+    post = db.query(Post).get(post_id)
+    return post.user
+
+
 def get_image_by_post_id(db: Session, post_id: int):
     return db.query(Image).filter(Image.post_id == post_id).all()
 

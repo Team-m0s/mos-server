@@ -5,6 +5,7 @@ from typing import Optional, List
 from datetime import datetime
 
 from database import get_db
+from firebase_admin import messaging
 from domain.comment import comment_schema, comment_crud
 from domain.post import post_crud
 from domain.user import user_crud
@@ -50,6 +51,22 @@ def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, 
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
     created_comment = comment_crud.create_comment(db, post=post, comment_create=_comment_create, user=current_user)
+
+    author = post_crud.get_post_author(db, post_id=post_id)
+
+    message = messaging.Message(
+        notification=messaging.Notification(
+            title='댓글 알림',
+            body='새로운 댓글이 달렸습니다.',
+        ),
+        data={
+            "post_id": post.id
+        },
+        token=author.fcm_token
+    )
+
+    messaging.send(message)
+
     return created_comment
 
 
