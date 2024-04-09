@@ -22,7 +22,8 @@ firebase_db = firestore.client()
 
 def add_user_to_firestore(uid: str, user_info: dict, auth_schema: AuthSchema):
     user_data = {
-        'nickname': auth_schema.nick_name,
+        'firebase_uuid': uid,
+        'nickName': auth_schema.nick_name,
         'profile_img': user_info.get("picture", None),
         'introduce': None,
         'lang_level': None
@@ -44,6 +45,7 @@ def create_user_kakao(db: Session, user_info: dict, auth_schema: AuthSchema):
     db_user = User(
         uuid=user_info['sub'],
         firebase_uuid=firebase_user.uid,
+        fcm_token=auth_schema.fcm_token,
         email=user_info['email'],
         nickName=auth_schema.nick_name,
         profile_img=user_info.get("picture", None),
@@ -77,6 +79,7 @@ def create_user_google(db: Session, user_info: dict, auth_schema: AuthSchema):
     db_user = User(
         uuid=user_info['sub'],
         firebase_uuid=firebase_user.uid,
+        fcm_token=auth_schema.fcm_token,
         email=user_info['email'],
         nickName=auth_schema.nick_name,
         profile_img=user_info.get("picture", None),
@@ -98,6 +101,7 @@ def create_user_apple(db: Session, user_info: dict, auth_schema: AuthSchema):
     db_user = User(
         uuid=user_info['sub'],
         firebase_uuid=firebase_user.uid,
+        fcm_token=auth_schema.fcm_token,
         email=user_info['email'],
         nickName=auth_schema.nick_name,
         profile_img=user_info.get("picture", None),
@@ -110,6 +114,8 @@ def create_user_apple(db: Session, user_info: dict, auth_schema: AuthSchema):
 def delete_user_sso(db: Session, db_user: User):
     db_user.nickName = '알수없음'
     db_user.uuid = ""
+    db_user.firebase_uuid = ""
+    db_user.fcm_token = ""
     db_user.provider = ""
     db_user.email = ""
     db_user.profile_img = ""

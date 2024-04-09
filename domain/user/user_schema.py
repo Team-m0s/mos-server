@@ -8,6 +8,7 @@ class ImageCreate(BaseModel):
 
 
 class AuthSchema(BaseModel):
+    fcm_token: str
     provider: str
     nick_name: str | None
 

@@ -5,6 +5,7 @@ import datetime
 
 
 class CommentCreate(BaseModel):
+    author_uuid: str
     content: str
     is_anonymous: bool
 
