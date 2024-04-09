@@ -24,6 +24,9 @@ class PostDetail(BaseModel):
     comment_count: int
     comment_posts: list[Comment] = []
 
+    class Config:
+        from_attributes = True
+
 
 class Post(BaseModel):
     id: int

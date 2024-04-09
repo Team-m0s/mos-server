@@ -7,6 +7,7 @@ from datetime import datetime
 from database import get_db
 from firebase_admin import messaging
 from domain.comment import comment_schema, comment_crud
+from domain.post.post_schema import PostDetail
 from domain.post import post_crud
 from domain.user import user_crud
 from domain.like import like_crud
@@ -50,15 +51,11 @@ def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, 
     post = post_crud.get_post_by_post_id(db, post_id=post_id)
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
-
-    total_pages, _post = post_crud.get_post(db, post_id=post_id)
-    post_crud.set_post_detail(db, _post, current_user, total_pages)
-
     created_comment = comment_crud.create_comment(db, post=post, comment_create=_comment_create, user=current_user)
 
     author = post_crud.get_post_author(db, post_id=post_id)
 
-    post_detail_dict = _post.dict()
+    post_detail = post_crud.get_post_detail_without_http(db, post_id=post_id)
 
     message = messaging.Message(
         notification=messaging.Notification(
@@ -66,7 +63,7 @@ def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, 
             body='새로운 댓글이 달렸습니다.',
         ),
         data={
-            "post_detail": post_detail_dict
+            "post_detail": post_detail
         },
         token=author.fcm_token
     )

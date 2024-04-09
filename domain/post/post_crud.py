@@ -1,5 +1,8 @@
 from datetime import datetime
 import math
+from typing import Optional
+
+from fastapi import HTTPException
 
 from domain.accompany import accompany_schema
 from domain.bookmark import bookmark_crud
@@ -100,7 +103,12 @@ def get_post(db: Session, post_id: int, start_index: int = 0, limit: int = 10, s
     return total_pages, post
 
 
-def set_post_detail(db: Session, _post: Post, current_user: User, total_pages: int):
+def get_post_detail_without_http(db: Session, post_id: int, current_user: Optional[User] = None):
+    total_pages, _post = get_post(db, post_id=post_id)
+
+    if not _post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
     images = get_image_by_post_id(db, post_id=_post.id)
     _post.image_urls = [accompany_schema.ImageBase(id=image.id,
                                                    image_url=f"https://www.mos-server.store/static/{image.image_url}")
@@ -128,6 +136,7 @@ def set_post_detail(db: Session, _post: Post, current_user: User, total_pages: i
             top_level_comments.append(comment)
 
     _post.comment_posts = top_level_comments
+    return _post
 
 
 def get_post_by_post_id(db: Session, post_id: int):
