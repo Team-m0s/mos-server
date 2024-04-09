@@ -1,6 +1,9 @@
 from datetime import datetime
 import math
 
+from domain.accompany import accompany_schema
+from domain.bookmark import bookmark_crud
+from domain.like import like_crud
 from domain.post.post_schema import PostCreate, PostUpdate
 from models import Post, User, Board, Comment, Image
 from sqlalchemy.orm import Session
@@ -95,6 +98,36 @@ def get_post(db: Session, post_id: int, start_index: int = 0, limit: int = 10, s
     total_comments = len(top_level_comments)
     total_pages = math.ceil(total_comments / limit) if limit > 0 else 0
     return total_pages, post
+
+
+def set_post_detail(db: Session, _post: Post, current_user: User, total_pages: int):
+    images = get_image_by_post_id(db, post_id=_post.id)
+    _post.image_urls = [accompany_schema.ImageBase(id=image.id,
+                                                   image_url=f"https://www.mos-server.store/static/{image.image_url}")
+                        for
+                        image in images if image.image_url] if images else []
+
+    if current_user:
+        post_like = like_crud.get_post_like(db, post_id=_post.id, user=current_user)
+        if post_like:
+            _post.is_liked_by_user = True
+        post_bookmark = bookmark_crud.get_post_bookmark(db, post_id=_post.id, user=current_user)
+        if post_bookmark:
+            _post.is_bookmarked_by_user = True
+
+    top_level_comments = []
+
+    for comment in _post.comment_posts:
+        comment.total_pages = total_pages
+        if current_user:
+            comment_like = like_crud.get_comment_like(db, comment_id=comment.id, user=current_user)
+            if comment_like:
+                comment.is_liked_by_user = True
+
+        if comment.parent_id is None:
+            top_level_comments.append(comment)
+
+    _post.comment_posts = top_level_comments
 
 
 def get_post_by_post_id(db: Session, post_id: int):

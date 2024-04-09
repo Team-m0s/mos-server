@@ -109,6 +109,7 @@ async def google_auth(auth_schema: AuthSchema = Body(...), token: str = Header()
     else:
         if db_user is None:
             raise HTTPException(status_code=404, detail="User not found")
+        user_crud.update_fcm_token(db, db_user=db_user, token=auth_schema.fcm_token)
 
     access_token_expires = timedelta(minutes=15)  # 토큰 유효 시간 설정
     access_token = jwt_token.create_access_token(data={"sub": user_info['sub']},
@@ -135,6 +136,7 @@ async def kakao_auth(auth_schema: AuthSchema = Body(...), token: str = Header(),
     else:
         if db_user is None:
             raise HTTPException(status_code=404, detail="User not found")
+        user_crud.update_fcm_token(db, db_user=db_user, token=auth_schema.fcm_token)
 
     # 토큰 생성
     access_token = jwt_token.create_access_token(data={"sub": user_info['sub']}, expires_delta=timedelta(minutes=15))
@@ -160,6 +162,7 @@ async def apple_auth(auth_schema: AuthSchema = Body(...), token: str = Header(),
     else:
         if db_user is None:
             raise HTTPException(status_code=404, detail="User not found")
+        user_crud.update_fcm_token(db, db_user=db_user, token=auth_schema.fcm_token)
 
     # 토큰 생성
     access_token = jwt_token.create_access_token(data={"sub": user_info['sub']}, expires_delta=timedelta(minutes=15))

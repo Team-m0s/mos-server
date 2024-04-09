@@ -129,6 +129,11 @@ def delete_user_sso(db: Session, db_user: User):
     db.commit()
 
 
+def update_fcm_token(db: Session, db_user: User, token: str):
+    db_user.fcm_token = token
+    db.commit()
+
+
 def get_user_by_uuid(db: Session, uuid: str):
     return db.query(User).filter(User.uuid == uuid).first()
 
