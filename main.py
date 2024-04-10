@@ -90,23 +90,17 @@ async def main():
 
 
 @app.post("/login/google/auth", tags=["Authentication"])
-async def google_auth(request: Request,
-                      auth_schema: AuthSchema = Body(...), token: str = Header(), db: Session = Depends(get_db)):
+async def google_auth(auth_schema: AuthSchema = Body(...), token: str = Header(), db: Session = Depends(get_db)):
     try:
-        # 클라이언트 ID를 요청 헤더의 'User-Agent' 값에 따라 선택
-        user_agent = request.headers.get('User-Agent')
-        if 'Android' in user_agent:
-            client_id = os.getenv("GOOGLE_CLIENT_ID_ANDROID")
-        else:
-            client_id = os.getenv("GOOGLE_CLIENT_ID_IOS")
-
-        id_info = id_token.verify_oauth2_token(token, requests.Request(), client_id)
-
-        if id_info['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
-            raise ValueError('Wrong issuer.')
-
+        # Try to verify the token with the first client ID
+        id_info = id_token.verify_oauth2_token(token, requests.Request(), os.getenv("GOOGLE_CLIENT_ID_IOS"))
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid token.")
+        try:
+            # If the first verification fails, try with the second client ID
+            id_info = id_token.verify_oauth2_token(token, requests.Request(), os.getenv("GOOGLE_CLIENT_ID"))
+        except ValueError:
+            # If both verifications fail, raise an exception
+            raise HTTPException(status_code=400, detail="Invalid token.")
 
     user_info = dict(id_info)
     db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
