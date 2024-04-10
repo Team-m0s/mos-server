@@ -7,6 +7,7 @@ from datetime import datetime
 from starlette import status
 
 from database import get_db
+from firebase_admin import messaging
 from domain.accompany import accompany_schema, accompany_crud
 from domain.notice import notice_schema, notice_crud
 from domain.user import user_crud
@@ -229,6 +230,21 @@ def accompany_create_notice(accompany_id: int, _notice_create: notice_schema.Not
 
     if current_user.id != accompany.leader_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="권한이 없습니다.")
+
+    topic = f'{accompany.id}_notice'
+
+    message = messaging.Message(
+        notification=messaging.Notification(
+            title='공지 알림',
+            body='새로운 공지사항이 등록되었습니다.',
+        ),
+        data={
+            "accompany_id": str(accompany.id)
+        },
+        topic=topic
+    )
+
+    messaging.send(message)
 
     notice_crud.create_accompany_notice(db, accompany_id=accompany_id, notice_create=_notice_create)
 

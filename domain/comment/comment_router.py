@@ -55,15 +55,13 @@ def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, 
 
     author = post_crud.get_post_author(db, post_id=post_id)
 
-    post_detail = post_crud.get_post_detail_without_http(db, post_id=post_id)
-
     message = messaging.Message(
         notification=messaging.Notification(
             title='댓글 알림',
             body='새로운 댓글이 달렸습니다.',
         ),
         data={
-            "post_detail": post_detail
+            "post_id": str(post.id)
         },
         token=author.fcm_token
     )

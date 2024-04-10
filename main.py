@@ -90,9 +90,17 @@ async def main():
 
 
 @app.post("/login/google/auth", tags=["Authentication"])
-async def google_auth(auth_schema: AuthSchema = Body(...), token: str = Header(), db: Session = Depends(get_db)):
+async def google_auth(request: Request,
+                      auth_schema: AuthSchema = Body(...), token: str = Header(), db: Session = Depends(get_db)):
     try:
-        id_info = id_token.verify_oauth2_token(token, requests.Request(), os.getenv("GOOGLE_CLIENT_ID_IOS"))
+        # 클라이언트 ID를 요청 헤더의 'User-Agent' 값에 따라 선택
+        user_agent = request.headers.get('User-Agent')
+        if 'Android' in user_agent:
+            client_id = os.getenv("GOOGLE_CLIENT_ID_ANDROID")
+        else:
+            client_id = os.getenv("GOOGLE_CLIENT_ID_IOS")
+
+        id_info = id_token.verify_oauth2_token(token, requests.Request(), client_id)
 
         if id_info['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
             raise ValueError('Wrong issuer.')
