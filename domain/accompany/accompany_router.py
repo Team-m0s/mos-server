@@ -314,7 +314,7 @@ def accompany_apply(application_create: accompany_schema.ApplicationCreate, toke
     if application_create.answer is None:
         if accompany.qna:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Answer should be required.")
-        accompany_crud.register_accompany(db, accompany_id=accompany.id, user_id=current_user.id)
+        accompany_crud.register_accompany(db, accompany_id=accompany.id, user=current_user)
     else:
         if accompany.qna is None:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Answer do not needed.")

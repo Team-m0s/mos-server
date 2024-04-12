@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 from typing import List, Optional
 from datetime import datetime, date
+from firebase_admin import messaging
 
 from utils import file_utils
 from models import Accompany, User, Image, Tag, accompany_member, ActivityScope, Application, Like
@@ -258,9 +259,12 @@ def apply_accompany(db: Session, accompany_id: int, user_id: int, answer: str):
     db.commit()
 
 
-def register_accompany(db: Session, accompany_id: int, user_id: int):
-    db.execute(accompany_member.insert().values(user_id=user_id, accompany_id=accompany_id))
+def register_accompany(db: Session, accompany_id: int, user: User):
+    db.execute(accompany_member.insert().values(user_id=user.id, accompany_id=accompany_id))
     db.commit()
+
+    topic = f'{accompany_id}_notice'
+    messaging.subscribe_to_topic(user.fcm_token, topic)
 
 
 def get_application_by_id(db: Session, application_id: int):
@@ -274,6 +278,11 @@ def approve_application(db: Session, application_id: int):
                                                     accompany_id=application.accompany_id))
         db.delete(application)
         db.commit()
+
+    db_user = get_user_by_id(db, user_id=application.user_id)
+
+    topic = f'{application.accompany_id}_notice'
+    messaging.subscribe_to_topic(db_user.fcm_token, topic)
 
 
 def reject_application(db: Session, application_id: int):
