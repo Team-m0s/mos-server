@@ -293,31 +293,42 @@ def reject_application(db: Session, application_id: int):
         db.commit()
 
 
-def ban_accompany_member(db: Session, accompany_id: int, member_id: int):
+def ban_accompany_member(db: Session, accompany_id: int, member: User):
     db.query(accompany_member).filter(
         and_(
-            accompany_member.c.user_id == member_id,
+            accompany_member.c.user_id == member.id,
             accompany_member.c.accompany_id == accompany_id
         )
     ).delete(synchronize_session=False)
     db.commit()
 
+    topic = f'{accompany_id}_notice'
+    messaging.unsubscribe_from_topic(member.fcm_token, topic)
 
-def leave_accompany(db: Session, accompany_id: int, member_id: int):
+
+def leave_accompany(db: Session, accompany_id: int, member: User):
     db.query(accompany_member).filter(
         and_(
-            accompany_member.c.user_id == member_id,
+            accompany_member.c.user_id == member.id,
             accompany_member.c.accompany_id == accompany_id
         )
     ).delete(synchronize_session=False)
     db.commit()
 
+    topic = f'{accompany_id}_notice'
+    messaging.unsubscribe_from_topic(member.fcm_token, topic)
 
-def assign_new_leader(db: Session, accompany_id: int, member_id: int):
+
+def assign_new_leader(db: Session, accompany_id: int, member: User):
     accompany = db.query(Accompany).filter(Accompany.id == accompany_id).first()
     old_leader_id = accompany.leader_id
-    accompany.leader_id = member_id
+    accompany.leader_id = member.id
 
     db.execute(accompany_member.insert().values(user_id=old_leader_id, accompany_id=accompany_id))
-    ban_accompany_member(db, accompany_id=accompany_id, member_id=member_id)
+    ban_accompany_member(db, accompany_id=accompany_id, member=member)
     db.commit()
+
+    old_leader = get_user_by_id(db, user_id=old_leader_id)
+
+    topic = f'{accompany_id}_notice'
+    messaging.unsubscribe_from_topic(old_leader.fcm_token, topic)

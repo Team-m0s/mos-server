@@ -358,7 +358,7 @@ def accompany_leave(accompany_id: int, token: str = Header(), db: Session = Depe
     if current_user not in members:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="권한이 없습니다.")
 
-    accompany_crud.leave_accompany(db, accompany_id=accompany_id, member_id=current_user.id)
+    accompany_crud.leave_accompany(db, accompany_id=accompany_id, member=current_user)
 
 
 @router.delete("/ban-member/{accompany_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
@@ -377,7 +377,7 @@ def accompany_ban_member(accompany_id: int, user_id: int, token: str = Header(),
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"해당 멤버가 존재하지 않습니다.")
 
-    accompany_crud.ban_accompany_member(db, accompany_id=accompany.id, member_id=member.id)
+    accompany_crud.ban_accompany_member(db, accompany_id=accompany.id, member=member)
 
 
 @router.put("/delegate-leader/{accompany_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
@@ -396,4 +396,4 @@ def accompany_delegate_leader(accompany_id: int, user_id: int, token: str = Head
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"해당 멤버가 존재하지 않습니다.")
 
-    accompany_crud.assign_new_leader(db, accompany_id=accompany_id, member_id=member.id)
+    accompany_crud.assign_new_leader(db, accompany_id=accompany_id, member=member)
