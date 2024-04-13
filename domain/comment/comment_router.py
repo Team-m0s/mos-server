@@ -111,6 +111,22 @@ def sub_comment_create(comment_id: int, _comment_create: comment_schema.SubComme
 
     created_comment = comment_crud.create_sub_comment(db, comment=comment, sub_comment_create=_comment_create,
                                                       user=current_user)
+
+    author = user_crud.get_user_by_id(db, user_id=comment.user_id)
+
+    message = messaging.Message(
+        notification=messaging.Notification(
+            title=f'내 댓글 "{comment.content}"에 새로운 답글이 달렸어요.',
+            body=_comment_create.content,
+        ),
+        data={
+            "post_id": str(comment.post_id)
+        },
+        token=author.fcm_token
+    )
+
+    messaging.send(message)
+
     return created_comment
 
 
