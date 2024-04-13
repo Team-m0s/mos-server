@@ -3,7 +3,7 @@ from datetime import datetime
 
 from domain.notice.notice_schema import NoticeCreate, NoticeUpdate
 from domain.accompany import accompany_crud
-from models import Notice
+from models import Notice, Notification
 
 
 def get_notice_by_id(db: Session, notice_id: int):
@@ -18,7 +18,22 @@ def create_accompany_notice(db: Session, accompany_id: int, notice_create: Notic
     db_notice = Notice(content=notice_create.content,
                        create_date=datetime.now(),
                        accompany_id=accompany_id)
+
     db.add(db_notice)
+
+    user_ids = [user.id for user in db_accompany.member]
+
+    notifications = [{
+        'title': '리더가 새로운 공지를 등록했습니다',
+        'body': notice_create.content,
+        'accompany_id': accompany_id,
+        'create_date': datetime.now(),
+        'user_id': user_id,
+        'is_Post': False
+    } for user_id in user_ids]
+
+    db.bulk_insert_mappings(Notification, notifications)
+
     db.commit()
 
 

@@ -7,7 +7,7 @@ from datetime import datetime, date
 from firebase_admin import messaging
 
 from utils import file_utils
-from models import Accompany, User, Image, Tag, accompany_member, ActivityScope, Application, Like
+from models import Accompany, User, Image, Tag, accompany_member, ActivityScope, Application, Like, Notification
 from domain.accompany.accompany_schema import AccompanyCreate, AccompanyUpdate, ImageBase, TagCreate, Category
 from domain.user.user_crud import get_user_by_id
 
@@ -252,10 +252,20 @@ def update_accompany(db: Session, db_accompany: Accompany, accompany_update: Acc
     db.commit()
 
 
-def apply_accompany(db: Session, accompany_id: int, user_id: int, answer: str):
-    db_application = Application(accompany_id=accompany_id, user_id=user_id,
+def apply_accompany(db: Session, accompany: Accompany, user_id: int, answer: str):
+    db_application = Application(accompany_id=accompany.id, user_id=user_id,
                                  answer=answer, apply_date=date.today())
+
+    db_notification = Notification(title='내 동행에 새로운 지원자가 있어요!',
+                                   body=answer,
+                                   accompany_id=accompany.id,
+                                   create_date=datetime.now(),
+                                   is_Post=False,
+                                   user_id=accompany.leader_id)
+
     db.add(db_application)
+    db.add(db_notification)
+
     db.commit()
 
 
@@ -280,6 +290,18 @@ def approve_application(db: Session, application_id: int):
         db.commit()
 
     db_user = get_user_by_id(db, user_id=application.user_id)
+
+    db_accompany = get_accompany_by_id(db, accompany_id=application.accompany_id)
+
+    db_notification = Notification(title=f'동행 {db_accompany.title}의 멤버가 되었어요!',
+                                   body='축하합니다! 이제 내 동행을 보러 가보실까요?',
+                                   accompany_id=db_accompany.id,
+                                   create_date=datetime.now(),
+                                   is_Post=False,
+                                   user_id=db_user.id)
+
+    db.add(db_notification)
+    db.commit()
 
     topic = f'{application.accompany_id}_notice'
     messaging.subscribe_to_topic(db_user.fcm_token, topic)
@@ -319,16 +341,25 @@ def leave_accompany(db: Session, accompany_id: int, member: User):
     messaging.unsubscribe_from_topic(member.fcm_token, topic)
 
 
-def assign_new_leader(db: Session, accompany_id: int, member: User):
-    accompany = db.query(Accompany).filter(Accompany.id == accompany_id).first()
+def assign_new_leader(db: Session, accompany: Accompany, member: User):
+    accompany = db.query(Accompany).filter(Accompany.id == accompany.id).first()
     old_leader_id = accompany.leader_id
     accompany.leader_id = member.id
 
-    db.execute(accompany_member.insert().values(user_id=old_leader_id, accompany_id=accompany_id))
-    ban_accompany_member(db, accompany_id=accompany_id, member=member)
-    db.commit()
+    db.execute(accompany_member.insert().values(user_id=old_leader_id, accompany_id=accompany.id))
+    ban_accompany_member(db, accompany_id=accompany.id, member=member)
 
     old_leader = get_user_by_id(db, user_id=old_leader_id)
 
-    topic = f'{accompany_id}_notice'
+    db_notification = Notification(title=f'동행 {accompany.title}의 리더가 되었어요!',
+                                   body='리더가 되면 여러 권한이 생겨요. 모임을 잘 이끌어주세요~!',
+                                   accompany_id=accompany.id,
+                                   create_date=datetime.now(),
+                                   is_Post=False,
+                                   user_id=member.id)
+
+    db.add(db_notification)
+    db.commit()
+
+    topic = f'{accompany.id}_notice'
     messaging.unsubscribe_from_topic(old_leader.fcm_token, topic)

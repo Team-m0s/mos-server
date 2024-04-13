@@ -100,6 +100,23 @@ class Bookmark(Base):
     create_date = Column(DateTime, nullable=False)
 
 
+class Notification(Base):
+    __tablename__ = 'notification'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String, nullable=False)
+    body = Column(Text, nullable=False)
+    post_id = Column(Integer, ForeignKey("post.id"))
+    post = relationship("Post", backref="notification_posts")
+    accompany_id = Column(Integer, ForeignKey("accompany.id"))
+    accompany = relationship("Accompany", backref="notification_accompanies")
+    user_id = Column(Integer, ForeignKey("user.id"))
+    user = relationship("User", backref="notification_users")
+    create_date = Column(DateTime, nullable=False)
+    is_read = Column(Boolean, nullable=False, default=False)
+    is_Post = Column(Boolean, nullable=False)
+
+
 class ReportReason(enum.Enum):
     hateSpeech = "욕설 / 비하발언"
     offTopic = "주제에 맞지 않는 글"

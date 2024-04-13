@@ -235,8 +235,8 @@ def accompany_create_notice(accompany_id: int, _notice_create: notice_schema.Not
 
     message = messaging.Message(
         notification=messaging.Notification(
-            title='공지 알림',
-            body='새로운 공지사항이 등록되었습니다.',
+            title='리더가 새로운 공지를 등록했습니다!',
+            body=_notice_create.content,
         ),
         data={
             "accompany_id": str(accompany.id)
@@ -318,8 +318,23 @@ def accompany_apply(application_create: accompany_schema.ApplicationCreate, toke
     else:
         if accompany.qna is None:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Answer do not needed.")
-        accompany_crud.apply_accompany(db, accompany_id=accompany.id,
+        accompany_crud.apply_accompany(db, accompany=accompany,
                                        user_id=current_user.id, answer=application_create.answer)
+
+    leader = user_crud.get_user_by_id(db, user_id=accompany.leader_id)
+
+    message = messaging.Message(
+        notification=messaging.Notification(
+            title='내 동행에 새로운 지원자가 있어요!',
+            body=application_create.answer,
+        ),
+        data={
+            "accompany_id": str(accompany.id)
+        },
+        token=leader.fcm_token
+    )
+
+    messaging.send(message)
 
 
 @router.put("/application/approve/{application_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
@@ -331,6 +346,22 @@ def application_approve(application_id: int, token: str = Header(), db: Session 
     if current_user.id != application.accompany.leader_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only the leader can approve applications.")
     accompany_crud.approve_application(db, application_id=application_id)
+
+    accompany = accompany_crud.get_accompany_by_id(db, accompany_id=application.accompany_id)
+    member = user_crud.get_user_by_id(db, user_id=application.user_id)
+
+    message = messaging.Message(
+        notification=messaging.Notification(
+            title=f'동행 {accompany.title}의 멤버가 되었어요!',
+            body='축하합니다! 이제 내 동행을 보러 가보실까요?',
+        ),
+        data={
+            "accompany_id": str(accompany.id)
+        },
+        token=member.fcm_token
+    )
+
+    messaging.send(message)
 
 
 @router.put("/application/reject/{application_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
@@ -396,4 +427,17 @@ def accompany_delegate_leader(accompany_id: int, user_id: int, token: str = Head
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"해당 멤버가 존재하지 않습니다.")
 
-    accompany_crud.assign_new_leader(db, accompany_id=accompany_id, member=member)
+    accompany_crud.assign_new_leader(db, accompany=accompany, member=member)
+
+    message = messaging.Message(
+        notification=messaging.Notification(
+            title=f'동행 {accompany.title}의 멤버가 되었어요!',
+            body='리더가 되면 여러 권한이 생겨요. 모임을 잘 이끌어주세요~!',
+        ),
+        data={
+            "accompany_id": str(accompany.id)
+        },
+        token=member.fcm_token
+    )
+
+    messaging.send(message)

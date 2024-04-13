@@ -61,7 +61,8 @@ def create_test_user_kakao(db: Session, user_info: dict):
         email=user_info['email'],
         nickName=user_info['display_name'],
         profile_img=user_info.get("picture", None),
-        provider='kakao'
+        provider='kakao',
+        fcm_token=''
     )
     db.add(db_user)
     db.commit()
