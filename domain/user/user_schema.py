@@ -19,12 +19,14 @@ class LanguageLevel(BaseModel):
 
 class PostUser(BaseModel):
     uuid: str
+    firebase_uuid: str
     nickName: str
     profile_img: str | None
 
 
 class CommentUser(BaseModel):
     uuid: str
+    firebase_uuid: str
     nickName: str
     profile_img: str | None
 

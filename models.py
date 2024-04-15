@@ -132,7 +132,7 @@ class Report(Base):
     __tablename__ = "report"
 
     id = Column(Integer, primary_key=True)
-    report_reason_enum = Column(Enum(ReportReason), nullable=True)
+    report_reason_enum = Column(JSON, nullable=True)
     report_reason_string = Column(String, nullable=True)
     report_date = Column(DateTime, nullable=False)
     reporter_id = Column(Integer, ForeignKey("user.id"))

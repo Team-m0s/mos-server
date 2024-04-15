@@ -11,7 +11,7 @@ from domain.user import user_crud
 def post_report(db: Session, reporter: User, post_report_create: PostReport):
     post = db.query(Post).filter(Post.id == post_report_create.post_id).first()
     db_report = Report(reporter_id=reporter.id,
-                       report_reason_enum=post_report_create.report_reason,
+                       report_reason_enum=[reason.value for reason in post_report_create.report_reason],
                        report_reason_string=post_report_create.other,
                        report_date=datetime.now(),
                        post_id=post_report_create.post_id)
@@ -29,7 +29,7 @@ def post_report(db: Session, reporter: User, post_report_create: PostReport):
 def comment_report(db: Session, reporter: User, comment_report_create: CommentReport):
     comment = db.query(Comment).filter(Comment.id == comment_report_create.comment_id).first()
     db_report = Report(reporter_id=reporter.id,
-                       report_reason_enum=comment_report_create.report_reason,
+                       report_reason_enum=[reason.value for reason in comment_report_create.report_reason],
                        report_reason_string=comment_report_create.other,
                        report_date=datetime.now(),
                        post_id=comment_report_create.post_id)
@@ -47,7 +47,7 @@ def comment_report(db: Session, reporter: User, comment_report_create: CommentRe
 def accompany_report(db: Session, reporter: User, accompany_report_create: AccompanyReport):
     accompany = db.query(Accompany).filter(Accompany.id == accompany_report_create.accompany_id).first()
     db_report = Report(reporter_id=reporter.id,
-                       report_reason_enum=accompany_report_create.report_reason,
+                       report_reason_enum=[reason.value for reason in accompany_report_create.report_reason],
                        report_reason_string=accompany_report_create.other,
                        report_date=datetime.now(),
                        accompany_id=accompany_report_create.accompany_id)
@@ -65,7 +65,7 @@ def accompany_report(db: Session, reporter: User, accompany_report_create: Accom
 def accompany_notice_report(db: Session, reporter: User, notice_report_create: NoticeReport):
     notice = db.query(Notice).filter(Notice.id == notice_report_create.notice_id).first()
     db_report = Report(reporter_id=reporter.id,
-                       report_reason_enum=notice_report_create.report_reason,
+                       report_reason_enum=[reason.value for reason in notice_report_create.report_reason],
                        report_reason_string=notice_report_create.other,
                        report_date=datetime.now(),
                        accompany_id=notice_report_create.accompany_id)
@@ -101,7 +101,7 @@ def accompany_chat_report(reporter: User, chat_report_create: AccompanyChatRepor
     report_content = {
         "reporterUid": reporter.firebase_uuid,
         "chatId": chat_report_create.message_id,
-        "reportReasonEnum": chat_report_create.report_reason,
+        "reportReasonEnum": [reason.value for reason in chat_report_create.report_reason],
         "reportReasonStr": chat_report_create.other
     }
 
@@ -124,7 +124,7 @@ def personal_chat_report(reporter: User, talk_report_create: PersonalChatReport)
     report_content = {
         "reporterUid": reporter.firebase_uuid,
         "chatId": talk_report_create.message_id,
-        "reportReasonEnum": talk_report_create.report_reason,
+        "reportReasonEnum": [reason.value for reason in talk_report_create.report_reason],
         "reportReasonStr": talk_report_create.other
     }
 
@@ -134,7 +134,7 @@ def personal_chat_report(reporter: User, talk_report_create: PersonalChatReport)
 def user_report(db: Session, reporter: User, user_report_create: UserReport):
     user = db.query(User).filter(User.id == user_report_create.reported_user_id).first()
     db_report = Report(reporter_id=reporter.id,
-                       report_reason_enum=user_report_create.report_reason,
+                       report_reason_enum=[reason.value for reason in user_report_create.report_reason],
                        report_reason_string=user_report_create.other,
                        report_date=datetime.now(),
                        reported_user_id=user_report_create.reported_user_id)
