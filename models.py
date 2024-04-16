@@ -154,14 +154,10 @@ class Block(Base):
     __tablename__ = "block"
 
     id = Column(Integer, primary_key=True)
-    blocker_id = Column(Integer, ForeignKey("user.id"))
-    blocker = relationship("User", backref="blocker_users", foreign_keys=[blocker_id])
-    blocked_id = Column(Integer, ForeignKey("user.id"))
-    blocked = relationship("User", backref="blocked_users", uselist=False, foreign_keys=[blocked_id])
-    post_id = Column(Integer, ForeignKey("post.id"))
-    post = relationship("Post", backref="block_posts")
-    accompany_id = Column(Integer, ForeignKey("accompany.id"))
-    accompany = relationship("Accompany", backref="block_accompanies")
+    blocker_uuid = Column(String, ForeignKey("user.uuid"))
+    blocker = relationship("User", backref="blocker_users", foreign_keys=[blocker_uuid])
+    blocked_uuid = Column(String, ForeignKey("user.uuid"))
+    blocked = relationship("User", backref="blocked_users", uselist=False, foreign_keys=[blocked_uuid])
 
 
 class Board(Base):

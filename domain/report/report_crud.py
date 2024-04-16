@@ -32,7 +32,7 @@ def comment_report(db: Session, reporter: User, comment_report_create: CommentRe
                        report_reason_enum=[reason.value for reason in comment_report_create.report_reason],
                        report_reason_string=comment_report_create.other,
                        report_date=datetime.now(),
-                       post_id=comment_report_create.post_id)
+                       comment_id=comment_report_create.comment_id)
     db.add(db_report)
 
     comment.report_count += 1
