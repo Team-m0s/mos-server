@@ -12,6 +12,7 @@ from domain.post import post_crud
 from domain.user import user_crud
 from domain.like import like_crud
 from domain.notice import notice_crud
+from domain.notification import notification_crud
 from domain.accompany import accompany_crud
 
 router = APIRouter(
@@ -54,6 +55,7 @@ def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, 
     created_comment = comment_crud.create_comment(db, post=post, comment_create=_comment_create, user=current_user)
 
     author = user_crud.get_user_by_uuid(db, uuid=_comment_create.author_uuid)
+    badge_count = notification_crud.get_unread_notification_count(db, user=author)
 
     message = messaging.Message(
         notification=messaging.Notification(
@@ -63,7 +65,15 @@ def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, 
         data={
             "post_id": str(post.id)
         },
-        token= author.fcm_token
+
+        apns=messaging.APNSConfig(
+            payload=messaging.APNSPayload(
+                aps=messaging.Aps(
+                    badge=badge_count
+                )
+            )
+        ),
+        token=author.fcm_token
     )
 
     messaging.send(message)
