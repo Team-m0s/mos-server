@@ -10,4 +10,5 @@ class AccompanyChat(BaseModel):
 class PersonalChat(BaseModel):
     sender_id: str
     receiver_id: str
+    is_anonymous: bool
     message: str

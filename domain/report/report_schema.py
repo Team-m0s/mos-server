@@ -42,6 +42,5 @@ class AccompanyChatReport(BaseModel):
 
 class PersonalChatReport(BaseModel):
     talk_id: str
-    message_id: str
     report_reason: List[ReportReason] | None
     other: str | None
