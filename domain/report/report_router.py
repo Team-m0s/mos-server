@@ -94,7 +94,7 @@ def report_accompany_chat(report: report_schema.AccompanyChatReport, token: str 
 def report_personal_chat(report: report_schema.PersonalChatReport, token: str = Header(), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
 
-    report_id = f"{current_user.firebase_uuid}_{report.message_id}"
+    report_id = f"{current_user.firebase_uuid}_{report.talk_id}"
     report_ref = user_crud.firebase_db.collection('reports').document(report_id)
 
     if report_ref.get().exists:

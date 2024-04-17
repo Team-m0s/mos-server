@@ -110,20 +110,17 @@ def accompany_chat_report(reporter: User, chat_report_create: AccompanyChatRepor
 
 def personal_chat_report(reporter: User, talk_report_create: PersonalChatReport):
     talk_ref = user_crud.firebase_db.collection('talks').document(talk_report_create.talk_id)
-    message_ref = talk_ref.collection('messages').document(talk_report_create.message_id)
 
-    message = message_ref.get()
-    if message.exists:
-        message_ref.update({'reportCount': firestore.Increment(1), 'isBlinded': True})
-    else:
+    talk = talk_ref.get()
+    if not talk.exists:
         raise ValueError("Chat not found")
 
     report_ref = user_crud.firebase_db.collection('reports') \
-        .document(f"{reporter.firebase_uuid}_{talk_report_create.message_id}")
+        .document(f"{reporter.firebase_uuid}_{talk_report_create.talk_id}")
 
     report_content = {
         "reporterUid": reporter.firebase_uuid,
-        "chatId": talk_report_create.message_id,
+        "chatId": talk_report_create.talk_id,
         "reportReasonEnum": [reason.value for reason in talk_report_create.report_reason],
         "reportReasonStr": talk_report_create.other
     }

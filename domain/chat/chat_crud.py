@@ -17,7 +17,7 @@ def create_accompany_chat(accompany: Accompany, user: User, message: str):
         "isLeader": is_leader,
         "sendTime": datetime.utcnow(),
         "text": message,
-        "userUid": user.firebase_uuid,
+        "firebase_uuid": user.firebase_uuid,
         "reportCount": 0,
         "isBlinded": False
     }
@@ -47,7 +47,7 @@ def create_personal_chat(sender: User, receiver: User, message: str, is_anonymou
 
     message_content = {
         "text": message,
-        "userUid": sender.firebase_uuid,
+        "firebase_uuid": sender.firebase_uuid,
         "profileImg": sender.profile_img,
         "nickName": sender.nickName,
         "sendTime": datetime.utcnow(),
