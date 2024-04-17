@@ -4,7 +4,8 @@ from domain.post.post_schema import Post
 
 
 class AccompanyChat(BaseModel):
-    id: int
+    accompany_id: int
+    message: str
 
 
 class PersonalChat(BaseModel):
