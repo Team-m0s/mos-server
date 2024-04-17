@@ -14,6 +14,12 @@ def get_notification_list(db: Session, user: User, start_index: int = 0, limit: 
 
     my_notification_list = query.offset(start_index).limit(limit).all()
 
+    unread_notifications = db.query(Notification).filter(and_(Notification.user_id == user.id, Notification.is_read == False)).all()
+    for notification in unread_notifications:
+        notification.is_read = True
+
+    db.commit()
+
     return total_pages, my_notification_list
 
 

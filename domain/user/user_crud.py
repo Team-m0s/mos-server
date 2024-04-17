@@ -53,6 +53,7 @@ def create_user_kakao(db: Session, user_info: dict, auth_schema: AuthSchema):
     )
     db.add(db_user)
     db.commit()
+    return db_user
 
 
 def create_test_user_kakao(db: Session, user_info: dict):
@@ -88,6 +89,7 @@ def create_user_google(db: Session, user_info: dict, auth_schema: AuthSchema):
     )
     db.add(db_user)
     db.commit()
+    return db_user
 
 
 def create_user_apple(db: Session, user_info: dict, auth_schema: AuthSchema):
@@ -110,6 +112,7 @@ def create_user_apple(db: Session, user_info: dict, auth_schema: AuthSchema):
     )
     db.add(db_user)
     db.commit()
+    return db_user
 
 
 def delete_user_sso(db: Session, db_user: User):

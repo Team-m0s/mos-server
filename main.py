@@ -108,7 +108,7 @@ async def google_auth(auth_schema: AuthSchema = Body(...), token: str = Header()
     db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
 
     if auth_schema.nick_name:
-        user_crud.create_user_google(db, user_info=user_info, auth_schema=auth_schema)
+        db_user = user_crud.create_user_google(db, user_info=user_info, auth_schema=auth_schema)
 
     else:
         if db_user is None:
@@ -135,7 +135,7 @@ async def kakao_auth(auth_schema: AuthSchema = Body(...), token: str = Header(),
     db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
 
     if auth_schema.nick_name:
-        user_crud.create_user_kakao(db, user_info=user_info, auth_schema=auth_schema)
+        db_user = user_crud.create_user_kakao(db, user_info=user_info, auth_schema=auth_schema)
 
     else:
         if db_user is None:
@@ -161,7 +161,7 @@ async def apple_auth(auth_schema: AuthSchema = Body(...), token: str = Header(),
     db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
 
     if auth_schema.nick_name:
-        user_crud.create_user_apple(db, user_info=user_info, auth_schema=auth_schema)
+        db_user = user_crud.create_user_apple(db, user_info=user_info, auth_schema=auth_schema)
 
     else:
         if db_user is None:
