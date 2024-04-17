@@ -159,7 +159,7 @@ class Block(Base):
     blocked_uuid = Column(String, ForeignKey("user.uuid"))
     blocked = relationship("User", backref="blocked_users", uselist=False, foreign_keys=[blocked_uuid])
     blocked_firebase_uuid = Column(String, ForeignKey("user.firebase_uuid"))
-    blocked_firebase = relationship("User", backref="blocked_firebase_users")
+    blocked_firebase = relationship("User", backref="blocked_firebase_users", foreign_keys=[blocked_firebase_uuid])
 
 
 class Board(Base):

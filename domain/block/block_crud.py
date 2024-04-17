@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy.orm import Session
 from models import User, Block
-from block_schema import BlockUser
+from domain.block.block_schema import BlockUser
 
 
 def get_blocked_list(db: Session, user: User):

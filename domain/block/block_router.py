@@ -13,10 +13,19 @@ router = APIRouter(
 )
 
 
-@router.get("/list", response_model=list[BlockedList], tags=["Block"])
+@router.get("/list", response_model=list[str], tags=["Block"])
 def blocked_list(token: str = Header(), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
-    return block_crud.get_blocked_list(db, user=current_user)
+    blocked_lists = block_crud.get_blocked_list(db, user=current_user)
+
+    result = []
+    for block in blocked_lists:
+        if block.blocked_uuid is not None:
+            result.append(block.blocked_uuid)
+        elif block.blocked_firebase_uuid is not None:
+            result.append(block.blocked_firebase_uuid)
+
+    return result
 
 
 @router.post("/user", status_code=status.HTTP_204_NO_CONTENT, tags=["Block"])
