@@ -1,4 +1,5 @@
 from pydantic import BaseModel, field_validator
+from typing import Optional
 
 
 class BlockedList(BaseModel):
@@ -7,5 +8,5 @@ class BlockedList(BaseModel):
 
 
 class BlockUser(BaseModel):
-    blocked_uuid: str | None
-    blocked_firebase_uuid: str | None
+    blocked_uuid: Optional[str]
+    blocked_firebase_uuid: Optional[str]
