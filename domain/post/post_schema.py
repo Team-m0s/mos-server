@@ -53,6 +53,7 @@ class PostList(BaseModel):
 class PostCreate(BaseModel):
     subject: str
     content: str
+    category: Optional[str]
     images_post: Optional[List[ImageCreate]] = None
     is_anonymous: bool
 

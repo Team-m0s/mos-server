@@ -41,6 +41,7 @@ class Post(Base):
     id = Column(Integer, primary_key=True)
     subject = Column(String, nullable=False)
     content = Column(Text, nullable=False)
+    category = Column(String, nullable=True)
     like_count = Column(Integer, default=0)
     is_anonymous = Column(Boolean, nullable=False, default=True)
     is_blinded = Column(Boolean, nullable=False, default=False)

@@ -15,10 +15,12 @@ from utils import file_utils
 
 
 def get_post_list(db: Session, board_id: int = 0, start_index: int = 0, limit: int = 10,
-                  search_keyword: str = None, sort_order: str = 'latest'):
+                  category: str = None, search_keyword: str = None, sort_order: str = 'latest'):
     query = db.query(Post)
     if board_id != 0:
         query = query.filter(Post.board_id == board_id)
+    if category:
+        query = query.filter(Post.category == category)
     if search_keyword:
         keyword_filter = or_(Post.subject.ilike(f"%{search_keyword}%"), Post.content.ilike(f"%{search_keyword}%"))
         query = query.filter(keyword_filter)
@@ -164,6 +166,7 @@ def create_post(db: Session, post_create: PostCreate, board: Board, user: User):
     db_post = Post(board=board,
                    subject=post_create.subject,
                    content=post_create.content,
+                   category=post_create.category,
                    is_anonymous=post_create.is_anonymous,
                    create_date=datetime.now(),
                    user=user)
