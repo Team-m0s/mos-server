@@ -57,3 +57,17 @@ def create_personal_chat(sender: User, receiver: User, message: str, is_anonymou
 
     message_ref = user_crud.firebase_db.collection('talks').document(hex_dig).collection('messages')
     message_ref.add(message_content)
+
+
+def exit_personal_chat(talk_id: str, user: User):
+    chat_ref = user_crud.firebase_db.collection('talks').document(talk_id)
+    chat = chat_ref.get()
+    if chat.exists:
+        participants = chat.get('participants')
+        if user.firebase_uuid in participants:
+            participants.remove(user.firebase_uuid)
+            chat_ref.update({"participants": participants})
+        else:
+            raise Exception("User not found in chat participants")
+    else:
+        raise Exception("Chat not found")

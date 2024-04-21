@@ -46,3 +46,9 @@ def personal_chat_create(personal_chat: chat_schema.PersonalChat, token: str = H
 
     chat_crud.create_personal_chat(sender=sender, receiver=receiver, message=personal_chat.message,
                                    is_anonymous=personal_chat.is_anonymous)
+
+
+@router.delete("/personal/exit", status_code=status.HTTP_204_NO_CONTENT, tags=["Chat"])
+def personal_chat_exit(talk_id: str, token: str = Header(), db: Session = Depends(get_db)):
+    current_user = user_crud.get_current_user(db, token)
+    chat_crud.exit_personal_chat(talk_id=talk_id, user=current_user)
