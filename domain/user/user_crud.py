@@ -192,6 +192,11 @@ def get_current_user(db: Session, token: str):
         return user
 
 
+def check_nickname_duplication(db: Session, nickname: str):
+    db_user = db.query(User).filter(User.nickName == nickname).first()
+    return db_user
+
+
 def update_user_profile(db: Session, db_user: User, user_update: UserUpdate):
     if db_user.nickName != user_update.nickName:
         if db_user.last_nickname_change and datetime.now() - db_user.last_nickname_change < timedelta(days=30):

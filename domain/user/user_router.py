@@ -34,6 +34,14 @@ def user_create(user_info: dict, user_create_: UserCreate, db: Session = Depends
     user_crud.create_user(db, user_info=user_info, user_create=user_create_)
 
 
+@router.get("/check/nickname", status_code=status.HTTP_200_OK, tags=["User"])
+def user_check_nickname(nickname: str, db: Session = Depends(get_db)):
+    existing_user = user_crud.check_nickname_duplication(db, nickname=nickname)
+    if existing_user:
+        raise HTTPException(status_code=400, detail="This nickname is already in use.")
+    return {"detail": "This nickname is available."}
+
+
 @router.put("/update/profile", status_code=status.HTTP_204_NO_CONTENT, tags=["User"])
 def user_profile_update(token: str = Header(), user_id: int = Form(...),
                         nickname: str = Form(...), lang_level: dict = Depends(parse_lang_level),
