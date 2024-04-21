@@ -100,7 +100,7 @@ def report_personal_chat(report: report_schema.PersonalChatReport, token: str = 
     if report_ref.get().exists:
         raise HTTPException(status_code=400, detail="You have already reported this chat")
 
-    report_crud.personal_chat_report(reporter=current_user, talk_report_create=report)
+    report_crud.personal_chat_report(db, reporter=current_user, talk_report_create=report)
 
 
 @router.post("/user/{user_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Report"])

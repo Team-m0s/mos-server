@@ -6,6 +6,8 @@ from google.cloud import firestore
 from domain.report.report_schema import PostReport, CommentReport, UserReport, AccompanyChatReport, \
     PersonalChatReport, AccompanyReport, NoticeReport
 from domain.user import user_crud
+from domain.block.block_schema import BlockUser
+from domain.block import block_crud
 
 
 def post_report(db: Session, reporter: User, post_report_create: PostReport):
@@ -108,7 +110,7 @@ def accompany_chat_report(reporter: User, chat_report_create: AccompanyChatRepor
     report_ref.set(report_content, merge=True)
 
 
-def personal_chat_report(reporter: User, talk_report_create: PersonalChatReport):
+def personal_chat_report(db: Session, reporter: User, talk_report_create: PersonalChatReport):
     talk_ref = user_crud.firebase_db.collection('talks').document(talk_report_create.talk_id)
 
     talk = talk_ref.get()
@@ -126,6 +128,12 @@ def personal_chat_report(reporter: User, talk_report_create: PersonalChatReport)
     }
 
     report_ref.set(report_content, merge=True)
+
+    participants = talk.to_dict()['participants']
+    other_user_uuid = [participant for participant in participants if participant != reporter.firebase_uuid][0]
+
+    blocked_user = BlockUser(blocked_firebase_uuid=other_user_uuid)
+    block_crud.block_user(db, user=reporter, blocked_user=blocked_user)
 
 
 def user_report(db: Session, reporter: User, user_report_create: UserReport):
