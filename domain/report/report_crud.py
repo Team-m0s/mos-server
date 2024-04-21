@@ -132,7 +132,7 @@ def personal_chat_report(db: Session, reporter: User, talk_report_create: Person
     participants = talk.to_dict()['participants']
     other_user_uuid = [participant for participant in participants if participant != reporter.firebase_uuid][0]
 
-    blocked_user = BlockUser(blocked_firebase_uuid=other_user_uuid)
+    blocked_user = BlockUser(blocked_uuid=None, blocked_firebase_uuid=other_user_uuid)
     block_crud.block_user(db, user=reporter, blocked_user=blocked_user)
 
 

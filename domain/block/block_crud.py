@@ -17,12 +17,16 @@ def block_user(db: Session, user: User, blocked_user: BlockUser):
     db.add(db_block)
     db.commit()
 
-    # Get all personal chats the user and blocked user are participating in
+    # Get all personal chats the user is participating in
     talks_ref = user_crud.firebase_db.collection('talks')
-    talks = talks_ref.where('participants', 'array_contains', user.firebase_uuid).where('participants',
-                                                                                        'array_contains',
-                                                                                        blocked_user.blocked_firebase_uuid).get()
+    user_talks = talks_ref.where('participants', 'array_contains', user.firebase_uuid).get()
+
+    # Get all personal chats the blocked user is participating in
+    blocked_user_talks = talks_ref.where('participants', 'array_contains', blocked_user.blocked_firebase_uuid).get()
+
+    # Find the common talks between the user and the blocked user
+    common_talks = [talk for talk in user_talks if talk in blocked_user_talks]
 
     # Exit the user from each personal chat with the blocked user
-    for talk in talks:
+    for talk in common_talks:
         chat_crud.exit_personal_chat(talk.id, user)
