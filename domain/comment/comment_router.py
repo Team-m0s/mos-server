@@ -59,8 +59,8 @@ def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, 
 
     message = messaging.Message(
         notification=messaging.Notification(
-            title='댓글 알림',
-            body='새로운 댓글이 달렸습니다.',
+            title=f'내 게시글 "{post.subject}"에 새로운 답글이 달렸어요.',
+            body=_comment_create.content,
         ),
         data={
             "post_id": str(post.id)
@@ -69,7 +69,8 @@ def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, 
         apns=messaging.APNSConfig(
             payload=messaging.APNSPayload(
                 aps=messaging.Aps(
-                    badge=badge_count
+                    badge=badge_count,
+                    content_available=True
                 )
             )
         ),
@@ -123,6 +124,7 @@ def sub_comment_create(comment_id: int, _comment_create: comment_schema.SubComme
                                                       user=current_user)
 
     author = user_crud.get_user_by_uuid(db, uuid=_comment_create.author_uuid)
+    badge_count = notification_crud.get_unread_notification_count(db, user=author)
 
     message = messaging.Message(
         notification=messaging.Notification(
@@ -132,6 +134,15 @@ def sub_comment_create(comment_id: int, _comment_create: comment_schema.SubComme
         data={
             "post_id": str(comment.post_id)
         },
+
+        apns=messaging.APNSConfig(
+            payload=messaging.APNSPayload(
+                aps=messaging.Aps(
+                    badge=badge_count,
+                    content_available=True
+                )
+            )
+        ),
         token=author.fcm_token
     )
 

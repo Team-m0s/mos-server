@@ -4,10 +4,12 @@ from starlette import status
 from datetime import datetime
 
 from database import get_db
+from firebase_admin import messaging
 from domain.user import user_crud
 from domain.accompany import accompany_crud
 from domain.chat import chat_crud
 from domain.chat import chat_schema
+from domain.notification import notification_crud
 
 router = APIRouter(
     prefix="/api/chat",
@@ -44,8 +46,32 @@ def personal_chat_create(personal_chat: chat_schema.PersonalChat, token: str = H
     if not receiver:
         raise HTTPException(status_code=404, detail="Receiver not found")
 
-    chat_crud.create_personal_chat(sender=sender, receiver=receiver, message=personal_chat.message,
+    chat_crud.create_personal_chat(db, sender=sender, receiver=receiver, message=personal_chat.message,
                                    is_anonymous=personal_chat.is_anonymous)
+
+    badge_count = notification_crud.get_unread_notification_count(db, user=sender)
+
+    message = messaging.Message(
+        notification=messaging.Notification(
+            title=f'"{receiver.nickName}"님으로부터 새로운 메시지가 있어요!',
+            body=personal_chat.message,
+        ),
+        data={
+            "sender_firebase_uuid": str(sender.firebase_uuid)
+        },
+
+        apns=messaging.APNSConfig(
+            payload=messaging.APNSPayload(
+                aps=messaging.Aps(
+                    badge=badge_count,
+                    content_available=True
+                )
+            )
+        ),
+        token=receiver.fcm_token
+    )
+
+    messaging.send(message)
 
 
 @router.delete("/personal/exit", status_code=status.HTTP_204_NO_CONTENT, tags=["Chat"])

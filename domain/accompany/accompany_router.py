@@ -238,6 +238,14 @@ def accompany_create_notice(accompany_id: int, _notice_create: notice_schema.Not
             title='리더가 새로운 공지를 등록했습니다!',
             body=_notice_create.content,
         ),
+
+        apns=messaging.APNSConfig(
+            payload=messaging.APNSPayload(
+                aps=messaging.Aps(
+                    content_available=True
+                )
+            )
+        ),
         data={
             "accompany_id": str(accompany.id)
         },
@@ -328,6 +336,14 @@ def accompany_apply(application_create: accompany_schema.ApplicationCreate, toke
             title='내 동행에 새로운 지원자가 있어요!',
             body=application_create.answer,
         ),
+
+        apns=messaging.APNSConfig(
+            payload=messaging.APNSPayload(
+                aps=messaging.Aps(
+                    content_available=True
+                )
+            )
+        ),
         data={
             "accompany_id": str(accompany.id)
         },
@@ -358,6 +374,14 @@ def application_approve(application_id: int, token: str = Header(), db: Session 
         data={
             "accompany_id": str(accompany.id)
         },
+
+        apns=messaging.APNSConfig(
+            payload=messaging.APNSPayload(
+                aps=messaging.Aps(
+                    content_available=True
+                )
+            )
+        ),
         token=member.fcm_token
     )
 
@@ -437,6 +461,14 @@ def accompany_delegate_leader(accompany_id: int, user_id: int, token: str = Head
         data={
             "accompany_id": str(accompany.id)
         },
+
+        apns=messaging.APNSConfig(
+            payload=messaging.APNSPayload(
+                aps=messaging.Aps(
+                    content_available=True
+                )
+            )
+        ),
         token=member.fcm_token
     )
 

@@ -113,6 +113,7 @@ class Notification(Base):
     accompany = relationship("Accompany", backref="notification_accompanies")
     user_id = Column(Integer, ForeignKey("user.id"))
     user = relationship("User", backref="notification_users")
+    sender_firebase_uuid = Column(String, nullable=True)
     create_date = Column(DateTime, nullable=False)
     is_read = Column(Boolean, nullable=False, default=False)
     is_Post = Column(Boolean, nullable=False)
