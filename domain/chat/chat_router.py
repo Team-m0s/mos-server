@@ -17,7 +17,8 @@ router = APIRouter(
 
 
 @router.post("/accompany/create", status_code=status.HTTP_204_NO_CONTENT, tags=["Chat"])
-def accompany_chat_create(accompany_chat: chat_schema.AccompanyChat, token: str = Header(), db: Session = Depends(get_db)):
+def accompany_chat_create(accompany_chat: chat_schema.AccompanyChat, token: str = Header(),
+                          db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
 
     if current_user.suspension_period and current_user.suspension_period > datetime.now():
@@ -46,24 +47,24 @@ def personal_chat_create(personal_chat: chat_schema.PersonalChat, token: str = H
     if not receiver:
         raise HTTPException(status_code=404, detail="Receiver not found")
 
-    chat_crud.create_personal_chat(db, sender=sender, receiver=receiver, message=personal_chat.message,
-                                   is_anonymous=personal_chat.is_anonymous)
+    talk_id = chat_crud.create_personal_chat(db, sender=sender, receiver=receiver, message=personal_chat.message,
+                                             is_anonymous=personal_chat.is_anonymous)
 
     badge_count = notification_crud.get_unread_notification_count(db, user=sender)
 
     message = messaging.Message(
         notification=messaging.Notification(
-            title=f'"{receiver.nickName}"님으로부터 새로운 메시지가 있어요!',
+            title='새로운 메시지가 있어요!',
             body=personal_chat.message,
         ),
         data={
-            "sender_firebase_uuid": str(sender.firebase_uuid)
+            "talk_id": str(talk_id)
         },
 
         apns=messaging.APNSConfig(
             payload=messaging.APNSPayload(
                 aps=messaging.Aps(
-                    #badge=badge_count,
+                    # badge=badge_count,
                     sound='default',
                     content_available=True,
                 )

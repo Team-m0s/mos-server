@@ -68,6 +68,7 @@ def create_personal_chat(db: Session, sender: User, receiver: User, message: str
 
     db.add(db_notification)
     db.commit()
+    return hex_dig
 
 
 def exit_personal_chat(talk_id: str, user: User):
