@@ -69,7 +69,8 @@ def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, 
         apns=messaging.APNSConfig(
             payload=messaging.APNSPayload(
                 aps=messaging.Aps(
-                    badge=badge_count,
+                    #badge=badge_count,
+                    sound='default',
                     content_available=True
                 )
             )
@@ -138,7 +139,8 @@ def sub_comment_create(comment_id: int, _comment_create: comment_schema.SubComme
         apns=messaging.APNSConfig(
             payload=messaging.APNSPayload(
                 aps=messaging.Aps(
-                    badge=badge_count,
+                    #badge=badge_count,
+                    sound='default',
                     content_available=True
                 )
             )

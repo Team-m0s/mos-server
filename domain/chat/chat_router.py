@@ -63,8 +63,9 @@ def personal_chat_create(personal_chat: chat_schema.PersonalChat, token: str = H
         apns=messaging.APNSConfig(
             payload=messaging.APNSPayload(
                 aps=messaging.Aps(
-                    badge=badge_count,
-                    content_available=True
+                    #badge=badge_count,
+                    sound='default',
+                    content_available=True,
                 )
             )
         ),
