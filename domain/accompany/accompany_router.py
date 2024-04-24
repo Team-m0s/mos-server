@@ -410,7 +410,11 @@ def accompany_leave(accompany_id: int, token: str = Header(), db: Session = Depe
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"동행을 찾을 수 없습니다.")
 
     if current_user.id == accompany.leader_id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="리더는 동행을 탈퇴할 수 없습니다.")
+        members = accompany_crud.get_members_by_accompany_id(db, accompany_id=accompany_id)
+        if len(members) >= 1:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="리더는 동행을 탈퇴할 수 없습니다.")
+        else:
+            accompany_crud.delete_accompany(db, accompany_id=accompany_id)
 
     members = accompany_crud.get_members_by_accompany_id(db, accompany_id=accompany_id)
     if current_user not in members:

@@ -186,6 +186,7 @@ def create_post(db: Session, post_create: PostCreate, board: Board, user: User):
 def update_post(db: Session, db_post: Post, post_update: PostUpdate):
     db_post.subject = post_update.subject
     db_post.content = post_update.content
+    db_post.category = post_update.category
     db_post.is_anonymous = post_update.is_anonymous
     db_post.modify_date = datetime.now()
     db.add(db_post)

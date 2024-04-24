@@ -341,6 +341,12 @@ def leave_accompany(db: Session, accompany_id: int, member: User):
     messaging.unsubscribe_from_topic(member.fcm_token, topic)
 
 
+def delete_accompany(db: Session, accompany_id: int):
+    db_accompany = db.query(Accompany).filter(Accompany.id == accompany_id).first()
+    db.delete(db_accompany)
+    db.commit()
+
+
 def assign_new_leader(db: Session, accompany: Accompany, member: User):
     accompany = db.query(Accompany).filter(Accompany.id == accompany.id).first()
     old_leader_id = accompany.leader_id

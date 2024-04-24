@@ -173,7 +173,7 @@ def post_create(token: str = Header(), board_id: int = Form(...),
 
 @router.put("/update", status_code=status.HTTP_204_NO_CONTENT, tags=["Post"])
 def post_update(token: str = Header(), post_id: int = Form(...),
-                subject: str = Form(...), content: str = Form(...),
+                subject: str = Form(...), content: str = Form(...), category: str = Form(None),
                 is_anonymous: bool = Form(...),
                 images: List[UploadFile] = File(None),
                 db: Session = Depends(get_db)):
@@ -206,7 +206,8 @@ def post_update(token: str = Header(), post_id: int = Form(...),
                 image_path = file_utils.save_image_file(image)
                 image_creates.append(post_schema.ImageCreate(image_url=image_path, image_hash=image_hash))
 
-    post_update_data = post_schema.PostUpdate(subject=subject, content=content,
+    post_update_data = post_schema.PostUpdate(subject=subject, content=content, category=category,
+
                                               is_anonymous=is_anonymous, images_post=image_creates, post_id=post_id)
 
     post_crud.update_post(db, db_post=post, post_update=post_update_data)

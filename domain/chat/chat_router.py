@@ -58,7 +58,8 @@ def personal_chat_create(personal_chat: chat_schema.PersonalChat, token: str = H
             body=personal_chat.message,
         ),
         data={
-            "talk_id": str(talk_id)
+            "talk_id": str(talk_id),
+            "last_message": str(personal_chat.message)
         },
 
         apns=messaging.APNSConfig(
