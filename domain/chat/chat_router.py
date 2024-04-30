@@ -47,7 +47,7 @@ def personal_chat_create(personal_chat: chat_schema.PersonalChat, token: str = H
     if not receiver:
         raise HTTPException(status_code=404, detail="Receiver not found")
 
-    talk_id = chat_crud.create_personal_chat(db, sender=sender, receiver=receiver, message=personal_chat.message,
+    talk_id = chat_crud.create_personal_chat(sender=sender, receiver=receiver, message=personal_chat.message,
                                              is_anonymous=personal_chat.is_anonymous)
 
     badge_count = notification_crud.get_unread_notification_count(db, user=sender)

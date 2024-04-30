@@ -27,7 +27,7 @@ def create_accompany_chat(accompany: Accompany, user: User, message: str):
     chat_ref.add(message_content)
 
 
-def create_personal_chat(db: Session, sender: User, receiver: User, message: str, is_anonymous: bool):
+def create_personal_chat(sender: User, receiver: User, message: str, is_anonymous: bool):
     participants = [sender.firebase_uuid, receiver.firebase_uuid]
 
     sorted_uuids = ''.join(sorted(participants))
@@ -59,15 +59,6 @@ def create_personal_chat(db: Session, sender: User, receiver: User, message: str
     message_ref = user_crud.firebase_db.collection('talks').document(hex_dig).collection('messages')
     message_ref.add(message_content)
 
-    db_notification = Notification(title=f'"{receiver.nickName}"님으로부터 새로운 메시지가 있어요!',
-                                   body=message,
-                                   sender_firebase_uuid=sender.firebase_uuid,
-                                   create_date=datetime.now(),
-                                   is_Post=False,
-                                   user_id=receiver.id)
-
-    db.add(db_notification)
-    db.commit()
     return hex_dig
 
 

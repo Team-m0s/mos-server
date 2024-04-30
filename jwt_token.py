@@ -210,7 +210,6 @@ async def verify_apple_token(token: str):
     except JWTError as e:
         raise HTTPException(status_code=401, detail="Signature verification failed: " + str(e))
 
-    print(decoded_payload)
     return decoded_payload
 
 
