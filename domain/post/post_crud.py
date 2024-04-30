@@ -8,7 +8,7 @@ from domain.accompany import accompany_schema
 from domain.bookmark import bookmark_crud
 from domain.like import like_crud
 from domain.post.post_schema import PostCreate, PostUpdate
-from models import Post, User, Board, Comment, Image
+from models import Post, User, Board, Comment, Image, Like
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from utils import file_utils
@@ -245,4 +245,53 @@ def delete_post(db: Session, db_post: Post):
         file_utils.delete_image_file(image.image_url)
         db.delete(image)
     db.delete(db_post)
+    db.commit()
+
+
+HOT_STATUS_UPDATE_CRITERIA = {
+    1: (5, 5),
+    2: (7, 6),
+    3: (5, 5),
+    4: (5, 5),
+    5: (5, 5),
+    6: (5, 5),
+    7: (5, 5),
+    8: (5, 5),
+    9: (8, 10),
+    10: (5, 5),
+    11: (8, 7),
+    12: (7, 6),
+    14: (8, 10),
+    15: (8, 10),
+    16: (10, 6),
+    17: (5, 6),
+}
+
+
+def update_hot_status(db: Session, post_id: int):
+    # Get the post from the database
+    post = db.query(Post).filter(Post.id == post_id).first()
+
+    # Check if the post exists
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    if post.board_id == 13:
+        return
+
+    # Get the number of likes for the post
+    like_count = db.query(Like).filter(Like.post_id == post_id).count()
+
+    # Get the number of unique users who commented on the post
+    comment_user_count = len(set(comment.user_id for comment in db.query(Comment).filter(Comment.post_id == post_id).all()))
+
+    criteria = HOT_STATUS_UPDATE_CRITERIA.get(post.board_id, (5, 5))
+    min_likes, min_comment_users = criteria
+
+    # Update the is_hot status if the conditions are met
+    if like_count >= min_likes or comment_user_count >= min_comment_users:
+        post.is_hot = True
+    else:
+        post.is_hot = False
+
     db.commit()

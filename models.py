@@ -45,6 +45,7 @@ class Post(Base):
     like_count = Column(Integer, default=0)
     is_anonymous = Column(Boolean, nullable=False, default=True)
     is_blinded = Column(Boolean, nullable=False, default=False)
+    is_hot = Column(Boolean, nullable=True)
     report_count = Column(Integer, nullable=False, default=0)
     create_date = Column(DateTime, nullable=False)
     modify_date = Column(DateTime, nullable=True)
