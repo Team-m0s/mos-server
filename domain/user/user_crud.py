@@ -3,7 +3,9 @@ from datetime import datetime, timedelta
 
 import firebase_admin
 from sqlalchemy.orm import Session
-from models import User, Image, Post, Comment
+
+from domain.accompany import accompany_crud
+from models import User, Image, Post, Comment, accompany_member, Accompany
 from fastapi import FastAPI, Request, HTTPException, status
 from jose import jwt
 from jwt_token import ALGORITHM, SECRET_KEY
@@ -125,10 +127,32 @@ def delete_user_sso(db: Session, db_user: User):
     db_user.profile_img = ""
     db_user.introduce = ""
     db_user.point = 0
-    db_user.lang_level = ""
+    db_user.lang_level = None
     db_user.report_count = 0
     db_user.last_nickname_change = None
     db_user.suspension_period = None
+
+    leader_accompanies = db.query(Accompany).filter(Accompany.leader_id == db_user.id).all()
+
+    for accompany in leader_accompanies:
+        # Get the members of the accompany
+        members = accompany_crud.get_members_by_accompany_id(db, accompany_id=accompany.id)
+
+        # If the user is the only member, delete the accompany
+        if len(members) == 1:
+            accompany_crud.delete_accompany(db, accompany_id=accompany.id)
+        else:
+            # If there are other members, delegate the leader role to another member
+            new_leader = next(member for member in members if member.id != db_user.id)
+            accompany_crud.assign_new_leader(db, accompany=accompany, member=new_leader)
+
+    # Get the accompanies where the user is a member
+    member_accompanies = db.query(Accompany).join(accompany_member, Accompany.id == accompany_member.c.accompany_id) \
+        .filter(accompany_member.c.user_id == db_user.id).all()
+
+    # Remove the user from these accompanies
+    for accompany in member_accompanies:
+        accompany_crud.leave_accompany(db, accompany_id=accompany.id, member=db_user)
 
     db.commit()
 
