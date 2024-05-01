@@ -15,10 +15,12 @@ from utils import file_utils
 
 
 def get_post_list(db: Session, board_id: int = 0, start_index: int = 0, limit: int = 10,
-                  category: str = None, search_keyword: str = None, sort_order: str = 'latest'):
+                  category: str = None, is_hot: bool = False, search_keyword: str = None, sort_order: str = 'latest'):
     query = db.query(Post)
     if board_id != 0:
         query = query.filter(Post.board_id == board_id)
+    if is_hot:
+        query = query.filter(Post.is_hot == True)
     if category:
         query = query.filter(Post.category == category)
     if search_keyword:
