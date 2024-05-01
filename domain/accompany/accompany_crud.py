@@ -9,7 +9,6 @@ from firebase_admin import messaging
 from utils import file_utils
 from models import Accompany, User, Image, Tag, accompany_member, ActivityScope, Application, Like, Notification
 from domain.accompany.accompany_schema import AccompanyCreate, AccompanyUpdate, ImageBase, TagCreate, Category
-from domain.user.user_crud import get_user_by_id
 
 
 def get_accompany_list(db: Session, is_closed: bool, start_index: int = 0, limit: int = 10,
@@ -113,7 +112,7 @@ def get_accompanies_by_user_id(db: Session, user_id: int, start_index: int = 0, 
 
 def set_accompany_detail(db: Session, accompany_list: List[Accompany]):
     for accompany in accompany_list:
-        leader = get_user_by_id(db, user_id=accompany.leader_id)
+        leader = get_user(db, user_id=accompany.leader_id)
         if leader.lang_level is None:
             leader.lang_level = {}
         accompany.leader = leader
@@ -289,7 +288,7 @@ def approve_application(db: Session, application_id: int):
         db.delete(application)
         db.commit()
 
-    db_user = get_user_by_id(db, user_id=application.user_id)
+    db_user = get_user(db, user_id=application.user_id)
 
     db_accompany = get_accompany_by_id(db, accompany_id=application.accompany_id)
 
@@ -355,7 +354,7 @@ def assign_new_leader(db: Session, accompany: Accompany, member: User):
     db.execute(accompany_member.insert().values(user_id=old_leader_id, accompany_id=accompany.id))
     ban_accompany_member(db, accompany_id=accompany.id, member=member)
 
-    old_leader = get_user_by_id(db, user_id=old_leader_id)
+    old_leader = get_user(db, user_id=old_leader_id)
 
     db_notification = Notification(title=f'동행 {accompany.title}의 리더가 되었어요!',
                                    body='리더가 되면 여러 권한이 생겨요. 모임을 잘 이끌어주세요~!',
@@ -369,3 +368,7 @@ def assign_new_leader(db: Session, accompany: Accompany, member: User):
 
     topic = f'{accompany.id}_notice'
     messaging.unsubscribe_from_topic(old_leader.fcm_token, topic)
+
+
+def get_user(db: Session, user_id: int):
+    return db.query(User).filter(User.id == user_id).first()
