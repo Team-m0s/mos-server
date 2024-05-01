@@ -29,7 +29,8 @@ def post_list(token: Optional[str] = Header(None), db: Session = Depends(get_db)
     if token:
         current_user = get_current_user(db, token)
     total_pages, _post_list = post_crud.get_post_list(db, board_id=board_id, start_index=page * size, limit=size,
-                                                      category=category, search_keyword=search_keyword, sort_order=sort_order)
+                                                      category=category, is_hot=is_hot,
+                                                      search_keyword=search_keyword, sort_order=sort_order)
 
     for post in _post_list:
         images = post_crud.get_image_by_post_id(db, post_id=post.id)
