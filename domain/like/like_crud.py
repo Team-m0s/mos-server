@@ -3,6 +3,7 @@ from models import Post, Comment, Like, User, Accompany
 from domain.post import post_crud
 from domain.comment import comment_crud
 
+
 def get_post_like(db: Session, post_id: int, user: User):
     like = db.query(Like).filter(Like.post_id == post_id, Like.user_id == user.id).first()
     return like

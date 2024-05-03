@@ -2,6 +2,7 @@ import math
 from datetime import datetime, timedelta
 
 import firebase_admin
+import random
 from sqlalchemy.orm import Session
 
 from domain.accompany import accompany_crud
@@ -44,8 +45,10 @@ def create_user_kakao(db: Session, user_info: dict, auth_schema: AuthSchema):
 
     add_user_to_firestore(uid=firebase_user.uid, user_info=user_info, auth_schema=auth_schema)
 
+    unique_uuid = generate_unique_uuid(db)
+
     db_user = User(
-        uuid=user_info['sub'],
+        uuid=unique_uuid,
         firebase_uuid=firebase_user.uid,
         fcm_token=auth_schema.fcm_token,
         email=user_info['email'],
@@ -81,8 +84,10 @@ def create_user_google(db: Session, user_info: dict, auth_schema: AuthSchema):
 
     add_user_to_firestore(uid=firebase_user.uid, user_info=user_info, auth_schema=auth_schema)
 
+    unique_uuid = generate_unique_uuid(db)
+
     db_user = User(
-        uuid=user_info['sub'],
+        uuid=unique_uuid,
         firebase_uuid=firebase_user.uid,
         fcm_token=auth_schema.fcm_token,
         email=user_info['email'],
@@ -104,8 +109,10 @@ def create_user_apple(db: Session, user_info: dict, auth_schema: AuthSchema):
 
     add_user_to_firestore(uid=firebase_user.uid, user_info=user_info, auth_schema=auth_schema)
 
+    unique_uuid = generate_unique_uuid(db)
+
     db_user = User(
-        uuid=user_info['sub'],
+        uuid=unique_uuid,
         firebase_uuid=firebase_user.uid,
         fcm_token=auth_schema.fcm_token,
         email=user_info['email'],
@@ -156,6 +163,14 @@ def delete_user_sso(db: Session, db_user: User):
         accompany_crud.leave_accompany(db, accompany_id=accompany.id, member=db_user)
 
     db.commit()
+
+
+def generate_unique_uuid(db: Session):
+    while True:
+        random_uuid = str(random.randint(1000000000, 9999999999))
+        existing_user = db.query(User).filter(User.uuid == random_uuid).first()
+        if not existing_user:
+            return random_uuid
 
 
 def update_fcm_token(db: Session, db_user: User, token: str):
