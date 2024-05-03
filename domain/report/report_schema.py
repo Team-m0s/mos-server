@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from models import ReportReason
+from models import ReportReason, ReportReasonChat
 from typing import List
 
 
@@ -36,11 +36,11 @@ class UserReport(BaseModel):
 class AccompanyChatReport(BaseModel):
     accompany_id: int
     message_id: str
-    report_reason: List[ReportReason] | None
+    report_reason: List[ReportReasonChat] | None
     other: str | None
 
 
 class PersonalChatReport(BaseModel):
     talk_id: str
-    report_reason: List[ReportReason] | None
+    report_reason: List[ReportReasonChat] | None
     other: str | None
