@@ -1,19 +1,6 @@
 from sqlalchemy.orm import Session
 from models import Post, Comment, Like, User, Accompany
-
-
-def post_like(db: Session, post: Post):
-    db_like = Like(post=post)
-    db.add(db_like)
-    post.like_count += 1
-    db.commit()
-
-
-def comment_like(db: Session, comment: Comment):
-    db_like = Like(comment=comment)
-    db.add(db_like)
-    comment.like_count += 1
-    db.commit()
+from domain.post import post_crud
 
 
 def get_post_like(db: Session, post_id: int, user: User):
@@ -30,6 +17,7 @@ def plus_post_like(db: Session, post: Post, user: User):
                    user_id=user.id)
     db.add(db_like)
     post.like_count += 1
+    post_crud.update_hot_status(db, post_id=post.id)
     db.commit()
 
 

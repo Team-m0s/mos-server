@@ -77,6 +77,15 @@ class Comment(Base):
     notice = relationship("Notice", backref="comment_notices")
 
 
+class BestComment(Base):
+    __talbename__ = "bestComment"
+
+    id = Column(Integer, primary_key=True)
+    comment_id = Column(Integer, ForeignKey("comment.id"))
+    comment = relationship("Comment", backref="best_comments")
+
+
+
 class Like(Base):
     __tablename__ = "like"
 

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from domain.comment.comment_schema import CommentCreate, CommentUpdate, CommentDelete, SubCommentCreate, \
     NoticeCommentCreate
-from domain.post.post_crud import get_post_by_post_id
+from domain.post import post_crud
 
 from models import Post, Comment, User, Notice, Notification
 
@@ -17,6 +17,8 @@ def create_comment(db: Session, post: Post, comment_create: CommentCreate, user:
                          create_date=datetime.now(),
                          user=user)
     db.add(db_comment)
+
+    post_crud.update_hot_status(db, post.id)
 
     db_notification = Notification(title=f'내 게시글 "{post.subject}"에 새로운 댓글이 달렸어요.',
                                    body=comment_create.content,
@@ -40,6 +42,8 @@ def create_sub_comment(db: Session, comment: Comment, sub_comment_create: SubCom
                              create_date=datetime.now(),
                              user=user)
     db.add(db_sub_comment)
+
+    post_crud.update_hot_status(db, comment.post_id)
 
     db_notification = Notification(title=f'내 댓글 "{comment.content}"에 새로운 답글이 달렸어요.',
                                    body=sub_comment_create.content,
