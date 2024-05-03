@@ -40,6 +40,14 @@ def comment_detail(comment_id: int, token: Optional[str] = Header(None),
     return _sub_comments
 
 
+@router.get("/best", response_model=List[comment_schema.Comment], tags=["Comment"])
+def get_best_comments(page: int = 0, size: int = 10, db: Session = Depends(get_db)):
+    total_pages, best_comments = comment_crud.get_best_comments(db, start_index=page * size, limit=size)
+    for comment in best_comments:
+        comment.total_pages = total_pages
+    return best_comments
+
+
 @router.post("/create/post/{post_id}", response_model=comment_schema.Comment,
              status_code=status.HTTP_201_CREATED, tags=["Comment"])
 def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, token: str = Header(),

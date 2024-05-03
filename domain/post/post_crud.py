@@ -244,9 +244,6 @@ def update_hot_status(db: Session, post_id: int):
     if post.board_id == 13:
         return
 
-    # Get the number of likes for the post
-    like_count = db.query(Like).filter(Like.post_id == post_id).count()
-
     # Get the number of unique users who commented on the post
     comment_user_count = len(set(comment.user_id for comment in db.query(Comment).filter(Comment.post_id == post_id).all()))
 
@@ -254,7 +251,7 @@ def update_hot_status(db: Session, post_id: int):
     min_likes, min_comment_users = criteria
 
     # Update the is_hot status if the conditions are met
-    if like_count >= min_likes or comment_user_count >= min_comment_users:
+    if post.like_count >= min_likes or comment_user_count >= min_comment_users:
         post.is_hot = True
 
     db.commit()

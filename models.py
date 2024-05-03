@@ -78,7 +78,7 @@ class Comment(Base):
 
 
 class BestComment(Base):
-    __talbename__ = "bestComment"
+    __tablename__ = "bestComment"
 
     id = Column(Integer, primary_key=True)
     comment_id = Column(Integer, ForeignKey("comment.id"))

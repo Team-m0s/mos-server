@@ -1,13 +1,14 @@
 import math
 from datetime import datetime
 
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from domain.comment.comment_schema import CommentCreate, CommentUpdate, CommentDelete, SubCommentCreate, \
     NoticeCommentCreate
 from domain.post import post_crud
 
-from models import Post, Comment, User, Notice, Notification
+from models import Post, Comment, User, Notice, Notification, BestComment
 
 
 def create_comment(db: Session, post: Post, comment_create: CommentCreate, user: User):
@@ -17,8 +18,6 @@ def create_comment(db: Session, post: Post, comment_create: CommentCreate, user:
                          create_date=datetime.now(),
                          user=user)
     db.add(db_comment)
-
-    post_crud.update_hot_status(db, post.id)
 
     db_notification = Notification(title=f'내 게시글 "{post.subject}"에 새로운 댓글이 달렸어요.',
                                    body=comment_create.content,
@@ -31,6 +30,8 @@ def create_comment(db: Session, post: Post, comment_create: CommentCreate, user:
 
     db.commit()
     db.refresh(db_comment)
+
+    post_crud.update_hot_status(db, post.id)
     return db_comment
 
 
@@ -43,8 +44,6 @@ def create_sub_comment(db: Session, comment: Comment, sub_comment_create: SubCom
                              user=user)
     db.add(db_sub_comment)
 
-    post_crud.update_hot_status(db, comment.post_id)
-
     db_notification = Notification(title=f'내 댓글 "{comment.content}"에 새로운 답글이 달렸어요.',
                                    body=sub_comment_create.content,
                                    post_id=comment.post_id,
@@ -56,6 +55,8 @@ def create_sub_comment(db: Session, comment: Comment, sub_comment_create: SubCom
 
     db.commit()
     db.refresh(db_sub_comment)
+
+    post_crud.update_hot_status(db, comment.post_id)
     return db_sub_comment
 
 
@@ -116,6 +117,17 @@ def get_sub_comments(db: Session, comment_id: int, start_index: int = 0, limit: 
     return total_pages, sub_comments
 
 
+def get_best_comments(db: Session, start_index: int = 0, limit: int = 10):
+    best_comments_query = db.query(Comment).join(BestComment, Comment.id == BestComment.comment_id)
+
+    total = best_comments_query.count()
+    total_pages = math.ceil(total / limit)
+
+    best_comments = best_comments_query.offset(start_index).limit(limit).all()
+
+    return total_pages, best_comments
+
+
 def update_comment(db: Session, db_comment: Comment, comment_update: CommentUpdate):
     db_comment.content = comment_update.content
     db_comment.modify_date = datetime.now()
@@ -130,4 +142,45 @@ def update_comment(db: Session, db_comment: Comment, comment_update: CommentUpda
 
 def delete_comment(db: Session, db_comment: Comment):
     db.delete(db_comment)
+    db.commit()
+
+
+BEST_COMMENT_UPDATE_CRITERIA = {
+    1: 5,
+    2: 7,
+    3: 5,
+    4: 5,
+    5: 5,
+    6: 5,
+    7: 5,
+    8: 5,
+    9: 10,
+    10: 6,
+    11: 8,
+    12: 7,
+    14: 10,
+    15: 10,
+    16: 10,
+    17: 10,
+}
+
+
+def update_best_comment_status(db: Session, comment_id: int):
+    comment = db.query(Comment).get(comment_id)
+
+    if not comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+
+    best_comment = db.query(BestComment).filter(BestComment.comment_id == comment_id).first()
+
+    if best_comment:
+        return
+
+    min_likes = BEST_COMMENT_UPDATE_CRITERIA.get(comment.post.board_id, 5)
+
+    if comment.like_count >= min_likes:
+        if not best_comment:
+            best_comment = BestComment(comment_id=comment_id)
+            db.add(best_comment)
+
     db.commit()

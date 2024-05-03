@@ -61,11 +61,12 @@ def create_user_kakao(db: Session, user_info: dict, auth_schema: AuthSchema):
 def create_test_user_kakao(db: Session, user_info: dict):
     db_user = User(
         uuid=user_info['email'],
+        firebase_uuid=user_info['email'],
+        fcm_token='',
         email=user_info['email'],
         nickName=user_info['display_name'],
         profile_img=user_info.get("picture", None),
-        provider='kakao',
-        fcm_token=''
+        provider='kakao'
     )
     db.add(db_user)
     db.commit()
