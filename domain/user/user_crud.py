@@ -48,7 +48,7 @@ def create_user_kakao(db: Session, user_info: dict, auth_schema: AuthSchema):
     unique_uuid = generate_unique_uuid(db)
 
     db_user = User(
-        uuid=user_info['email'],
+        uuid=user_info['sub'],
         user_code=unique_uuid,
         firebase_uuid=firebase_user.uid,
         fcm_token=auth_schema.fcm_token,
