@@ -1,7 +1,7 @@
 import datetime
 
 from pydantic import BaseModel, field_validator
-from domain.comment.comment_schema import Comment
+from domain.comment.comment_schema import VocabularyComment
 from domain.user.user_schema import PostUser
 
 
@@ -12,7 +12,7 @@ class VocabularyDetail(BaseModel):
     content: str
     create_date: datetime.datetime
     comment_count: int
-    comment_vocabularies: list[Comment] = []
+    comment_vocabularies: list[VocabularyComment] = []
 
     class Config:
         from_attributes = True

@@ -70,6 +70,13 @@ class NoticeComment(BaseModel):
     modify_date: datetime.datetime | None
 
 
+class VocabularyComment(BaseModel):
+    id: int
+    content: str
+    user: CommentUser | None
+    create_date: datetime.datetime
+
+
 class VocaComment(BaseModel):
     id: int
     content: str

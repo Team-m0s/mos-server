@@ -25,7 +25,7 @@ def vocabulary_list(db: Session = Depends(get_db), page: int = 0, size: int = 10
     return _voca_list
 
 
-@router.get("/detail/{vocabulary_id}", response_model=vocabulary_schema.Vocabulary, tags=["Vocabulary"])
+@router.get("/detail/{vocabulary_id}", response_model=vocabulary_schema.VocabularyDetail, tags=["Vocabulary"])
 def get_vocabulary(vocabulary_id: int, page: int = 0, size: int = 10, db: Session = Depends(get_db)):
     total_pages, vocabulary = vocabulary_crud.get_vocabulary(db, vocabulary_id, start_index=page * size, limit=size)
     if vocabulary is None:
