@@ -19,6 +19,7 @@ class LanguageLevel(BaseModel):
 
 class PostUser(BaseModel):
     uuid: str
+    user_code: str
     firebase_uuid: str
     nickName: str
     profile_img: str | None

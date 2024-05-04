@@ -12,6 +12,7 @@ from domain.post import post_crud
 from domain.user import user_crud
 from domain.like import like_crud
 from domain.notice import notice_crud
+from domain.vocabulary import vocabulary_crud
 from domain.notification import notification_crud
 from domain.accompany import accompany_crud
 
@@ -112,6 +113,26 @@ def notice_comment_create(notice_id: int, _comment_create: comment_schema.Notice
 
     created_comment = comment_crud.create_notice_comment(db, notice=notice, notice_comment_create=_comment_create,
                                                          user=current_user)
+    return created_comment
+
+
+@router.post("/create/vocabulary/{vocabulary_id}", response_model=comment_schema.VocaComment,
+             status_code=status.HTTP_201_CREATED, tags=["Comment"])
+def voca_comment_create(vocabulary_id: int, _comment_create: comment_schema.VocaCommentCreate, token: str = Header(),
+                        db: Session = Depends(get_db)):
+    current_user = user_crud.get_current_user(db, token)
+
+    if current_user.suspension_period and current_user.suspension_period > datetime.now():
+        raise HTTPException(status_code=403, detail="User is currently suspended")
+
+    vocabulary = vocabulary_crud.get_vocabulary_by_id(db, vocabulary_id=vocabulary_id)
+    if not vocabulary:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vocabulary not found")
+    elif vocabulary.is_solved:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Vocabulary is closed")
+
+    created_comment = comment_crud.create_vocabulary_comment(db, vocabulary=vocabulary,
+                                                             voca_comment_create=_comment_create, user=current_user)
     return created_comment
 
 

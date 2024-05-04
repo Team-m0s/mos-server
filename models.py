@@ -57,6 +57,21 @@ class Post(Base):
     board = relationship("Board", backref="post_boards")
 
 
+class Vocabulary(Base):
+    __tablename__ = "vocabulary"
+
+    id = Column(Integer, primary_key=True)
+    subject = Column(String, nullable=False)
+    content = Column(Text, nullable=False)
+    is_solved = Column(Boolean, nullable=False, default=False)
+    report_count = Column(Integer, nullable=False, default=0)
+    create_date = Column(DateTime, nullable=False)
+    user_id = Column(Integer, ForeignKey("user.id"))
+    author = relationship("User", backref="voca_author", foreign_keys=[user_id])
+    solved_user_id = Column(Integer, ForeignKey("user.id"))
+    solved_user = relationship("User", backref="voca_solved_user", foreign_keys=[solved_user_id])
+
+
 class Comment(Base):
     __tablename__ = "comment"
 
@@ -76,6 +91,8 @@ class Comment(Base):
     post = relationship("Post", backref="comment_posts")
     notice_id = Column(Integer, ForeignKey("notice.id"))
     notice = relationship("Notice", backref="comment_notices")
+    vocabulary_id = Column(Integer, ForeignKey("vocabulary.id"))
+    vocabulary = relationship("Vocabulary", backref="comment_vocabularies")
 
 
 class BestComment(Base):

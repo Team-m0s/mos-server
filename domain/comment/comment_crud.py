@@ -5,10 +5,10 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from domain.comment.comment_schema import CommentCreate, CommentUpdate, CommentDelete, SubCommentCreate, \
-    NoticeCommentCreate
+    NoticeCommentCreate, VocaCommentCreate
 from domain.post import post_crud
 
-from models import Post, Comment, User, Notice, Notification, BestComment
+from models import Post, Comment, User, Notice, Notification, BestComment, Vocabulary
 
 
 def create_comment(db: Session, post: Post, comment_create: CommentCreate, user: User):
@@ -70,6 +70,17 @@ def create_notice_comment(db: Session, notice: Notice, notice_comment_create: No
     db.commit()
     db.refresh(db_notice_comment)
     return db_notice_comment
+
+
+def create_vocabulary_comment(db: Session, vocabulary: Vocabulary, voca_comment_create: VocaCommentCreate, user: User):
+    db_voca_comment = Comment(vocabulary=vocabulary,
+                              content=voca_comment_create.content,
+                              create_date=datetime.now(),
+                              user=user)
+    db.add(db_voca_comment)
+    db.commit()
+    db.refresh(db_voca_comment)
+    return db_voca_comment
 
 
 def get_comment_by_id(db: Session, comment_id: int):
