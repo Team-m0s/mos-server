@@ -13,6 +13,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True)
     uuid = Column(String, nullable=False)
+    user_code = Column(String, nullable=False)
     firebase_uuid = Column(String, nullable=False, default="")
     fcm_token = Column(String, nullable=False)
     provider = Column(String, nullable=False)
