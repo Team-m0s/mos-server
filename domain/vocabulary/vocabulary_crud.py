@@ -29,7 +29,7 @@ def get_vocabulary(db: Session, vocabulary_id: int, start_index: int = 0, limit:
     vocabulary.comment_vocabularies = comments_query.offset(start_index).limit(limit).all()
     vocabulary.total_pages = total_pages
 
-    return vocabulary
+    return total_pages, vocabulary
 
 
 def get_vocabulary_by_id(db: Session, vocabulary_id: int):

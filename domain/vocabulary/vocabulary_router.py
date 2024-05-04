@@ -25,6 +25,17 @@ def vocabulary_list(db: Session = Depends(get_db), page: int = 0, size: int = 10
     return _voca_list
 
 
+@router.get("/detail/{vocabulary_id}", response_model=vocabulary_schema.Vocabulary, tags=["Vocabulary"])
+def get_vocabulary(vocabulary_id: int, page: int = 0, size: int = 10, db: Session = Depends(get_db)):
+    total_pages, vocabulary = vocabulary_crud.get_vocabulary(db, vocabulary_id, start_index=page * size, limit=size)
+    if vocabulary is None:
+        raise HTTPException(status_code=404, detail="Vocabulary not found")
+
+    for comment in vocabulary.comment_vocabularies:
+        comment.total_pages = total_pages
+    return vocabulary
+
+
 @router.post("/create", status_code=status.HTTP_204_NO_CONTENT, tags=["Vocabulary"])
 def vocabulary_create(_vocabulary_create: vocabulary_schema.VocabularyCreate, token: str = Header(),
                       db: Session = Depends(get_db)):

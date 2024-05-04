@@ -27,6 +27,7 @@ class PostUser(BaseModel):
 
 class CommentUser(BaseModel):
     uuid: str
+    user_code: str
     firebase_uuid: str
     nickName: str
     profile_img: str | None
