@@ -7,7 +7,7 @@ from domain.user.user_schema import PostUser
 
 class VocabularyDetail(BaseModel):
     id: int
-    user: PostUser | None
+    author: PostUser | None
     subject: str
     content: str
     create_date: datetime.datetime
