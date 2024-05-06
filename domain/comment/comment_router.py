@@ -131,6 +131,12 @@ def voca_comment_create(vocabulary_id: int, _comment_create: comment_schema.Voca
     elif vocabulary.is_solved:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Vocabulary is closed")
 
+    # Check if the user has already commented on the vocabulary
+    existing_comment = comment_crud.get_vocabulary_comment(db, user_id=current_user.id, vocabulary_id=vocabulary_id)
+    if existing_comment:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User has already commented on this "
+                                                                            "vocabulary")
+
     created_comment = comment_crud.create_vocabulary_comment(db, vocabulary=vocabulary,
                                                              voca_comment_create=_comment_create, user=current_user)
     return created_comment

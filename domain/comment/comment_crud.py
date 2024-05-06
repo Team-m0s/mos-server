@@ -139,6 +139,10 @@ def get_best_comments(db: Session, start_index: int = 0, limit: int = 10):
     return total_pages, best_comments
 
 
+def get_vocabulary_comment(db: Session, user_id: int, vocabulary_id: int):
+    return db.query(Comment).filter(Comment.vocabulary_id == vocabulary_id, Comment.user_id == user_id).first()
+
+
 def update_comment(db: Session, db_comment: Comment, comment_update: CommentUpdate):
     db_comment.content = comment_update.content
     db_comment.modify_date = datetime.now()
