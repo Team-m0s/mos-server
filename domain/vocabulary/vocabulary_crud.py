@@ -51,6 +51,11 @@ def create_vocabulary(db: Session, vocabulary_create: VocabularyCreate, user: Us
     db.commit()
 
 
+def delete_vocabulary(db: Session, vocabulary: Vocabulary):
+    db.delete(vocabulary)
+    db.commit()
+
+
 def mark_vocabulary_as_solved(db: Session, vocabulary: Vocabulary, user_id: int):
     vocabulary.is_solved = True
     vocabulary.solved_user_id = user_id
