@@ -9,7 +9,6 @@ from domain.vocabulary import vocabulary_schema
 from domain.vocabulary import vocabulary_crud
 from domain.user import user_crud
 
-
 router = APIRouter(
     prefix="/api/vocabulary",
 )
@@ -26,7 +25,7 @@ def vocabulary_list(db: Session = Depends(get_db), page: int = 0, size: int = 10
 
 
 @router.get("/detail/{vocabulary_id}", response_model=vocabulary_schema.VocabularyDetail, tags=["Vocabulary"])
-def get_vocabulary(vocabulary_id: int, page: int = 0, size: int = 10, db: Session = Depends(get_db)):
+def vocabulary_detail(vocabulary_id: int, page: int = 0, size: int = 10, db: Session = Depends(get_db)):
     total_pages, vocabulary = vocabulary_crud.get_vocabulary(db, vocabulary_id, start_index=page * size, limit=size)
     if vocabulary is None:
         raise HTTPException(status_code=404, detail="Vocabulary not found")
@@ -34,6 +33,19 @@ def get_vocabulary(vocabulary_id: int, page: int = 0, size: int = 10, db: Sessio
     for comment in vocabulary.comment_vocabularies:
         comment.total_pages = total_pages
     return vocabulary
+
+
+@router.put("/solve/{vocabulary_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Vocabulary"])
+def solve_vocabulary(vocabulary_id: int, user_id: int, token: str = Header(), db: Session = Depends(get_db)):
+    current_user = user_crud.get_current_user(db, token)
+
+    vocabulary = vocabulary_crud.get_vocabulary_by_id(db, vocabulary_id=vocabulary_id)
+    if not vocabulary:
+        raise HTTPException(status_code=404, detail="Vocabulary not found")
+    if current_user.id != vocabulary.author.id:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+
+    vocabulary_crud.mark_vocabulary_as_solved(db, vocabulary=vocabulary, user_id=user_id)
 
 
 @router.post("/create", status_code=status.HTTP_204_NO_CONTENT, tags=["Vocabulary"])

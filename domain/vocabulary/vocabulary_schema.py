@@ -11,6 +11,7 @@ class VocabularyDetail(BaseModel):
     subject: str
     content: str
     create_date: datetime.datetime
+    solved_user_comment = VocabularyComment
     comment_count: int
     comment_vocabularies: list[VocabularyComment] = []
 

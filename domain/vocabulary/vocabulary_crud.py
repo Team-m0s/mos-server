@@ -30,6 +30,11 @@ def get_vocabulary(db: Session, vocabulary_id: int, start_index: int = 0, limit:
     vocabulary.total_pages = total_pages
     vocabulary.comment_count = total_comments
 
+    if vocabulary.is_solved:
+        solved_user_comment = db.query(Comment).filter(Comment.user_id == vocabulary.solved_user_id,
+                                                       Comment.vocabulary_id == vocabulary_id).first()
+        vocabulary.solved_user_comment = solved_user_comment
+
     return total_pages, vocabulary
 
 
@@ -43,4 +48,10 @@ def create_vocabulary(db: Session, vocabulary_create: VocabularyCreate, user: Us
                                create_date=datetime.now(),
                                author=user,)
     db.add(db_vocabulary)
+    db.commit()
+
+
+def mark_vocabulary_as_solved(db: Session, vocabulary: Vocabulary, user_id: int):
+    vocabulary.is_solved = True
+    vocabulary.solved_user_id = user_id
     db.commit()

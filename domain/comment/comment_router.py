@@ -116,7 +116,7 @@ def notice_comment_create(notice_id: int, _comment_create: comment_schema.Notice
     return created_comment
 
 
-@router.post("/create/vocabulary/{vocabulary_id}", response_model=comment_schema.VocaComment,
+@router.post("/create/vocabulary/{vocabulary_id}", response_model=comment_schema.VocabularyComment,
              status_code=status.HTTP_201_CREATED, tags=["Comment"])
 def voca_comment_create(vocabulary_id: int, _comment_create: comment_schema.VocaCommentCreate, token: str = Header(),
                         db: Session = Depends(get_db)):

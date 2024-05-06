@@ -40,7 +40,6 @@ class VocaCommentCreate(BaseModel):
         return v
 
 
-
 class Comment(BaseModel):
     id: int
     parent_id: int | None
@@ -75,13 +74,7 @@ class VocabularyComment(BaseModel):
     content: str
     user: CommentUser | None
     create_date: datetime.datetime
-
-
-class VocaComment(BaseModel):
-    id: int
-    content: str
-    user: CommentUser | None
-    create_date: datetime.datetime
+    total_pages: int = 0
 
 
 class CommentUpdate(CommentCreate):
