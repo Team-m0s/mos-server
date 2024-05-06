@@ -27,6 +27,12 @@ class NoticeReport(BaseModel):
     other: str | None
 
 
+class VocabularyReport(BaseModel):
+    vocabulary_id: int
+    report_reason: List[ReportReason] | None
+    other: str | None
+
+
 class UserReport(BaseModel):
     reported_user_id: int
     report_reason: List[ReportReason] | None

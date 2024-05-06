@@ -7,6 +7,7 @@ from domain.post import post_crud
 from domain.comment import comment_crud
 from domain.accompany import accompany_crud
 from domain.notice import notice_crud
+from domain.vocabulary import vocabulary_crud
 from domain.report import report_schema
 from domain.report import report_crud
 
@@ -73,6 +74,21 @@ def report_accompany_notice(report: report_schema.NoticeReport, token: str = Hea
         raise HTTPException(status_code=400, detail="You have already reported this notice")
 
     report_crud.accompany_notice_report(db, reporter=current_user, notice_report_create=report)
+
+
+@router.post("/vocabulary/{vocabulary_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Report"])
+def report_vocabulary(report: report_schema.VocabularyReport, token: str = Header(), db: Session = Depends(get_db)):
+    current_user = user_crud.get_current_user(db, token)
+
+    vocabulary = vocabulary_crud.get_vocabulary_by_id(db, vocabulary_id=report.vocabulary_id)
+    if not vocabulary:
+        raise HTTPException(status_code=404, detail="Vocabulary not found")
+
+    existing_report = report_crud.get_vocabulary_report(db, user=current_user, vocabulary_id=vocabulary.id)
+    if existing_report:
+        raise HTTPException(status_code=400, detail="You have already reported this vocabulary")
+
+    report_crud.vocabulary_report(db, reporter=current_user, voca_report_create=report)
 
 
 @router.post("/accompany/chat", status_code=status.HTTP_204_NO_CONTENT, tags=["Report"])

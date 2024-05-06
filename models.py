@@ -103,7 +103,6 @@ class BestComment(Base):
     comment = relationship("Comment", backref="best_comments")
 
 
-
 class Like(Base):
     __tablename__ = "like"
 
@@ -186,6 +185,8 @@ class Report(Base):
     accompany = relationship("Accompany", backref="report_accompanies")
     notice_id = Column(Integer, ForeignKey("notice.id"))
     notice = relationship("Notice", backref="report_notices")
+    vocabulary_id = Column(Integer, ForeignKey("vocabulary.id"))
+    vocabulary = relationship("Vocabulary", backref="report_vocabularies")
     reported_user_id = Column(Integer, ForeignKey("user.id"), nullable=True)
     reported_user = relationship("User", backref="report_reported_users", uselist=False,
                                  foreign_keys=[reported_user_id])

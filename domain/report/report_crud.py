@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
-from models import Report, User, Post, Comment, Accompany, Notice
+from models import Report, User, Post, Comment, Accompany, Notice, Vocabulary
 from google.cloud import firestore
 
 from domain.report.report_schema import PostReport, CommentReport, UserReport, AccompanyChatReport, \
-    PersonalChatReport, AccompanyReport, NoticeReport
+    PersonalChatReport, AccompanyReport, NoticeReport, VocabularyReport
 from domain.user import user_crud
 from domain.block.block_schema import BlockUser
 from domain.block import block_crud
@@ -78,6 +78,20 @@ def accompany_notice_report(db: Session, reporter: User, notice_report_create: N
     if notice.report_count >= 10:
         notice.is_blinded = True
         notice.blind_date = datetime.now()
+
+    db.commit()
+
+
+def vocabulary_report(db: Session, reporter: User, voca_report_create: VocabularyReport):
+    vocabulary = db.query(Vocabulary).filter(Vocabulary.id == voca_report_create.vocabulary_id).first()
+    db_report = Report(reporter_id=reporter.id,
+                       report_reason_enum=[reason.value for reason in voca_report_create.report_reason],
+                       report_reason_string=voca_report_create.other,
+                       report_date=datetime.now(),
+                       vocabulary_id=voca_report_create.vocabulary_id)
+    db.add(db_report)
+
+    vocabulary.report_count += 1
 
     db.commit()
 
@@ -176,6 +190,11 @@ def get_accompany_report(db: Session, user: User, accompany_id: int):
 
 def get_notice_report(db: Session, user: User, notice_id: int):
     db_report = db.query(Report).filter(Report.reporter_id == user.id, Report.notice_id == notice_id).first()
+    return db_report
+
+
+def get_vocabulary_report(db: Session, user: User, vocabulary_id: int):
+    db_report = db.query(Vocabulary).filter(Report.reporter_id == user.id, Report.vocabulary_id == vocabulary_id).first()
     return db_report
 
 
