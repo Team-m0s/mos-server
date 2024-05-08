@@ -3,6 +3,7 @@ import datetime
 from pydantic import BaseModel, field_validator
 from domain.comment.comment_schema import VocabularyComment
 from domain.user.user_schema import PostUser
+from typing import Optional
 
 
 class VocabularyDetail(BaseModel):
@@ -10,8 +11,9 @@ class VocabularyDetail(BaseModel):
     author: PostUser | None
     subject: str
     content: str
+    is_solved: bool
     create_date: datetime.datetime
-    solved_user_comment: VocabularyComment
+    solved_user_comment: Optional[VocabularyComment] = None
     comment_count: int
     comment_vocabularies: list[VocabularyComment] = []
 
@@ -23,6 +25,7 @@ class Vocabulary(BaseModel):
     id: int
     subject: str
     content: str
+    is_solved: bool
     create_date: datetime.datetime
     comment_count: int
     total_pages: int = 0
