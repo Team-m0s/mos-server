@@ -12,6 +12,15 @@ class AuthSchema(BaseModel):
     provider: str
     nick_name: str | None
 
+    @field_validator('nick_name')
+    def validate_nick_name(cls, v):
+        if v:
+            if len(v) < 2 or len(v) > 10:
+                raise ValueError('닉네임은 최소 2글자 이상, 10글자 이하만 가능합니다.')
+            if v.strip() != v:
+                raise ValueError('닉네임에는 공백을 포함할 수 없습니다.')
+        return v
+
 
 class LanguageLevel(BaseModel):
     level: Dict[str, int]
