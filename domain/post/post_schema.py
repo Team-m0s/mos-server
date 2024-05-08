@@ -61,12 +61,16 @@ class PostCreate(BaseModel):
     def subject_length(cls, v):
         if not v or len(v.strip()) < 2:
             raise ValueError('제목은 공백 제외 2글자 이상이어야 합니다.')
+        if len(v) > 100:
+            raise ValueError('제목은 100글자 이하로 입력해주세요.')
         return v
 
     @field_validator('content')
     def content_length(cls, v):
         if not v or len(v.strip()) < 5:
             raise ValueError('내용은 공백 제외 5글자 이상이어야 합니다.')
+        if len(v) > 1000:
+            raise ValueError('내용은 공백 포함 1000글자 이하이어야 합니다.')
         return v
 
 

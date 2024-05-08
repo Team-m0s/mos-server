@@ -1,42 +1,42 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from models import ReportReason, ReportReasonChat
 from typing import List
 
 
-class PostReport(BaseModel):
+class ReportCreate(BaseModel):
+    report_reason: List[ReportReason] | None
+    other: str | None
+
+    @field_validator('other')
+    def check_length(cls, v):
+        if v is not None:
+            if len(v.strip()) < 1 or len(v) > 100:
+                raise ValueError('신고 사유는 공백 제외 1글자 이상, 공백 포함 100글자 이하만 가능합니다.')
+        return v
+
+
+class PostReport(ReportCreate):
     post_id: int
-    report_reason: List[ReportReason] | None
-    other: str | None
 
 
-class CommentReport(BaseModel):
+class CommentReport(ReportCreate):
     comment_id: int
-    report_reason: List[ReportReason] | None
-    other: str | None
 
 
-class AccompanyReport(BaseModel):
+class AccompanyReport(ReportCreate):
     accompany_id: int
-    report_reason: List[ReportReason] | None
-    other: str | None
 
 
-class NoticeReport(BaseModel):
+class NoticeReport(ReportCreate):
     notice_id: int
-    report_reason: List[ReportReason] | None
-    other: str | None
 
 
-class VocabularyReport(BaseModel):
+class VocabularyReport(ReportCreate):
     vocabulary_id: int
-    report_reason: List[ReportReason] | None
-    other: str | None
 
 
-class UserReport(BaseModel):
+class UserReport(ReportCreate):
     reported_user_id: int
-    report_reason: List[ReportReason] | None
-    other: str | None
 
 
 class UserFeedback(BaseModel):
