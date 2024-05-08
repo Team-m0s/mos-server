@@ -238,7 +238,7 @@ async def token_refresh(token: str = Header(...), db: Session = Depends(get_db))
 
 
 scheduler = BlockingScheduler()
-scheduler.add_job(db_utils.delete_blinded_posts, 'cron', hour=0, minute=0)
+scheduler.add_job(db_utils.delete_blinded_contents, 'cron', hour=0, minute=0)
 scheduler.start()
 
 app.include_router(post_router.router)
