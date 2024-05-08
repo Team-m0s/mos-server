@@ -3,7 +3,7 @@ from datetime import timedelta
 from fastapi import FastAPI, Request, Depends, HTTPException, Header, Body
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
-from apscheduler.schedulers.background import BlockingScheduler
+from apscheduler.schedulers.background import BackgroundScheduler
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
@@ -237,7 +237,7 @@ async def token_refresh(token: str = Header(...), db: Session = Depends(get_db))
     return {"access_token": new_access_token, "token_type": "bearer"}
 
 
-scheduler = BlockingScheduler()
+scheduler = BackgroundScheduler()
 scheduler.add_job(db_utils.delete_blinded_contents, 'cron', hour=0, minute=0)
 scheduler.start()
 
