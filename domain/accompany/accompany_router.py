@@ -241,7 +241,12 @@ def accompany_create_notice(accompany_id: int, _notice_create: notice_schema.Not
         data={
             "accompany_id": str(accompany.id)
         },
-
+        android=messaging.AndroidConfig(
+            priority='high',
+            notification=messaging.AndroidNotification(
+                sound='default'
+            )
+        ),
         apns=messaging.APNSConfig(
             payload=messaging.APNSPayload(
                 aps=messaging.Aps(
@@ -340,7 +345,12 @@ def accompany_apply(application_create: accompany_schema.ApplicationCreate, toke
         data={
             "accompany_id": str(accompany.id)
         },
-
+        android=messaging.AndroidConfig(
+            priority='high',
+            notification=messaging.AndroidNotification(
+                sound='default'
+            )
+        ),
         apns=messaging.APNSConfig(
             payload=messaging.APNSPayload(
                 aps=messaging.Aps(
@@ -376,7 +386,12 @@ def application_approve(application_id: int, token: str = Header(), db: Session 
         data={
             "accompany_id": str(accompany.id)
         },
-
+        android=messaging.AndroidConfig(
+            priority='high',
+            notification=messaging.AndroidNotification(
+                sound='default'
+            )
+        ),
         apns=messaging.APNSConfig(
             payload=messaging.APNSPayload(
                 aps=messaging.Aps(
@@ -469,7 +484,12 @@ def accompany_delegate_leader(accompany_id: int, user_id: int, token: str = Head
         data={
             "accompany_id": str(accompany.id)
         },
-
+        android=messaging.AndroidConfig(
+            priority='high',
+            notification=messaging.AndroidNotification(
+                sound='default'
+            )
+        ),
         apns=messaging.APNSConfig(
             payload=messaging.APNSPayload(
                 aps=messaging.Aps(

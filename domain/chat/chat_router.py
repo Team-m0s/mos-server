@@ -61,7 +61,12 @@ def personal_chat_create(personal_chat: chat_schema.PersonalChat, token: str = H
             "talk_id": str(talk_id),
             "last_message": str(personal_chat.message)
         },
-
+        android=messaging.AndroidConfig(
+            priority='high',
+            notification=messaging.AndroidNotification(
+                sound='default'
+            )
+        ),
         apns=messaging.APNSConfig(
             payload=messaging.APNSPayload(
                 aps=messaging.Aps(

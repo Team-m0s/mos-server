@@ -75,7 +75,12 @@ def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, 
             data={
                 "post_id": str(post.id)
             },
-
+            android=messaging.AndroidConfig(
+                priority='high',
+                notification=messaging.AndroidNotification(
+                    sound='default'
+                )
+            ),
             apns=messaging.APNSConfig(
                 payload=messaging.APNSPayload(
                     aps=messaging.Aps(
@@ -172,7 +177,12 @@ def sub_comment_create(comment_id: int, _comment_create: comment_schema.SubComme
             data={
                 "post_id": str(comment.post_id)
             },
-
+            android=messaging.AndroidConfig(
+                priority='high',
+                notification=messaging.AndroidNotification(
+                    sound='default'
+                )
+            ),
             apns=messaging.APNSConfig(
                 payload=messaging.APNSPayload(
                     aps=messaging.Aps(
