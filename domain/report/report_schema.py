@@ -39,6 +39,10 @@ class UserReport(BaseModel):
     other: str | None
 
 
+class UserFeedback(BaseModel):
+    content: str
+
+
 class AccompanyChatReport(BaseModel):
     accompany_id: int
     message_id: str

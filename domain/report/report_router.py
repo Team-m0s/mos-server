@@ -132,3 +132,10 @@ def report_user(report: report_schema.UserReport, token: str = Header(), db: Ses
         raise HTTPException(status_code=400, detail="You have already reported this user")
 
     report_crud.user_report(db, reporter=current_user, user_report_create=report)
+
+
+@router.post("/feedback", status_code=status.HTTP_204_NO_CONTENT, tags=["Report"])
+def send_feedback(feedback: report_schema.UserFeedback, token: str = Header(), db: Session = Depends(get_db)):
+    current_user = user_crud.get_current_user(db, token)
+
+    report_crud.user_feedback(db, reporter=current_user, user_feedback_create=feedback)

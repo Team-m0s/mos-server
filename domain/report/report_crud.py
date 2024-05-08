@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
-from models import Report, User, Post, Comment, Accompany, Notice, Vocabulary
+from models import Report, User, Post, Comment, Accompany, Notice, Vocabulary, Feedback
 from google.cloud import firestore
 
 from domain.report.report_schema import PostReport, CommentReport, UserReport, AccompanyChatReport, \
-    PersonalChatReport, AccompanyReport, NoticeReport, VocabularyReport
+    PersonalChatReport, AccompanyReport, NoticeReport, VocabularyReport, UserFeedback
 from domain.user import user_crud
 from domain.block.block_schema import BlockUser
 from domain.block import block_crud
@@ -170,6 +170,14 @@ def user_report(db: Session, reporter: User, user_report_create: UserReport):
     elif user.report_count >= 100:
         user.suspension_period = datetime.now() + timedelta(days=3650)
 
+    db.commit()
+
+
+def user_feedback(db: Session, reporter: User, user_feedback_create: UserFeedback):
+    db_feedback = Feedback(user_id=reporter.id,
+                           content=user_feedback_create.content,
+                           create_date=datetime.now())
+    db.add(db_feedback)
     db.commit()
 
 

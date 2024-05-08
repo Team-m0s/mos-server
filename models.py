@@ -192,6 +192,16 @@ class Report(Base):
                                  foreign_keys=[reported_user_id])
 
 
+class Feedback(Base):
+    __tablename__ = "feedback"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("user.id"))
+    user = relationship("User", backref="feedback_users")
+    content = Column(Text, nullable=False)
+    create_date = Column(DateTime, nullable=False)
+
+
 class Block(Base):
     __tablename__ = "block"
 
