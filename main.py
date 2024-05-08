@@ -3,6 +3,7 @@ from datetime import timedelta
 from fastapi import FastAPI, Request, Depends, HTTPException, Header, Body
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
+from apscheduler.schedulers.background import BlockingScheduler
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
@@ -16,6 +17,7 @@ from fastapi_sso.sso.kakao import KakaoSSO
 from firebase_admin import auth
 
 import jwt_token
+from utils import db_utils
 from domain.user import user_crud
 from domain.user.user_schema import AuthSchema
 from domain.post import post_router
@@ -234,6 +236,10 @@ async def token_refresh(token: str = Header(...), db: Session = Depends(get_db))
 
     return {"access_token": new_access_token, "token_type": "bearer"}
 
+
+scheduler = BlockingScheduler()
+scheduler.add_job(db_utils.delete_blinded_posts, 'cron', hour=0, minute=0)
+scheduler.start()
 
 app.include_router(post_router.router)
 app.include_router(comment_router.router)
