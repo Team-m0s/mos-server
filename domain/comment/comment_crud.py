@@ -178,7 +178,7 @@ def delete_comment(db: Session, db_comment: Comment):
 
 
 BEST_COMMENT_UPDATE_CRITERIA = {
-    3: 5,
+    3: 1,
     4: 7,
     5: 5,
     6: 5,
