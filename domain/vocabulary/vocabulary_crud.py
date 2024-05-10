@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from models import Vocabulary, User, Comment
 
-from domain.vocabulary.vocabulary_schema import VocabularyCreate
+from domain.vocabulary.vocabulary_schema import VocabularyCreate, VocabularyUpdate
 
 
 def get_vocabulary_list(db: Session, start_index: int = 0, limit: int = 10):
@@ -47,6 +47,14 @@ def create_vocabulary(db: Session, vocabulary_create: VocabularyCreate, user: Us
                                content=vocabulary_create.content,
                                create_date=datetime.now(),
                                author=user,)
+    db.add(db_vocabulary)
+    db.commit()
+
+
+def update_vocabulary(db: Session, db_vocabulary: Vocabulary, vocabulary_update: VocabularyUpdate):
+    db_vocabulary.subject = vocabulary_update.subject
+    db_vocabulary.content = vocabulary_update.content
+
     db.add(db_vocabulary)
     db.commit()
 

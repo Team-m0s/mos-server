@@ -46,3 +46,7 @@ class VocabularyCreate(BaseModel):
         if not v or len(v.strip()) < 2 or len(v.strip()) > 100:
             raise ValueError('내용은 공백 제외 2글자 이상, 100글자 이하이어야 합니다.')
         return v
+
+
+class VocabularyUpdate(VocabularyCreate):
+    vocabulary_id: int

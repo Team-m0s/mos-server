@@ -59,6 +59,25 @@ def vocabulary_create(_vocabulary_create: vocabulary_schema.VocabularyCreate, to
     vocabulary_crud.create_vocabulary(db, vocabulary_create=_vocabulary_create, user=current_user)
 
 
+@router.put("/update", status_code=status.HTTP_204_NO_CONTENT, tags=["Vocabulary"])
+def vocabulary_update(_vocabulary_update: vocabulary_schema.VocabularyUpdate, token: str = Header(),
+                      db: Session = Depends(get_db)):
+    current_user = user_crud.get_current_user(db, token)
+
+    if current_user.suspension_period and current_user.suspension_period > datetime.now():
+        raise HTTPException(status_code=403, detail="User is currently suspended")
+
+    vocabulary = vocabulary_crud.get_vocabulary_by_id(db, vocabulary_id=_vocabulary_update.vocabulary_id)
+
+    if not vocabulary:
+        raise HTTPException(status_code=404, detail="Vocabulary not found")
+
+    if current_user.id != _vocabulary_update.author.id:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+
+    vocabulary_crud.update_vocabulary(db, db_vocabulary=vocabulary, vocabulary_update=_vocabulary_update)
+
+
 @router.delete("/delete/{vocabulary_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Vocabulary"])
 def delete_vocabulary(vocabulary_id: int, token: str = Header(), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
