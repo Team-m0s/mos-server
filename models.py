@@ -8,6 +8,16 @@ from datetime import datetime
 import enum
 
 
+class UserActivity(Base):
+    __tablename__ = "user_activity"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("user.id"))
+    activity_type = Column(String, nullable=False)
+    activity_date = Column(DateTime, nullable=False)
+    user = relationship("User", backref="activity_users")
+
+
 class User(Base):
     __tablename__ = "user"
 
