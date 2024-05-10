@@ -41,6 +41,9 @@ def create_comment(db: Session, post: Post, comment_create: CommentCreate, user:
 
 
 def create_sub_comment(db: Session, comment: Comment, sub_comment_create: SubCommentCreate, user: User):
+    user_crud.add_user_activity_and_points(db, user=user, activity_type='comment', activity_limit=30,
+                                           activity_point=2)
+
     db_sub_comment = Comment(post=comment.post,
                              parent_id=comment.id,
                              content=sub_comment_create.content,
@@ -79,6 +82,9 @@ def create_notice_comment(db: Session, notice: Notice, notice_comment_create: No
 
 
 def create_vocabulary_comment(db: Session, vocabulary: Vocabulary, voca_comment_create: VocaCommentCreate, user: User):
+    user_crud.add_user_activity_and_points(db, user=user, activity_type='comment', activity_limit=0,
+                                           activity_point=2)
+
     db_voca_comment = Comment(vocabulary=vocabulary,
                               content=voca_comment_create.content,
                               create_date=datetime.now(),
@@ -162,6 +168,11 @@ def update_comment(db: Session, db_comment: Comment, comment_update: CommentUpda
 
 
 def delete_comment(db: Session, db_comment: Comment):
+    if db_comment.user.point >= 2:
+        db_comment.user.point -= 2
+    elif db_comment.user.point < 2:
+        db_comment.user.point = 0
+
     db.delete(db_comment)
     db.commit()
 

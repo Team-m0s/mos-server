@@ -213,7 +213,7 @@ def delete_post(db: Session, db_post: Post):
 
     if db_post.user.point >= 5:
         db_post.user.point -= 5
-    elif db_post.user.point > 0:
+    elif db_post.user.point < 5:
         db_post.user.point = 0
 
     db.delete(db_post)

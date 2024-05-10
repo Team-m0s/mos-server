@@ -292,11 +292,14 @@ def add_user_activity_and_points(db: Session, user: User, activity_type: str, ac
     db.add(db_activity)
     db.commit()
 
-    today = datetime.now().date()
-    activity_today = db.query(UserActivity).filter(
-        UserActivity.user_id == user.id,
-        UserActivity.activity_type == activity_type,
-        UserActivity.activity_date >= today).count()
-
-    if activity_today <= activity_limit:
+    if activity_limit == 0:
         user.point += activity_point
+    else:
+        today = datetime.now().date()
+        activity_today = db.query(UserActivity).filter(
+            UserActivity.user_id == user.id,
+            UserActivity.activity_type == activity_type,
+            UserActivity.activity_date >= today).count()
+
+        if activity_today <= activity_limit:
+            user.point += activity_point
