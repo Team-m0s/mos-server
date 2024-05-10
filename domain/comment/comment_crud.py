@@ -19,14 +19,15 @@ def create_comment(db: Session, post: Post, comment_create: CommentCreate, user:
                          user=user)
     db.add(db_comment)
 
-    db_notification = Notification(title=f'내 게시글 "{post.subject}"에 새로운 댓글이 달렸어요.',
-                                   body=comment_create.content,
-                                   post_id=post.id,
-                                   create_date=datetime.now(),
-                                   is_Post=True,
-                                   user_id=post.user_id)
+    if post.user_id != user.id:
+        db_notification = Notification(title=f'내 게시글 "{post.subject}"에 새로운 댓글이 달렸어요.',
+                                       body=comment_create.content,
+                                       post_id=post.id,
+                                       create_date=datetime.now(),
+                                       is_Post=True,
+                                       user_id=post.user_id)
 
-    db.add(db_notification)
+        db.add(db_notification)
 
     db.commit()
     db.refresh(db_comment)
@@ -44,14 +45,15 @@ def create_sub_comment(db: Session, comment: Comment, sub_comment_create: SubCom
                              user=user)
     db.add(db_sub_comment)
 
-    db_notification = Notification(title=f'내 댓글 "{comment.content}"에 새로운 답글이 달렸어요.',
-                                   body=sub_comment_create.content,
-                                   post_id=comment.post_id,
-                                   create_date=datetime.now(),
-                                   is_Post=True,
-                                   user_id=comment.user_id)
+    if comment.user_id != user.id:
+        db_notification = Notification(title=f'내 댓글 "{comment.content}"에 새로운 답글이 달렸어요.',
+                                       body=sub_comment_create.content,
+                                       post_id=comment.post_id,
+                                       create_date=datetime.now(),
+                                       is_Post=True,
+                                       user_id=comment.user_id)
 
-    db.add(db_notification)
+        db.add(db_notification)
 
     db.commit()
     db.refresh(db_sub_comment)
