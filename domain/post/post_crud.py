@@ -263,5 +263,6 @@ def update_hot_status(db: Session, post_id: int):
     # Update the is_hot status if the conditions are met
     if post.like_count >= min_likes or comment_user_count >= min_comment_users:
         post.is_hot = True
+        post.user.point += 50
 
     db.commit()

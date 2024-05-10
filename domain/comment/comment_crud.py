@@ -213,6 +213,7 @@ def update_best_comment_status(db: Session, comment_id: int):
     if comment.like_count >= min_likes:
         if not best_comment:
             best_comment = BestComment(comment_id=comment_id)
+            comment.user.point += 30
             db.add(best_comment)
 
     db.commit()
