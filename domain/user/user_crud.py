@@ -6,7 +6,7 @@ import random
 from sqlalchemy.orm import Session
 
 from domain.accompany import accompany_crud
-from models import User, Image, Post, Comment, accompany_member, Accompany
+from models import User, Image, accompany_member, Accompany, UserActivity
 from fastapi import FastAPI, Request, HTTPException, status
 from jose import jwt
 from jwt_token import ALGORITHM, SECRET_KEY
@@ -283,3 +283,20 @@ def update_user_profile(db: Session, db_user: User, user_update: UserUpdate):
         db_user.profile_img = f"https://www.mos-server.store/static/{submitted_image.image_url}"
 
     db.commit()
+
+
+def add_user_activity_and_points(db: Session, user: User, activity_type: str, activity_limit: int, activity_point: int):
+    db_activity = UserActivity(user_id=user.id,
+                               activity_type=activity_type,
+                               activity_date=datetime.now())
+    db.add(db_activity)
+    db.commit()
+
+    today = datetime.now().date()
+    activity_today = db.query(UserActivity).filter(
+        UserActivity.user_id == user.id,
+        UserActivity.activity_type == activity_type,
+        UserActivity.activity_date >= today).count()
+
+    if activity_today <= activity_limit:
+        user.point += activity_point

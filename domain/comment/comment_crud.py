@@ -7,11 +7,15 @@ from sqlalchemy.orm import Session
 from domain.comment.comment_schema import CommentCreate, CommentUpdate, CommentDelete, SubCommentCreate, \
     NoticeCommentCreate, VocaCommentCreate
 from domain.post import post_crud
+from domain.user import user_crud
 
 from models import Post, Comment, User, Notice, Notification, BestComment, Vocabulary
 
 
 def create_comment(db: Session, post: Post, comment_create: CommentCreate, user: User):
+    user_crud.add_user_activity_and_points(db, user=user, activity_type='comment', activity_limit=30,
+                                           activity_point=2)
+
     db_comment = Comment(post=post,
                          content=comment_create.content,
                          is_anonymous=comment_create.is_anonymous,

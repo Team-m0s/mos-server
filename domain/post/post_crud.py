@@ -4,7 +4,8 @@ from typing import Optional
 
 from fastapi import HTTPException
 from domain.post.post_schema import PostCreate, PostUpdate
-from models import Post, User, Board, Comment, Image, Like, UserActivity
+from domain.user import user_crud
+from models import Post, User, Board, Comment, Image
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from utils import file_utils
@@ -125,20 +126,8 @@ def get_image_by_hash_all(db: Session, image_hash: str):
 
 
 def create_post(db: Session, post_create: PostCreate, board: Board, user: User):
-    db_activity = UserActivity(user_id=user.id,
-                               activity_type='post',
-                               activity_date=datetime.now())
-    db.add(db_activity)
-    db.commit()
-
-    today = datetime.now().date()
-    post_activity_today = db.query(UserActivity).filter(
-        UserActivity.user_id == user.id,
-        UserActivity.activity_type == 'post',
-        UserActivity.activity_date >= today).count()
-
-    if post_activity_today <= 10:
-        user.point += 5
+    user_crud.add_user_activity_and_points(db, user=user, activity_type='post', activity_limit=10,
+                                           activity_point=5)
 
     db_post = Post(board=board,
                    subject=post_create.subject,
