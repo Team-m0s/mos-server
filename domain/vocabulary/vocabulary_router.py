@@ -35,7 +35,7 @@ def vocabulary_detail(vocabulary_id: int, page: int = 0, size: int = 10, db: Ses
     return vocabulary
 
 
-@router.put("/solve/{vocabulary_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Vocabulary"])
+@router.put("/solve/{vocabulary_id}", response_model=vocabulary_schema.VocabularyDetail, tags=["Vocabulary"])
 def solve_vocabulary(vocabulary_id: int, user_id: int, token: str = Header(), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
 
@@ -46,6 +46,13 @@ def solve_vocabulary(vocabulary_id: int, user_id: int, token: str = Header(), db
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
     vocabulary_crud.mark_vocabulary_as_solved(db, vocabulary=vocabulary, user_id=user_id)
+
+    total_pages, vocabulary = vocabulary_crud.get_vocabulary(db, vocabulary_id)
+
+    for comment in vocabulary.comment_vocabularies:
+        comment.total_pages = total_pages
+
+    return vocabulary
 
 
 @router.post("/create", status_code=status.HTTP_204_NO_CONTENT, tags=["Vocabulary"])
