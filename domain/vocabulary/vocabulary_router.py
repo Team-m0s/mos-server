@@ -79,7 +79,7 @@ def vocabulary_update(_vocabulary_update: vocabulary_schema.VocabularyUpdate, to
     if not vocabulary:
         raise HTTPException(status_code=404, detail="Vocabulary not found")
 
-    if current_user.id != _vocabulary_update.author.id:
+    if current_user.id != vocabulary.author.id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
     vocabulary_crud.update_vocabulary(db, db_vocabulary=vocabulary, vocabulary_update=_vocabulary_update)
