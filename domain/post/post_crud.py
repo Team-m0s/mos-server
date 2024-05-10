@@ -221,22 +221,22 @@ def delete_post(db: Session, db_post: Post):
 
 
 HOT_STATUS_UPDATE_CRITERIA = {
-    1: (5, 5),
-    2: (7, 6),
     3: (5, 5),
-    4: (5, 5),
+    4: (7, 6),
     5: (5, 5),
     6: (5, 5),
     7: (5, 5),
     8: (5, 5),
-    9: (8, 10),
+    9: (5, 5),
     10: (5, 5),
-    11: (8, 7),
-    12: (7, 6),
-    14: (8, 10),
-    15: (8, 10),
-    16: (10, 6),
-    17: (5, 6),
+    11: (8, 10),
+    12: (5, 5),
+    13: (8, 7),
+    14: (7, 6),
+    16: (8, 10),
+    17: (8, 10),
+    18: (10, 6),
+    19: (5, 6),
 }
 
 
@@ -251,7 +251,7 @@ def update_hot_status(db: Session, post_id: int):
     if post.is_hot:
         return
 
-    if post.board_id == 13:
+    if post.board_id == 15:
         return
 
     # Get the number of unique users who commented on the post
