@@ -1,7 +1,7 @@
 import math
 from datetime import datetime
 from sqlalchemy.orm import Session
-from models import Vocabulary, User, Comment
+from models import Vocabulary, User, Comment, Notification
 
 from domain.vocabulary.vocabulary_schema import VocabularyCreate, VocabularyUpdate
 from domain.user import user_crud
@@ -81,4 +81,13 @@ def mark_vocabulary_as_solved(db: Session, vocabulary: Vocabulary, user_id: int)
 
     vocabulary.is_solved = True
     vocabulary.solved_user_id = user_id
+
+    db_notification = Notification(title='🎊내 답변이 채택되었어요!',
+                                   body=vocabulary.subject,
+                                   vocabulary_id=vocabulary.id,
+                                   create_date=datetime.now(),
+                                   is_Post=False,
+                                   user_id=user_id)
+    db.add(db_notification)
+
     db.commit()
