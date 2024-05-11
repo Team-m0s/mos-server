@@ -6,6 +6,7 @@ from models import Vocabulary, User, Comment
 from domain.vocabulary.vocabulary_schema import VocabularyCreate, VocabularyUpdate
 from domain.user import user_crud
 
+
 def get_vocabulary_list(db: Session, start_index: int = 0, limit: int = 10):
     query = db.query(Vocabulary)
 
@@ -49,7 +50,7 @@ def create_vocabulary(db: Session, vocabulary_create: VocabularyCreate, user: Us
     db_vocabulary = Vocabulary(subject=vocabulary_create.subject,
                                content=vocabulary_create.content,
                                create_date=datetime.now(),
-                               author=user,)
+                               author=user, )
     db.add(db_vocabulary)
     db.commit()
 
@@ -77,7 +78,6 @@ def mark_vocabulary_as_solved(db: Session, vocabulary: Vocabulary, user_id: int)
 
     vocabulary.author.point += 3
     solved_user.point += 10
-
 
     vocabulary.is_solved = True
     vocabulary.solved_user_id = user_id

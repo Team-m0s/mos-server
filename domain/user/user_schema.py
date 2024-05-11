@@ -35,6 +35,7 @@ class PostUser(BaseModel):
 
 
 class CommentUser(BaseModel):
+    id: int
     uuid: str
     user_code: str
     firebase_uuid: str
