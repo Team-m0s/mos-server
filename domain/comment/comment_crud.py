@@ -90,6 +90,17 @@ def create_vocabulary_comment(db: Session, vocabulary: Vocabulary, voca_comment_
                               create_date=datetime.now(),
                               user=user)
     db.add(db_voca_comment)
+
+    if vocabulary.user_id != user.id:
+        db_notification = Notification(title='📗내 단어장에 새로운 답변이 달렸어요!',
+                                       body=voca_comment_create.content,
+                                       vocabulary_id=vocabulary.id,
+                                       create_date=datetime.now(),
+                                       is_Post=False,
+                                       user_id=vocabulary.user_id)
+
+        db.add(db_notification)
+
     db.commit()
     db.refresh(db_voca_comment)
     return db_voca_comment

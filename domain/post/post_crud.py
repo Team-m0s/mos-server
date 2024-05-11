@@ -5,7 +5,7 @@ from typing import Optional
 from fastapi import HTTPException
 from domain.post.post_schema import PostCreate, PostUpdate
 from domain.user import user_crud
-from models import Post, User, Board, Comment, Image
+from models import Post, User, Board, Comment, Image, Notification
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from utils import file_utils
@@ -265,6 +265,14 @@ def update_hot_status(db: Session, post_id: int):
     if post.like_count >= min_likes or comment_user_count >= min_comment_users:
         post.is_hot = True
         post.user.point += 50
+
+        db_notification = Notification(title='🔥내 게시글이 베스트로 선정되었어요.',
+                                       body=post.subject,
+                                       post_id=post.id,
+                                       create_date=datetime.now(),
+                                       is_Post=True,
+                                       user_id=post.user_id)
+        db.add(db_notification)
 
         # Add push notification sending here
         message = messaging.Message(
