@@ -195,7 +195,10 @@ def update_accompany(db: Session, db_accompany: Accompany, accompany_update: Acc
     db_accompany.activity_scope = accompany_update.activity_scope
     db_accompany.introduce = accompany_update.introduce
     db_accompany.total_member = accompany_update.total_member
-    db_accompany.qna = accompany_update.qna
+    if accompany_update.qna is None:
+        db_accompany.qna = None
+    else:
+        db_accompany.qna = accompany_update.qna
     db_accompany.update_date = datetime.now()
 
     current_images = get_image_by_accompany_id(db, accompany_id=db_accompany.id)
