@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from models import Post, Comment, Like, User, Accompany
 from domain.post import post_crud
 from domain.comment import comment_crud
+from domain.user import user_crud
 
 
 def get_post_like(db: Session, post_id: int, user: User):
@@ -14,6 +15,10 @@ def get_user_like(db: Session, user: User):
 
 
 def plus_post_like(db: Session, post: Post, user: User):
+    user_crud.add_user_activity_and_points(db, user, "like", 20, 2)
+
+    user_crud.add_user_activity_and_points(db, post.user, "get_like", 10, 4)
+
     db_like = Like(post_id=post.id,
                    user_id=user.id)
     db.add(db_like)
@@ -26,6 +31,17 @@ def plus_post_like(db: Session, post: Post, user: User):
 def minus_post_like(db: Session, like: Like, post: Post):
     db.delete(like)
     post.like_count -= 1
+
+    if like.user.point >= 2:
+        like.user.point -= 2
+    elif like.user.point < 2:
+        like.user.point = 0
+
+    if post.user.point >= 4:
+        post.user.point -= 4
+    elif post.user.point < 4:
+        post.user.point = 0
+
     db.commit()
 
 
@@ -35,6 +51,10 @@ def get_comment_like(db: Session, comment_id: int, user: User):
 
 
 def plus_comment_like(db: Session, comment: Comment, user: User):
+    user_crud.add_user_activity_and_points(db, user, "like", 20, 2)
+
+    user_crud.add_user_activity_and_points(db, comment.user, "get_like", 10, 4)
+
     db_like = Like(comment_id=comment.id,
                    user_id=user.id)
     db.add(db_like)
@@ -47,6 +67,17 @@ def plus_comment_like(db: Session, comment: Comment, user: User):
 def minus_comment_like(db: Session, like: Like, comment: Comment):
     db.delete(like)
     comment.like_count -= 1
+
+    if like.user.point >= 2:
+        like.user.point -= 2
+    elif like.user.point < 2:
+        like.user.point = 0
+
+    if comment.user.point >= 4:
+        comment.user.point -= 4
+    elif comment.user.point < 4:
+        comment.user.point = 0
+
     db.commit()
 
 
