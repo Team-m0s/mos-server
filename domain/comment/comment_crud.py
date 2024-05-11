@@ -203,6 +203,9 @@ def update_best_comment_status(db: Session, comment_id: int):
     if not comment:
         raise HTTPException(status_code=404, detail="Comment not found")
 
+    if comment.post.board_id == 15:
+        return
+
     best_comment = db.query(BestComment).filter(BestComment.comment_id == comment_id).first()
 
     if best_comment:
