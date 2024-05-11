@@ -172,7 +172,7 @@ def accompany_update(token: str = Header(), accompany_id: int = Form(...),
                      title: str = Form(...), activity_scope: accompany_schema.ActivityScope = Form(...),
                      images: List[UploadFile] = File(None), city: str = Form(None),
                      introduce: str = Form(...), total_member: int = Form(...),
-                     tags: List[str] = Form(None), db: Session = Depends(get_db)):
+                     tags: List[str] = Form(None), qna: str = Form(None), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
 
     if current_user.suspension_period and current_user.suspension_period > datetime.now():
@@ -211,7 +211,7 @@ def accompany_update(token: str = Header(), accompany_id: int = Form(...),
                                                              activity_scope=activity_scope,
                                                              images_accompany=image_creates,
                                                              city=city, introduce=introduce, total_member=total_member,
-                                                             tags_accompany=tag_creates, accompany_id=accompany_id)
+                                                             tags_accompany=tag_creates, qna=qna, accompany_id=accompany_id)
 
     accompany_crud.update_accompany(db, db_accompany=accompany, accompany_update=accompany_update_data)
 
