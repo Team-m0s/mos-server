@@ -8,6 +8,7 @@ from database import get_db
 from domain.vocabulary import vocabulary_schema
 from domain.vocabulary import vocabulary_crud
 from domain.user import user_crud
+from firebase_admin import messaging
 
 router = APIRouter(
     prefix="/api/vocabulary",
@@ -48,6 +49,36 @@ def solve_vocabulary(vocabulary_id: int, user_id: int, token: str = Header(), db
     vocabulary_crud.mark_vocabulary_as_solved(db, vocabulary=vocabulary, user_id=user_id)
 
     total_pages, vocabulary = vocabulary_crud.get_vocabulary(db, vocabulary_id)
+
+    solver = user_crud.get_user_by_id(db, user_id)
+
+    message = messaging.Message(
+        notification=messaging.Notification(
+            title='🎊내 답변이 채택되었어요!',
+            body=vocabulary.subject,
+        ),
+        data={
+            "vocabulary_id": str(vocabulary.id)
+        },
+        android=messaging.AndroidConfig(
+            priority='high',
+            notification=messaging.AndroidNotification(
+                sound='default'
+            )
+        ),
+        apns=messaging.APNSConfig(
+            payload=messaging.APNSPayload(
+                aps=messaging.Aps(
+                    # badge=badge_count,
+                    sound='default',
+                    content_available=True
+                )
+            )
+        ),
+        token=solver.fcm_token
+    )
+
+    messaging.send(message)
 
     for comment in vocabulary.comment_vocabularies:
         comment.total_pages = total_pages

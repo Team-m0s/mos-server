@@ -148,6 +148,8 @@ class Notification(Base):
     post = relationship("Post", backref="notification_posts")
     accompany_id = Column(Integer, ForeignKey("accompany.id"))
     accompany = relationship("Accompany", backref="notification_accompanies")
+    vocabulary_id = Column(Integer, ForeignKey("vocabulary.id"))
+    vocabulary = relationship("Vocabulary", backref="notification_vocabularies")
     user_id = Column(Integer, ForeignKey("user.id"))
     user = relationship("User", backref="notification_users")
     sender_firebase_uuid = Column(String, nullable=True)

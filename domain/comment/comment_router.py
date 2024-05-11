@@ -147,6 +147,41 @@ def voca_comment_create(vocabulary_id: int, _comment_create: comment_schema.Voca
 
     created_comment = comment_crud.create_vocabulary_comment(db, vocabulary=vocabulary,
                                                              voca_comment_create=_comment_create, user=current_user)
+
+    author = user_crud.get_user_by_uuid(db, uuid=_comment_create.author_uuid)
+    badge_count = notification_crud.get_unread_notification_count(db, user=author)
+
+    blocked_users = block_crud.get_blocked_list(db, user=author)
+    if current_user.uuid not in [block.blocked_uuid for block in blocked_users]:
+        if author.uuid != current_user.uuid:
+            message = messaging.Message(
+                notification=messaging.Notification(
+                    title='📗내 단어장에 새로운 답변이 달렸어요!',
+                    body=_comment_create.content,
+                ),
+                data={
+                    "vocabulary_id": str(vocabulary.id)
+                },
+                android=messaging.AndroidConfig(
+                    priority='high',
+                    notification=messaging.AndroidNotification(
+                        sound='default'
+                    )
+                ),
+                apns=messaging.APNSConfig(
+                    payload=messaging.APNSPayload(
+                        aps=messaging.Aps(
+                            #badge=badge_count,
+                            sound='default',
+                            content_available=True
+                        )
+                    )
+                ),
+                token=author.fcm_token
+            )
+
+            messaging.send(message)
+
     return created_comment
 
 

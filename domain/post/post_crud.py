@@ -9,6 +9,7 @@ from models import Post, User, Board, Comment, Image
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from utils import file_utils
+from firebase_admin import messaging
 
 
 def get_post_list(db: Session, board_id: int = 0, start_index: int = 0, limit: int = 10,
@@ -264,5 +265,30 @@ def update_hot_status(db: Session, post_id: int):
     if post.like_count >= min_likes or comment_user_count >= min_comment_users:
         post.is_hot = True
         post.user.point += 50
+
+        # Add push notification sending here
+        message = messaging.Message(
+            notification=messaging.Notification(
+                title='🔥내 게시글이 베스트로 선정되었어요.',
+                body=post.subject,
+            ),
+            android=messaging.AndroidConfig(
+                priority='high',
+                notification=messaging.AndroidNotification(
+                    sound='default'
+                )
+            ),
+            apns=messaging.APNSConfig(
+                payload=messaging.APNSPayload(
+                    aps=messaging.Aps(
+                        sound='default',
+                        content_available=True
+                    )
+                )
+            ),
+            token=post.user.fcm_token  # Assuming the User model has an fcm_token field
+        )
+
+        messaging.send(message)
 
     db.commit()
