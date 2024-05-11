@@ -15,6 +15,7 @@ from domain.notice import notice_crud
 from domain.vocabulary import vocabulary_crud
 from domain.notification import notification_crud
 from domain.accompany import accompany_crud
+from domain.block import block_crud
 
 router = APIRouter(
     prefix="/api/comment",
@@ -66,34 +67,36 @@ def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, 
     author = user_crud.get_user_by_uuid(db, uuid=_comment_create.author_uuid)
     badge_count = notification_crud.get_unread_notification_count(db, user=author)
 
-    if author.uuid != current_user.uuid:
-        message = messaging.Message(
-            notification=messaging.Notification(
-                title=f'내 게시글 "{post.subject}"에 새로운 답글이 달렸어요.',
-                body=_comment_create.content,
-            ),
-            data={
-                "post_id": str(post.id)
-            },
-            android=messaging.AndroidConfig(
-                priority='high',
-                notification=messaging.AndroidNotification(
-                    sound='default'
-                )
-            ),
-            apns=messaging.APNSConfig(
-                payload=messaging.APNSPayload(
-                    aps=messaging.Aps(
-                        #badge=badge_count,
-                        sound='default',
-                        content_available=True
+    blocked_users = block_crud.get_blocked_list(db, user=author)
+    if current_user.uuid not in [block.blocked_uuid for block in blocked_users]:
+        if author.uuid != current_user.uuid:
+            message = messaging.Message(
+                notification=messaging.Notification(
+                    title=f'내 게시글 "{post.subject}"에 새로운 답글이 달렸어요.',
+                    body=_comment_create.content,
+                ),
+                data={
+                    "post_id": str(post.id)
+                },
+                android=messaging.AndroidConfig(
+                    priority='high',
+                    notification=messaging.AndroidNotification(
+                        sound='default'
                     )
-                )
-            ),
-            token=author.fcm_token
-        )
+                ),
+                apns=messaging.APNSConfig(
+                    payload=messaging.APNSPayload(
+                        aps=messaging.Aps(
+                            #badge=badge_count,
+                            sound='default',
+                            content_available=True
+                        )
+                    )
+                ),
+                token=author.fcm_token
+            )
 
-        messaging.send(message)
+            messaging.send(message)
 
     return created_comment
 
@@ -168,34 +171,36 @@ def sub_comment_create(comment_id: int, _comment_create: comment_schema.SubComme
     author = user_crud.get_user_by_uuid(db, uuid=_comment_create.author_uuid)
     badge_count = notification_crud.get_unread_notification_count(db, user=author)
 
-    if author.uuid != current_user.uuid:
-        message = messaging.Message(
-            notification=messaging.Notification(
-                title=f'내 댓글 "{comment.content}"에 새로운 답글이 달렸어요.',
-                body=_comment_create.content,
-            ),
-            data={
-                "post_id": str(comment.post_id)
-            },
-            android=messaging.AndroidConfig(
-                priority='high',
-                notification=messaging.AndroidNotification(
-                    sound='default'
-                )
-            ),
-            apns=messaging.APNSConfig(
-                payload=messaging.APNSPayload(
-                    aps=messaging.Aps(
-                        #badge=badge_count,
-                        sound='default',
-                        content_available=True
+    blocked_users = block_crud.get_blocked_list(db, user=author)
+    if current_user.uuid not in [block.blocked_uuid for block in blocked_users]:
+        if author.uuid != current_user.uuid:
+            message = messaging.Message(
+                notification=messaging.Notification(
+                    title=f'내 댓글 "{comment.content}"에 새로운 답글이 달렸어요.',
+                    body=_comment_create.content,
+                ),
+                data={
+                    "post_id": str(comment.post_id)
+                },
+                android=messaging.AndroidConfig(
+                    priority='high',
+                    notification=messaging.AndroidNotification(
+                        sound='default'
                     )
-                )
-            ),
-            token=author.fcm_token
-        )
+                ),
+                apns=messaging.APNSConfig(
+                    payload=messaging.APNSPayload(
+                        aps=messaging.Aps(
+                            #badge=badge_count,
+                            sound='default',
+                            content_available=True
+                        )
+                    )
+                ),
+                token=author.fcm_token
+            )
 
-        messaging.send(message)
+            messaging.send(message)
 
     return created_comment
 

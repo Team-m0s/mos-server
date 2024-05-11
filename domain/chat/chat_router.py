@@ -10,6 +10,7 @@ from domain.accompany import accompany_crud
 from domain.chat import chat_crud
 from domain.chat import chat_schema
 from domain.notification import notification_crud
+from domain.block import block_crud
 
 router = APIRouter(
     prefix="/api/chat",
@@ -52,34 +53,36 @@ def personal_chat_create(personal_chat: chat_schema.PersonalChat, token: str = H
 
     badge_count = notification_crud.get_unread_notification_count(db, user=sender)
 
-    message = messaging.Message(
-        notification=messaging.Notification(
-            title='새로운 메시지가 있어요!',
-            body=personal_chat.message,
-        ),
-        data={
-            "talk_id": str(talk_id),
-            "last_message": str(personal_chat.message)
-        },
-        android=messaging.AndroidConfig(
-            priority='high',
-            notification=messaging.AndroidNotification(
-                sound='default'
-            )
-        ),
-        apns=messaging.APNSConfig(
-            payload=messaging.APNSPayload(
-                aps=messaging.Aps(
-                    # badge=badge_count,
-                    sound='default',
-                    content_available=True,
+    blocked_users = block_crud.get_blocked_list(db, user=receiver)
+    if sender.uuid not in [block.blocked_uuid for block in blocked_users]:
+        message = messaging.Message(
+            notification=messaging.Notification(
+                title='새로운 메시지가 있어요!',
+                body=personal_chat.message,
+            ),
+            data={
+                "talk_id": str(talk_id),
+                "last_message": str(personal_chat.message)
+            },
+            android=messaging.AndroidConfig(
+                priority='high',
+                notification=messaging.AndroidNotification(
+                    sound='default'
                 )
-            )
-        ),
-        token=receiver.fcm_token
-    )
+            ),
+            apns=messaging.APNSConfig(
+                payload=messaging.APNSPayload(
+                    aps=messaging.Aps(
+                        # badge=badge_count,
+                        sound='default',
+                        content_available=True,
+                    )
+                )
+            ),
+            token=receiver.fcm_token
+        )
 
-    messaging.send(message)
+        messaging.send(message)
 
 
 @router.delete("/personal/exit", status_code=status.HTTP_204_NO_CONTENT, tags=["Chat"])
