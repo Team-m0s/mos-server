@@ -13,6 +13,7 @@ class PostDetail(BaseModel):
     user: PostUser | None
     subject: str
     content: str
+    category: str | None
     like_count: int
     is_liked_by_user: bool = False
     is_bookmarked_by_user: bool = False
