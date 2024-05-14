@@ -145,6 +145,9 @@ def post_create(token: str = Header(), board_id: int = Form(...),
     if current_user.suspension_period and current_user.suspension_period > datetime.now():
         raise HTTPException(status_code=403, detail="User is currently suspended")
 
+    if board_id in [1, 2]:
+        raise HTTPException(status_code=403, detail="Can not create posts in this board")
+
     board = board_crud.get_board(db, board_id)
     if not board:
         raise HTTPException(status_code=404, detail="Board not found")
