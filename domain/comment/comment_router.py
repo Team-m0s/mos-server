@@ -148,7 +148,7 @@ def voca_comment_create(vocabulary_id: int, _comment_create: comment_schema.Voca
     created_comment = comment_crud.create_vocabulary_comment(db, vocabulary=vocabulary,
                                                              voca_comment_create=_comment_create, user=current_user)
 
-    author = vocabulary.user
+    author = vocabulary.author
     badge_count = notification_crud.get_unread_notification_count(db, user=author)
 
     blocked_users = block_crud.get_blocked_list(db, user=author)

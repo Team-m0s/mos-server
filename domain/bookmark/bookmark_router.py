@@ -27,6 +27,19 @@ def bookmark_list(token: str = Header(), db: Session = Depends(get_db), page: in
     for bookmark in _my_bookmark_list:
         post = post_crud.get_post_by_post_id(db, post_id=bookmark.post_id)
         post.comment_count = comment_crud.get_post_comment_count(db, post_id=post.id)
+
+        # 북마크 게시글 이미지 정보 설정
+        images = post_crud.get_image_by_post_id(db, post_id=post.id)
+        post.image_urls = [accompany_schema.ImageBase(id=image.id,
+                                                      image_url=f"https://www.mos-server.store/static/{image.image_url}")
+                           for
+                           image in images if image.image_url] if images else []
+
+        # 북마크 게시글 좋아요 여부 설정
+        post_like = like_crud.get_post_like(db, post_id=post.id, user=current_user)
+        if post_like:
+            post.is_liked_by_user = True
+
         bookmark.post = post
         bookmark.post.total_pages = total_pages
 
