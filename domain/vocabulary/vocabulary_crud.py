@@ -8,7 +8,7 @@ from domain.user import user_crud
 
 
 def get_vocabulary_list(db: Session, start_index: int = 0, limit: int = 10):
-    query = db.query(Vocabulary)
+    query = db.query(Vocabulary).order_by(Vocabulary.create_date.desc())
 
     total = query.count()
     total_pages = math.ceil(total / limit)
