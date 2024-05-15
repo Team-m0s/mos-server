@@ -11,7 +11,7 @@ class CommentCreate(BaseModel):
 
     @field_validator('content')
     def not_empty(cls, v):
-        if not v or len(v.strip()) < 2:
+        if not v or len(v.strip()) < 1:
             raise ValueError('댓글은 공백 제외 2글자 이상이어야 합니다.')
         if len(v) > 800:
             raise ValueError('댓글은 공백 포함 800글자 이하이어야 합니다.')
@@ -27,7 +27,7 @@ class NoticeCommentCreate(BaseModel):
 
     @field_validator('content')
     def not_empty(cls, v):
-        if not v or len(v.strip()) < 2:
+        if not v or len(v.strip()) < 1:
             raise ValueError('댓글은 공백 제외 2글자 이상이어야 합니다.')
         if len(v) > 800:
             raise ValueError('댓글은 공백 포함 800글자 이하이어야 합니다.')
@@ -39,7 +39,7 @@ class VocaCommentCreate(BaseModel):
 
     @field_validator('content')
     def not_empty(cls, v):
-        if not v or len(v.strip()) < 2:
+        if not v or len(v.strip()) < 1:
             raise ValueError('댓글은 공백 제외 2글자 이상이어야 합니다.')
         if len(v) > 800:
             raise ValueError('댓글은 공백 포함 800글자 이하이어야 합니다.')
@@ -83,8 +83,17 @@ class VocabularyComment(BaseModel):
     total_pages: int = 0
 
 
-class CommentUpdate(CommentCreate):
-    comment_id: int
+class CommentUpdate(BaseModel):
+    content: str
+    is_anonymous: bool
+
+    @field_validator('content')
+    def not_empty(cls, v):
+        if not v or len(v.strip()) < 1:
+            raise ValueError('댓글은 공백 제외 2글자 이상이어야 합니다.')
+        if len(v) > 800:
+            raise ValueError('댓글은 공백 포함 800글자 이하이어야 합니다.')
+        return v
 
 
 class CommentDelete(BaseModel):
