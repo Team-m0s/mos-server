@@ -59,6 +59,7 @@ class AccompanyBase(BaseModel):
     title: str
     city: str
     total_member: int
+    application_count: Optional[int] = None
     leader_id: int
     leader: UserBase
     member: list[UserBase] = []
@@ -85,7 +86,6 @@ class AccompanyCreate(BaseModel):
     city: Optional[str] = None
     introduce: str
     total_member: int
-    application_count: Optional[int] = None
     tags_accompany: Optional[List[TagCreate]] = None
     qna: Optional[str] = None
 
