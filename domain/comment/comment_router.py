@@ -64,7 +64,7 @@ def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, 
         raise HTTPException(status_code=404, detail="Post not found")
     created_comment = comment_crud.create_comment(db, post=post, comment_create=_comment_create, user=current_user)
 
-    author = user_crud.get_user_by_uuid(db, uuid=_comment_create.author_uuid)
+    author = post.user
     badge_count = notification_crud.get_unread_notification_count(db, user=author)
 
     blocked_users = block_crud.get_blocked_list(db, user=author)
@@ -203,7 +203,7 @@ def sub_comment_create(comment_id: int, _comment_create: comment_schema.SubComme
     created_comment = comment_crud.create_sub_comment(db, comment=comment, sub_comment_create=_comment_create,
                                                       user=current_user)
 
-    author = user_crud.get_user_by_uuid(db, uuid=_comment_create.author_uuid)
+    author = comment.user
     badge_count = notification_crud.get_unread_notification_count(db, user=author)
 
     blocked_users = block_crud.get_blocked_list(db, user=author)
