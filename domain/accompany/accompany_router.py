@@ -71,6 +71,10 @@ def accompany_detail(accompany_id: int, token: Optional[str] = Header(None), db:
         if accompany_like:
             _accompany.is_like_by_user = True
 
+        if current_user.id == _accompany.leader_id:
+            application_list = accompany_crud.get_application_list(db, accompany_id=accompany_id)
+            _accompany.application_count = len(application_list)
+
     return _accompany
 
 
