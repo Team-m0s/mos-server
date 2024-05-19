@@ -7,6 +7,7 @@ class Notification(BaseModel):
     title: str
     body: str
     post_id: int | None
+    vocabulary_id: int | None
     accompany_id: int | None
     create_date: datetime.datetime
     total_pages: int = 0
