@@ -156,7 +156,7 @@ def voca_comment_create(vocabulary_id: int, _comment_create: comment_schema.Voca
         if author.uuid != current_user.uuid:
             message = messaging.Message(
                 notification=messaging.Notification(
-                    title='📗내 단어장에 새로운 답변이 달렸어요!',
+                    title='📗 내 단어장에 새로운 답변이 달렸어요!',
                     body=_comment_create.content,
                 ),
                 data={

@@ -3,7 +3,7 @@ from datetime import datetime
 from models import Board
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from board_schema import BoardCreate
+from domain.board.board_schema import BoardCreate
 from models import Post
 
 

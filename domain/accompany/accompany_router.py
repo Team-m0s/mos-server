@@ -239,7 +239,7 @@ def accompany_create_notice(accompany_id: int, _notice_create: notice_schema.Not
 
     message = messaging.Message(
         notification=messaging.Notification(
-            title='📢리더가 새로운 공지를 등록했습니다!',
+            title='📢 리더가 새로운 공지를 등록했습니다!',
             body=_notice_create.content,
         ),
         data={
@@ -343,7 +343,7 @@ def accompany_apply(application_create: accompany_schema.ApplicationCreate, toke
 
     message = messaging.Message(
         notification=messaging.Notification(
-            title='🙋🏻내 동행에 새로운 지원자가 있어요!',
+            title='🙋🏻 내 동행에 새로운 지원자가 있어요!',
             body=application_create.answer,
         ),
         data={
@@ -384,7 +384,7 @@ def application_approve(application_id: int, token: str = Header(), db: Session 
 
     message = messaging.Message(
         notification=messaging.Notification(
-            title=f'🎉동행 {accompany.title}의 멤버가 되었어요!',
+            title=f'🎉 동행 {accompany.title}의 멤버가 되었어요!',
             body='축하합니다! 이제 내 동행을 보러 가보실까요?',
         ),
         data={
@@ -482,7 +482,7 @@ def accompany_delegate_leader(accompany_id: int, user_id: int, token: str = Head
 
     message = messaging.Message(
         notification=messaging.Notification(
-            title=f'😎동행 {accompany.title}의 리더가 되었어요!',
+            title=f'😎 동행 {accompany.title}의 리더가 되었어요!',
             body='리더가 되면 여러 권한이 생겨요. 모임을 잘 이끌어주세요~!',
         ),
         data={

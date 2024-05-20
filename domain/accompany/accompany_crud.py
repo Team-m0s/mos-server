@@ -259,7 +259,7 @@ def apply_accompany(db: Session, accompany: Accompany, user_id: int, answer: str
     db_application = Application(accompany_id=accompany.id, user_id=user_id,
                                  answer=answer, apply_date=date.today())
 
-    db_notification = Notification(title='내 동행에 새로운 지원자가 있어요!',
+    db_notification = Notification(title='🙋🏻 내 동행에 새로운 지원자가 있어요!',
                                    body=answer,
                                    accompany_id=accompany.id,
                                    create_date=datetime.now(),
@@ -296,7 +296,7 @@ def approve_application(db: Session, application_id: int):
 
     db_accompany = get_accompany_by_id(db, accompany_id=application.accompany_id)
 
-    db_notification = Notification(title=f'동행 {db_accompany.title}의 멤버가 되었어요!',
+    db_notification = Notification(title=f'🎉 동행 {db_accompany.title}의 멤버가 되었어요!',
                                    body='축하합니다! 이제 내 동행을 보러 가보실까요?',
                                    accompany_id=db_accompany.id,
                                    create_date=datetime.now(),
@@ -360,7 +360,7 @@ def assign_new_leader(db: Session, accompany: Accompany, member: User):
 
     old_leader = get_user(db, user_id=old_leader_id)
 
-    db_notification = Notification(title=f'동행 {accompany.title}의 리더가 되었어요!',
+    db_notification = Notification(title=f'😎 동행 {accompany.title}의 리더가 되었어요!',
                                    body='리더가 되면 여러 권한이 생겨요. 모임을 잘 이끌어주세요~!',
                                    accompany_id=accompany.id,
                                    create_date=datetime.now(),

@@ -54,7 +54,7 @@ def solve_vocabulary(vocabulary_id: int, user_id: int, token: str = Header(), db
 
     message = messaging.Message(
         notification=messaging.Notification(
-            title='🎊내 답변이 채택되었어요!',
+            title='🎊 내 답변이 채택되었어요!',
             body=vocabulary.subject,
         ),
         data={
