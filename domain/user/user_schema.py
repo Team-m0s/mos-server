@@ -1,7 +1,7 @@
 import datetime
 
 from pydantic import BaseModel, field_validator
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 
 class ImageCreate(BaseModel):
@@ -32,6 +32,11 @@ class UserList(BaseModel):
     email: str
     nickName: str
     register_date: datetime.datetime
+
+
+class UserListResponse(BaseModel):
+    total_users: int
+    users: List[UserList]
 
 
 class PostUser(BaseModel):

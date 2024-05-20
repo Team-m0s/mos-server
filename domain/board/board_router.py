@@ -17,5 +17,5 @@ def board_list(db: Session = Depends(get_db)):
 
 
 @router.post("/create", status_code=status.HTTP_204_NO_CONTENT, tags=["Board"])
-def board_create(title: str = Body(...), db: Session = Depends(get_db)):
-    board_crud.create_board(db, title=title)
+def board_create(_board_create: board_schema.BoardCreate, db: Session = Depends(get_db)):
+    board_crud.create_board(db, board_create=_board_create)

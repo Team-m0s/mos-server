@@ -3,6 +3,7 @@ from datetime import datetime
 from models import Board
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+from board_schema import BoardCreate
 from models import Post
 
 
@@ -45,8 +46,8 @@ def get_board(db: Session, board_id: int):
     return board
 
 
-def create_board(db: Session, title: str):
-    db_board = Board(title=title,
+def create_board(db: Session, board_create: BoardCreate):
+    db_board = Board(title=board_create.title,
                      create_date=datetime.now())
     db.add(db_board)
     db.commit()

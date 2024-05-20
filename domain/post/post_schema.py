@@ -5,6 +5,7 @@ from typing import Optional, List
 from domain.comment.comment_schema import Comment
 from domain.board.board_schema import Board
 from domain.accompany.accompany_schema import ImageCreate, ImageBase
+from models import PostCategory
 
 
 class PostDetail(BaseModel):
@@ -13,7 +14,7 @@ class PostDetail(BaseModel):
     user: PostUser | None
     subject: str
     content: str
-    category: str | None
+    category: PostCategory | None
     like_count: int
     is_liked_by_user: bool = False
     is_bookmarked_by_user: bool = False
@@ -54,7 +55,7 @@ class PostList(BaseModel):
 class PostCreate(BaseModel):
     subject: str
     content: str
-    category: Optional[str]
+    category: Optional[PostCategory]
     images_post: Optional[List[ImageCreate]] = None
     is_anonymous: bool
 

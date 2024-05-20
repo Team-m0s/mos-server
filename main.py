@@ -32,6 +32,7 @@ from domain.chat import chat_router
 from domain.notification import notification_router
 from domain.block import block_router
 from domain.vocabulary import vocabulary_router
+from domain.admin import admin_router
 
 load_dotenv()
 
@@ -253,3 +254,4 @@ app.include_router(chat_router.router)
 app.include_router(notification_router.router)
 app.include_router(block_router.router)
 app.include_router(vocabulary_router.router)
+app.include_router(admin_router.router)

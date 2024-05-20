@@ -3,4 +3,7 @@ from models import User
 
 
 def get_all_users(db: Session):
-    return db.query(User).all()
+    db_users = db.query(User).all()
+    total_users = len(db_users)
+
+    return total_users, db_users

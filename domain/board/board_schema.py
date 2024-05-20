@@ -3,6 +3,10 @@ from typing import Optional
 import datetime
 
 
+class BoardCreate(BaseModel):
+    title: str
+
+
 class Board(BaseModel):
     id: int
     create_date: datetime.datetime
@@ -11,4 +15,3 @@ class Board(BaseModel):
 
     class Config:
         from_attributes = True
-
