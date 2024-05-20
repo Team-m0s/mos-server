@@ -1,3 +1,5 @@
+import datetime
+
 from pydantic import BaseModel, field_validator
 from typing import Dict, Optional
 
@@ -24,6 +26,12 @@ class AuthSchema(BaseModel):
 
 class LanguageLevel(BaseModel):
     level: Dict[str, int]
+
+
+class UserList(BaseModel):
+    email: str
+    nickName: str
+    register_date: datetime.datetime
 
 
 class PostUser(BaseModel):

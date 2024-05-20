@@ -55,7 +55,8 @@ def create_user_kakao(db: Session, user_info: dict, auth_schema: AuthSchema):
         email=user_info['email'],
         nickName=auth_schema.nick_name,
         profile_img=user_info.get("picture", None),
-        provider=auth_schema.provider
+        provider=auth_schema.provider,
+        register_date=datetime.now()
     )
     db.add(db_user)
     db.commit()
@@ -71,7 +72,8 @@ def create_test_user_kakao(db: Session, user_info: dict):
         email=user_info['email'],
         nickName=user_info['display_name'],
         profile_img=user_info.get("picture", None),
-        provider='kakao'
+        provider='kakao',
+        register_date=datetime.now()
     )
     db.add(db_user)
     db.commit()
@@ -96,7 +98,8 @@ def create_user_google(db: Session, user_info: dict, auth_schema: AuthSchema):
         email=user_info['email'],
         nickName=auth_schema.nick_name,
         profile_img=user_info.get("picture", None),
-        provider=auth_schema.provider
+        provider=auth_schema.provider,
+        register_date=datetime.now()
     )
     db.add(db_user)
     db.commit()
@@ -122,7 +125,8 @@ def create_user_apple(db: Session, user_info: dict, auth_schema: AuthSchema):
         email=user_info['email'],
         nickName=auth_schema.nick_name,
         profile_img=user_info.get("picture", None),
-        provider=auth_schema.provider
+        provider=auth_schema.provider,
+        register_date=datetime.now()
     )
     db.add(db_user)
     db.commit()
@@ -140,6 +144,7 @@ def delete_user_sso(db: Session, db_user: User):
     db_user.introduce = ""
     db_user.point = 0
     db_user.lang_level = None
+    db_user.register_date = ""
     db_user.report_count = 0
     db_user.last_nickname_change = None
     db_user.suspension_period = None

@@ -44,9 +44,11 @@ def upgrade() -> None:
     sa.Column('introduce', sa.String(), nullable=True),
     sa.Column('point', sa.Integer(), nullable=False),
     sa.Column('lang_level', sa.JSON(), nullable=True),
+    sa.Column('register_date', sa.DateTime(), nullable=False),
     sa.Column('report_count', sa.Integer(), nullable=False),
     sa.Column('last_nickname_change', sa.DateTime(), nullable=True),
     sa.Column('suspension_period', sa.DateTime(), nullable=True),
+    sa.Column('is_admin', sa.Boolean(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('accompany',
