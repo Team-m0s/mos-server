@@ -174,7 +174,7 @@ def user_report(db: Session, reporter: User, user_report_create: UserReport):
 
 
 def user_feedback(db: Session, reporter: User, user_feedback_create: UserFeedback):
-    user_crud.add_user_activity_and_points(db, uesr=reporter, activity_type='feedback', activity_limit=5,
+    user_crud.add_user_activity_and_points(db, user=reporter, activity_type='feedback', activity_limit=5,
                                            activity_point=3)
     db_feedback = Feedback(user_id=reporter.id,
                            content=user_feedback_create.content,

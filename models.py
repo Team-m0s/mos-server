@@ -353,3 +353,5 @@ class Notice(Base):
     is_blinded = Column(Boolean, nullable=False, default=False)
     accompany_id = Column(Integer, ForeignKey("accompany.id"))
     accompany = relationship("Accompany", backref="notices_accompany")
+    user_id = Column(Integer, ForeignKey("user.id"))
+    user = relationship("User", backref="notices_user")

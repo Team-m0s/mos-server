@@ -264,7 +264,7 @@ def accompany_create_notice(accompany_id: int, _notice_create: notice_schema.Not
 
     messaging.send(message)
 
-    notice_crud.create_accompany_notice(db, accompany_id=accompany_id, notice_create=_notice_create)
+    notice_crud.create_accompany_notice(db, accompany_id=accompany_id, user=current_user, notice_create=_notice_create)
 
 
 @router.put("/update/notice", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])

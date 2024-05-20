@@ -56,6 +56,13 @@ class CommentUser(BaseModel):
     profile_img: str | None
 
 
+class NoticeUser(BaseModel):
+    id: int
+    uuid: str
+    nickName: str
+    profile_img: str | None
+
+
 class UserBase(BaseModel):
     id: int
     uuid: str

@@ -1,10 +1,12 @@
 from pydantic import BaseModel, field_validator
 import datetime
 from domain.comment.comment_schema import NoticeComment
+from domain.user.user_schema import NoticeUser
 
 
 class NoticeBase(BaseModel):
     id: int
+    user: NoticeUser
     content: str
     create_date: datetime.datetime
     update_date: datetime.datetime | None
