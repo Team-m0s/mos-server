@@ -251,7 +251,6 @@ class Board(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
     create_date = Column(DateTime, nullable=False)
-    parent_id = Column(Integer, nullable=True)
 
 
 class ActivityScope(enum.Enum):

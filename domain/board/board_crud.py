@@ -30,7 +30,6 @@ def get_board_list(db: Session):
     result = [
         {
             "id": board.id,
-            "parent_id": board.parent_id,
             "create_date": board.create_date,
             "title": board.title,
             "latest_post_date": latest_post_date
@@ -46,9 +45,8 @@ def get_board(db: Session, board_id: int):
     return board
 
 
-def create_board(db: Session, title: str, parent_id: int = None):
+def create_board(db: Session, title: str):
     db_board = Board(title=title,
-                     parent_id=parent_id,
                      create_date=datetime.now())
     db.add(db_board)
     db.commit()
