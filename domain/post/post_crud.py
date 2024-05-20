@@ -5,7 +5,7 @@ from typing import Optional
 from fastapi import HTTPException
 from domain.post.post_schema import PostCreate, PostUpdate
 from domain.user import user_crud
-from models import Post, User, Board, Comment, Image, Notification
+from models import Post, User, Board, Comment, Image, Notification, PostCategory
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from utils import file_utils
@@ -13,7 +13,7 @@ from firebase_admin import messaging
 
 
 def get_post_list(db: Session, board_id: int = 0, start_index: int = 0, limit: int = 10,
-                  category: str = None, is_hot: bool = False, search_keyword: str = None, sort_order: str = 'latest'):
+                  category: PostCategory = None, is_hot: bool = False, search_keyword: str = None, sort_order: str = 'latest'):
     query = db.query(Post)
     if board_id != 0:
         query = query.filter(Post.board_id == board_id)

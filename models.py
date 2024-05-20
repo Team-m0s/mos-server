@@ -46,13 +46,30 @@ class Admin(Base):
     password = Column(String, nullable=False)
 
 
+class PostCategory(enum.Enum):
+    korean = '한국어'
+    english = 'English'
+    chinese = '中文'
+    japanese = '日本語'
+    vietnamese = 'Tiếng Việt'
+    french = 'Français'
+    german = 'Deutsch'
+    italian = 'Italiano'
+    spanish = 'Español'
+    portuguese = 'Português'
+    russian = 'Русский'
+    turkish = 'Türkçe'
+    indonesian = 'Bahasa Indonesia'
+    arabic = 'العربية'
+
+
 class Post(Base):
     __tablename__ = "post"
 
     id = Column(Integer, primary_key=True)
     subject = Column(String, nullable=False)
     content = Column(Text, nullable=False)
-    category = Column(String, nullable=True)
+    category = Column(Enum(PostCategory), nullable=True)
     like_count = Column(Integer, default=0)
     is_anonymous = Column(Boolean, nullable=False, default=True)
     is_blinded = Column(Boolean, nullable=False, default=False)
@@ -241,7 +258,7 @@ class ActivityScope(enum.Enum):
     hybrid = "온오프라인"
 
 
-class Category(enum.Enum):
+class AccompanyCategory(enum.Enum):
     activity = '액티비티'
     cultureArt = '문화 ･ 예술'
     hobby = '취미생활'
@@ -284,7 +301,7 @@ class Accompany(Base):
     blind_date = Column(DateTime, nullable=True)
     report_count = Column(Integer, nullable=False, default=0)
     is_blinded = Column(Boolean, nullable=False, default=False)
-    category = Column(Enum(Category), nullable=False)
+    category = Column(Enum(AccompanyCategory), nullable=False)
     chat_count = Column(Integer, nullable=False, default=0)
     like_count = Column(Integer, nullable=False, default=0)
     is_closed = Column(Boolean, nullable=False, default=False)

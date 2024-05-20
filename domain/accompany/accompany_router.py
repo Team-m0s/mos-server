@@ -13,7 +13,7 @@ from domain.notice import notice_schema, notice_crud
 from domain.user import user_crud
 from domain.like import like_crud
 from utils import file_utils
-from models import ActivityScope, Category
+from models import ActivityScope, AccompanyCategory
 
 router = APIRouter(
     prefix="/api/accompany"
@@ -25,7 +25,7 @@ def member_query_processor(total_member_min: int, total_member_max: int):
     return result
 
 
-def category_query_processor(category1: Category = None, category2: Category = None, category3: Category = None):
+def category_query_processor(category1: AccompanyCategory = None, category2: AccompanyCategory = None, category3: AccompanyCategory = None):
     if category1 is None and category2 is None and category3 is None:
         return None
 
@@ -36,7 +36,7 @@ def category_query_processor(category1: Category = None, category2: Category = N
 @router.get("/list", response_model=list[accompany_schema.AccompanyBase], tags=["Accompany"])
 def accompany_list(is_closed: bool, token: Optional[str] = Header(None), db: Session = Depends(get_db),
                    page: int = 0, size: int = 10, search_keyword: str = None,
-                   category: Category = None, sort_order: str = 'latest'):
+                   category: AccompanyCategory = None, sort_order: str = 'latest'):
     current_user = None
     if token:
         current_user = user_crud.get_current_user(db, token)
@@ -82,7 +82,7 @@ def accompany_detail(accompany_id: int, token: Optional[str] = Header(None), db:
 def accompany_filtered_list(is_closed: bool, total_member: List[int] = Depends(member_query_processor),
                             token: Optional[str] = Header(None), db: Session = Depends(get_db),
                             activity_scope: ActivityScope = None, city: str = None,
-                            category: List[Category] = Depends(category_query_processor)):
+                            category: List[AccompanyCategory] = Depends(category_query_processor)):
     current_user = None
     if token:
         current_user = user_crud.get_current_user(db, token)
@@ -129,7 +129,7 @@ def get_accompanies_by_user(token: str = Header(), page: int = 0, size: int = 10
 
 
 @router.post("/create", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
-def accompany_create(token: str = Header(), category: accompany_schema.Category = Form(...),
+def accompany_create(token: str = Header(), category: accompany_schema.AccompanyCategory = Form(...),
                      title: str = Form(...), activity_scope: accompany_schema.ActivityScope = Form(...),
                      images: List[UploadFile] = File(None), city: str = Form(None),
                      introduce: str = Form(...), total_member: int = Form(...),
@@ -172,7 +172,7 @@ def accompany_create(token: str = Header(), category: accompany_schema.Category 
 
 @router.put("/update", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
 def accompany_update(token: str = Header(), accompany_id: int = Form(...),
-                     category: accompany_schema.Category = Form(...),
+                     category: accompany_schema.AccompanyCategory = Form(...),
                      title: str = Form(...), activity_scope: accompany_schema.ActivityScope = Form(...),
                      images: List[UploadFile] = File(None), city: str = Form(None),
                      introduce: str = Form(...), total_member: int = Form(...),

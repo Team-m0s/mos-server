@@ -8,11 +8,11 @@ from firebase_admin import messaging
 
 from utils import file_utils
 from models import Accompany, User, Image, Tag, accompany_member, ActivityScope, Application, Like, Notification
-from domain.accompany.accompany_schema import AccompanyCreate, AccompanyUpdate, ImageBase, TagCreate, Category
+from domain.accompany.accompany_schema import AccompanyCreate, AccompanyUpdate, ImageBase, TagCreate, AccompanyCategory
 
 
 def get_accompany_list(db: Session, is_closed: bool, start_index: int = 0, limit: int = 10,
-                       search_keyword: str = None, category: Category = None, sort_order: str = 'latest'):
+                       search_keyword: str = None, category: AccompanyCategory = None, sort_order: str = 'latest'):
     query = db.query(Accompany)
 
     if not is_closed:
@@ -46,7 +46,7 @@ def get_accompany_list(db: Session, is_closed: bool, start_index: int = 0, limit
 
 def get_accompany_filtered_list(db: Session, is_closed: bool, total_member: List[int],
                                 activity_scope: ActivityScope = None, city: str = None,
-                                category: List[Category] = None):
+                                category: List[AccompanyCategory] = None):
     query = db.query(Accompany)
 
     if not is_closed:

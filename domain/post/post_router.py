@@ -13,6 +13,7 @@ from domain.bookmark import bookmark_crud
 from domain.user.user_crud import get_current_user
 from domain.board import board_crud
 from domain.accompany import accompany_schema
+from models import PostCategory
 
 router = APIRouter(
     prefix="/api/post",
@@ -23,7 +24,7 @@ router = APIRouter(
             description="board_id가 0이면 전체 게시글 조회, page는 시작 index, size는 조회 개수입니다. keyword를 사용해 검색 가능합니다."
                         "\n정렬 순서는 기본 최신순이며, 과거순은 'oldest' 좋아요순은 'popularity'를 넣어서 요청하시면 됩니다.")
 def post_list(token: Optional[str] = Header(None), db: Session = Depends(get_db),
-              board_id: int = 0, page: int = 0, size: int = 10, category: str = None, is_hot: bool = False,
+              board_id: int = 0, page: int = 0, size: int = 10, category: PostCategory = None, is_hot: bool = False,
               search_keyword: str = None, sort_order: str = 'latest'):
     current_user = None
     if token:
@@ -136,7 +137,7 @@ def post_detail(post_id: int, token: Optional[str] = Header(None), comment_sort_
 
 @router.post("/create", status_code=status.HTTP_204_NO_CONTENT, tags=["Post"])
 def post_create(token: str = Header(), board_id: int = Form(...),
-                subject: str = Form(...), content: str = Form(...), category: str = Form(None),
+                subject: str = Form(...), content: str = Form(...), category: PostCategory = Form(None),
                 is_anonymous: bool = Form(...),
                 images: List[UploadFile] = File(None),
                 db: Session = Depends(get_db)):
@@ -177,7 +178,7 @@ def post_create(token: str = Header(), board_id: int = Form(...),
 
 @router.put("/update", status_code=status.HTTP_204_NO_CONTENT, tags=["Post"])
 def post_update(token: str = Header(), post_id: int = Form(...),
-                subject: str = Form(...), content: str = Form(...), category: str = Form(None),
+                subject: str = Form(...), content: str = Form(...), category: PostCategory = Form(None),
                 is_anonymous: bool = Form(...),
                 images: List[UploadFile] = File(None),
                 db: Session = Depends(get_db)):
