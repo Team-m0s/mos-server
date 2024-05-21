@@ -10,6 +10,7 @@ from database import get_db
 from firebase_admin import messaging
 from domain.accompany import accompany_schema, accompany_crud
 from domain.notice import notice_schema, notice_crud
+from domain.notification import notification_crud
 from domain.user import user_crud
 from domain.like import like_crud
 from utils import file_utils
@@ -340,6 +341,7 @@ def accompany_apply(application_create: accompany_schema.ApplicationCreate, toke
                                        user_id=current_user.id, answer=application_create.answer)
 
     leader = user_crud.get_user_by_id(db, user_id=accompany.leader_id)
+    badge_count = notification_crud.get_unread_notification_count(db, user=leader)
 
     message = messaging.Message(
         notification=messaging.Notification(
@@ -358,6 +360,7 @@ def accompany_apply(application_create: accompany_schema.ApplicationCreate, toke
         apns=messaging.APNSConfig(
             payload=messaging.APNSPayload(
                 aps=messaging.Aps(
+                    badge=badge_count,
                     sound='default',
                     content_available=True
                 )
@@ -382,6 +385,8 @@ def application_approve(application_id: int, token: str = Header(), db: Session 
     accompany = accompany_crud.get_accompany_by_id(db, accompany_id=application.accompany_id)
     member = user_crud.get_user_by_id(db, user_id=application.user_id)
 
+    badge_count = notification_crud.get_unread_notification_count(db, user=member)
+
     message = messaging.Message(
         notification=messaging.Notification(
             title=f'🎉 동행 {accompany.title}의 멤버가 되었어요!',
@@ -399,6 +404,7 @@ def application_approve(application_id: int, token: str = Header(), db: Session 
         apns=messaging.APNSConfig(
             payload=messaging.APNSPayload(
                 aps=messaging.Aps(
+                    badge=badge_count,
                     sound='default',
                     content_available=True
                 )
@@ -479,6 +485,7 @@ def accompany_delegate_leader(accompany_id: int, user_id: int, token: str = Head
                             detail=f"해당 멤버가 존재하지 않습니다.")
 
     accompany_crud.assign_new_leader(db, accompany=accompany, member=member)
+    badge_count = notification_crud.get_unread_notification_count(db, user=member)
 
     message = messaging.Message(
         notification=messaging.Notification(
@@ -497,6 +504,7 @@ def accompany_delegate_leader(accompany_id: int, user_id: int, token: str = Head
         apns=messaging.APNSConfig(
             payload=messaging.APNSPayload(
                 aps=messaging.Aps(
+                    badge=badge_count,
                     sound='default',
                     content_available=True
                 )

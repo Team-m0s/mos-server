@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from starlette import status
 
 from database import get_db
+from domain.notification import notification_crud
 from domain.vocabulary import vocabulary_schema
 from domain.vocabulary import vocabulary_crud
 from domain.user import user_crud
@@ -51,6 +52,7 @@ def solve_vocabulary(vocabulary_id: int, user_id: int, token: str = Header(), db
     total_pages, vocabulary = vocabulary_crud.get_vocabulary(db, vocabulary_id)
 
     solver = user_crud.get_user_by_id(db, user_id)
+    badge_count = notification_crud.get_unread_notification_count(db, user=solver)
 
     message = messaging.Message(
         notification=messaging.Notification(
@@ -69,7 +71,7 @@ def solve_vocabulary(vocabulary_id: int, user_id: int, token: str = Header(), db
         apns=messaging.APNSConfig(
             payload=messaging.APNSPayload(
                 aps=messaging.Aps(
-                    # badge=badge_count,
+                    badge=badge_count,
                     sound='default',
                     content_available=True
                 )
