@@ -144,7 +144,7 @@ def delete_user_sso(db: Session, db_user: User):
     db_user.introduce = ""
     db_user.point = 0
     db_user.lang_level = None
-    db_user.register_date = ""
+    db_user.register_date = datetime(1970, 1, 1)
     db_user.report_count = 0
     db_user.last_nickname_change = None
     db_user.suspension_period = None

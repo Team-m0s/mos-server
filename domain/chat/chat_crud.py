@@ -4,7 +4,6 @@ from models import User, Accompany
 
 from google.cloud import firestore
 from domain.user import user_crud
-from models import Notification
 import hashlib
 
 

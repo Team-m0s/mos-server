@@ -51,7 +51,7 @@ def personal_chat_create(personal_chat: chat_schema.PersonalChat, token: str = H
     talk_id = chat_crud.create_personal_chat(sender=sender, receiver=receiver, message=personal_chat.message,
                                              is_anonymous=personal_chat.is_anonymous)
 
-    badge_count = notification_crud.get_unread_notification_count(db, user=sender)
+    badge_count = notification_crud.get_unread_notification_count(db, user=receiver)
 
     blocked_users = block_crud.get_blocked_list(db, user=receiver)
     if sender.uuid not in [block.blocked_uuid for block in blocked_users]:

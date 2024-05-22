@@ -276,9 +276,6 @@ def register_accompany(db: Session, accompany_id: int, user: User):
     db.execute(accompany_member.insert().values(user_id=user.id, accompany_id=accompany_id))
     db.commit()
 
-    topic = f'{accompany_id}_notice'
-    messaging.subscribe_to_topic(user.fcm_token, topic)
-
 
 def get_application_by_id(db: Session, application_id: int):
     return db.query(Application).filter(Application.id == application_id).first()
@@ -326,9 +323,6 @@ def ban_accompany_member(db: Session, accompany_id: int, member: User):
         )
     ).delete(synchronize_session=False)
     db.commit()
-
-    topic = f'{accompany_id}_notice'
-    messaging.unsubscribe_from_topic(member.fcm_token, topic)
 
 
 def leave_accompany(db: Session, accompany_id: int, member: User):

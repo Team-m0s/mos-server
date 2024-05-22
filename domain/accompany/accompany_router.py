@@ -236,34 +236,39 @@ def accompany_create_notice(accompany_id: int, _notice_create: notice_schema.Not
     if current_user.id != accompany.leader_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="권한이 없습니다.")
 
-    topic = f'{accompany.id}_notice'
+    members = accompany_crud.get_members_by_accompany_id(db, accompany_id=accompany_id)
+    messages = []
 
-    message = messaging.Message(
-        notification=messaging.Notification(
-            title='📢 리더가 새로운 공지를 등록했습니다!',
-            body=_notice_create.content,
-        ),
-        data={
-            "accompany_id": str(accompany.id)
-        },
-        android=messaging.AndroidConfig(
-            priority='high',
-            notification=messaging.AndroidNotification(
-                sound='default'
-            )
-        ),
-        apns=messaging.APNSConfig(
-            payload=messaging.APNSPayload(
-                aps=messaging.Aps(
-                    sound='default',
-                    content_available=True
+    for member in members:
+        badge_count = notification_crud.get_unread_notification_count(db, user=member)
+        message = messaging.Message(
+            notification=messaging.Notification(
+                title='📢 리더가 새로운 공지를 등록했습니다!',
+                body=_notice_create.content,
+            ),
+            data={
+                "accompany_id": str(accompany.id)
+            },
+            android=messaging.AndroidConfig(
+                priority='high',
+                notification=messaging.AndroidNotification(
+                    sound='default'
                 )
-            )
-        ),
-        topic=topic
-    )
+            ),
+            apns=messaging.APNSConfig(
+                payload=messaging.APNSPayload(
+                    aps=messaging.Aps(
+                        badge=badge_count,
+                        sound='default',
+                        content_available=True
+                    )
+                )
+            ),
+            token=member.fcm_token
+        )
+        messages.append(message)
 
-    messaging.send(message)
+    messaging.send_each(messages)
 
     notice_crud.create_accompany_notice(db, accompany_id=accompany_id, user=current_user, notice_create=_notice_create)
 
