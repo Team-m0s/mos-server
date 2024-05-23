@@ -177,13 +177,24 @@ class Notification(Base):
     is_Post = Column(Boolean, nullable=False)
 
 
-class ReportReason(enum.Enum):
+class ReportReasonBoard(enum.Enum):
     hateSpeech = "욕설 / 비하발언"
     offTopic = "주제에 맞지 않는 글"
     repeatedPosts = "같은 내용 반복 게시"
     promotionalContent = "홍보성 콘텐츠"
     inappropriateProfile = "부적절한 닉네임 / 프로필 사진"
     privacyViolation = "개인 사생활 침해"
+    adultContent = "19+ 음란성, 만남 유도"
+    other = "기타"
+
+
+class ReportReasonAccompany(enum.Enum):
+    hateSpeech = "욕설 / 비하발언"
+    fraud = "사기 / 사칭"
+    repeatedPosts = "같은 내용 반복 게시"
+    promotionalContent = "홍보성 콘텐츠"
+    privacyBreach = "개인정보 무단 수집 / 유포"
+    rightsViolation = "명예훼손 / 저작권 등 권리침해"
     adultContent = "19+ 음란성, 만남 유도"
     other = "기타"
 

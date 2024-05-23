@@ -1,10 +1,10 @@
 from pydantic import BaseModel, field_validator
-from models import ReportReason, ReportReasonChat
+from models import ReportReasonBoard, ReportReasonChat, ReportReasonAccompany
 from typing import List
 
 
 class ReportCreate(BaseModel):
-    report_reason: List[ReportReason] | None
+    report_reason: List[ReportReasonBoard] | None
     other: str | None
 
     @field_validator('other')
@@ -24,10 +24,12 @@ class CommentReport(ReportCreate):
 
 
 class AccompanyReport(ReportCreate):
+    report_reason = List[ReportReasonAccompany] | None
     accompany_id: int
 
 
 class NoticeReport(ReportCreate):
+    report_reason = List[ReportReasonAccompany] | None
     notice_id: int
 
 
