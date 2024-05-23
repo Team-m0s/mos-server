@@ -201,11 +201,11 @@ class ReportReasonAccompany(enum.Enum):
 
 class ReportReasonChat(enum.Enum):
     hateSpeech = "욕설 / 비하발언"
-    offTopic = "주제에 맞지 않는 글"
+    fraud = "사기 / 사칭"
     repeatedPosts = "채팅 도배"
     promotionalContent = "홍보성 콘텐츠"
     inappropriateProfile = "부적절한 닉네임 / 프로필 사진"
-    privacyViolation = "개인 사생활 침해"
+    incitement = "불건전한 선동"
     adultContent = "19+ 음란성, 만남 유도"
     other = "기타"
 
