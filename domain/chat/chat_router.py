@@ -54,7 +54,11 @@ def personal_chat_create(personal_chat: chat_schema.PersonalChat, token: str = H
     badge_count = notification_crud.get_unread_notification_count(db, user=receiver)
 
     blocked_users = block_crud.get_blocked_list(db, user=receiver)
-    if sender.uuid not in [block.blocked_uuid for block in blocked_users]:
+    blocked_uuids = {block.blocked_uuid for block in blocked_users}
+    blocked_firebase_uuids = {block.blocked_firebase_uuid for block in blocked_users}
+
+    # sender의 UUID와 firebase_uuid가 각각의 집합에 포함되어 있는지 확인
+    if sender.uuid not in blocked_uuids and sender.firebase_uuid not in blocked_firebase_uuids:
         message = messaging.Message(
             notification=messaging.Notification(
                 title='새로운 메시지가 있어요!',

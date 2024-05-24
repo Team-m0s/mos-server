@@ -70,7 +70,7 @@ def accompany_notice_report(db: Session, reporter: User, notice_report_create: N
                        report_reason_enum=[reason.value for reason in notice_report_create.report_reason],
                        report_reason_string=notice_report_create.other,
                        report_date=datetime.now(),
-                       accompany_id=notice_report_create.accompany_id)
+                       notice_id=notice_report_create.notice_id)
     db.add(db_report)
 
     notice.report_count += 1

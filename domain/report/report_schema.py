@@ -23,13 +23,15 @@ class CommentReport(ReportCreate):
     comment_id: int
 
 
-class AccompanyReport(ReportCreate):
-    report_reason = List[ReportReasonAccompany] | None
+class AccompanyReport(BaseModel):
+    report_reason: List[ReportReasonAccompany] | None
+    other: str | None
     accompany_id: int
 
 
-class NoticeReport(ReportCreate):
-    report_reason = List[ReportReasonAccompany] | None
+class NoticeReport(BaseModel):
+    report_reason: List[ReportReasonAccompany] | None
+    other: str | None
     notice_id: int
 
 

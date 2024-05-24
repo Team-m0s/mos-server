@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: b2e8eaca7899
+Revision ID: bc430a068d49
 Revises: 
-Create Date: 2024-03-31 17:24:41.586029
+Create Date: 2024-05-24 14:19:24.021075
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'b2e8eaca7899'
+revision: str = 'bc430a068d49'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -35,7 +35,9 @@ def upgrade() -> None:
     op.create_table('user',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('uuid', sa.String(), nullable=False),
+    sa.Column('user_code', sa.String(), nullable=False),
     sa.Column('firebase_uuid', sa.String(), nullable=False),
+    sa.Column('fcm_token', sa.String(), nullable=False),
     sa.Column('provider', sa.String(), nullable=False),
     sa.Column('email', sa.String(), nullable=False),
     sa.Column('nickName', sa.String(), nullable=False),
@@ -43,8 +45,8 @@ def upgrade() -> None:
     sa.Column('introduce', sa.String(), nullable=True),
     sa.Column('point', sa.Integer(), nullable=False),
     sa.Column('lang_level', sa.JSON(), nullable=True),
-    sa.Column('register_date', sa.DateTime(), nullable=False),
     sa.Column('report_count', sa.Integer(), nullable=False),
+    sa.Column('register_date', sa.DateTime(), nullable=False),
     sa.Column('last_nickname_change', sa.DateTime(), nullable=True),
     sa.Column('suspension_period', sa.DateTime(), nullable=True),
     sa.Column('is_admin', sa.Boolean(), nullable=False),
@@ -60,8 +62,10 @@ def upgrade() -> None:
     sa.Column('activity_scope', sa.Enum('online', 'offline', 'hybrid', name='activityscope'), nullable=False),
     sa.Column('create_date', sa.String(), nullable=False),
     sa.Column('update_date', sa.String(), nullable=False),
+    sa.Column('blind_date', sa.DateTime(), nullable=True),
     sa.Column('report_count', sa.Integer(), nullable=False),
-    sa.Column('category', sa.Enum('activity', 'cultureArt', 'hobby', 'musicInstrument', 'volunteering', 'oneDayClass', 'parentingPet', 'foodTour', 'languageExchange', 'game', 'exerciseSport', 'booksSelfImprovement', 'dating', 'others', 'all', name='category'), nullable=False),
+    sa.Column('is_blinded', sa.Boolean(), nullable=False),
+    sa.Column('category', sa.Enum('activity', 'cultureArt', 'hobby', 'musicInstrument', 'volunteering', 'oneDayClass', 'parentingPet', 'foodTour', 'languageExchange', 'game', 'exerciseSport', 'booksSelfImprovement', 'dating', 'others', 'all', name='accompanycategory'), nullable=False),
     sa.Column('chat_count', sa.Integer(), nullable=False),
     sa.Column('like_count', sa.Integer(), nullable=False),
     sa.Column('is_closed', sa.Boolean(), nullable=False),
@@ -69,19 +73,62 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['leader_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('block',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('blocker_uuid', sa.String(), nullable=True),
+    sa.Column('blocked_uuid', sa.String(), nullable=True),
+    sa.Column('blocked_firebase_uuid', sa.String(), nullable=True),
+    sa.ForeignKeyConstraint(['blocked_firebase_uuid'], ['user.firebase_uuid'], ),
+    sa.ForeignKeyConstraint(['blocked_uuid'], ['user.uuid'], ),
+    sa.ForeignKeyConstraint(['blocker_uuid'], ['user.uuid'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('feedback',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('content', sa.Text(), nullable=False),
+    sa.Column('create_date', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('post',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('subject', sa.String(), nullable=False),
     sa.Column('content', sa.Text(), nullable=False),
+    sa.Column('category', sa.Enum('korean', 'english', 'chinese', 'japanese', 'vietnamese', 'french', 'german', 'italian', 'spanish', 'portuguese', 'russian', 'turkish', 'indonesian', 'arabic', name='postcategory'), nullable=True),
     sa.Column('like_count', sa.Integer(), nullable=True),
     sa.Column('is_anonymous', sa.Boolean(), nullable=False),
     sa.Column('is_blinded', sa.Boolean(), nullable=False),
+    sa.Column('is_hot', sa.Boolean(), nullable=True),
     sa.Column('report_count', sa.Integer(), nullable=False),
     sa.Column('create_date', sa.DateTime(), nullable=False),
     sa.Column('modify_date', sa.DateTime(), nullable=True),
+    sa.Column('blind_date', sa.DateTime(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('board_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['board_id'], ['board.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('user_activity',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('activity_type', sa.String(), nullable=False),
+    sa.Column('activity_date', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_user_activity_id'), 'user_activity', ['id'], unique=False)
+    op.create_table('vocabulary',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('subject', sa.String(), nullable=False),
+    sa.Column('content', sa.Text(), nullable=False),
+    sa.Column('is_solved', sa.Boolean(), nullable=False),
+    sa.Column('report_count', sa.Integer(), nullable=False),
+    sa.Column('create_date', sa.DateTime(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('solved_user_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['solved_user_id'], ['user.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -128,9 +175,31 @@ def upgrade() -> None:
     sa.Column('content', sa.String(), nullable=False),
     sa.Column('create_date', sa.DateTime(), nullable=False),
     sa.Column('update_date', sa.DateTime(), nullable=True),
+    sa.Column('blind_date', sa.DateTime(), nullable=True),
     sa.Column('report_count', sa.Integer(), nullable=False),
+    sa.Column('is_blinded', sa.Boolean(), nullable=False),
     sa.Column('accompany_id', sa.Integer(), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['accompany_id'], ['accompany.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('notification',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('title', sa.String(), nullable=False),
+    sa.Column('body', sa.Text(), nullable=False),
+    sa.Column('post_id', sa.Integer(), nullable=True),
+    sa.Column('accompany_id', sa.Integer(), nullable=True),
+    sa.Column('vocabulary_id', sa.Integer(), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('sender_firebase_uuid', sa.String(), nullable=True),
+    sa.Column('create_date', sa.DateTime(), nullable=False),
+    sa.Column('is_read', sa.Boolean(), nullable=False),
+    sa.Column('is_Post', sa.Boolean(), nullable=False),
+    sa.ForeignKeyConstraint(['accompany_id'], ['accompany.id'], ),
+    sa.ForeignKeyConstraint(['post_id'], ['post.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
+    sa.ForeignKeyConstraint(['vocabulary_id'], ['vocabulary.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('tag',
@@ -147,15 +216,24 @@ def upgrade() -> None:
     sa.Column('like_count', sa.Integer(), nullable=True),
     sa.Column('create_date', sa.DateTime(), nullable=False),
     sa.Column('modify_date', sa.DateTime(), nullable=True),
+    sa.Column('blind_date', sa.DateTime(), nullable=True),
     sa.Column('is_anonymous', sa.Boolean(), nullable=False),
     sa.Column('is_blinded', sa.Boolean(), nullable=False),
     sa.Column('report_count', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('post_id', sa.Integer(), nullable=True),
     sa.Column('notice_id', sa.Integer(), nullable=True),
+    sa.Column('vocabulary_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['notice_id'], ['notice.id'], ),
     sa.ForeignKeyConstraint(['post_id'], ['post.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
+    sa.ForeignKeyConstraint(['vocabulary_id'], ['vocabulary.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('bestComment',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('comment_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['comment_id'], ['comment.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('like',
@@ -172,13 +250,15 @@ def upgrade() -> None:
     )
     op.create_table('report',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('report_reason_enum', sa.Enum('hateSpeech', 'offTopic', 'repeatedPosts', 'promotionalContent', 'inappropriateProfile', 'privacyViolation', 'adultContent', 'other', name='reportreason'), nullable=True),
+    sa.Column('report_reason_enum', sa.JSON(), nullable=True),
     sa.Column('report_reason_string', sa.String(), nullable=True),
+    sa.Column('report_date', sa.DateTime(), nullable=False),
     sa.Column('reporter_id', sa.Integer(), nullable=True),
     sa.Column('post_id', sa.Integer(), nullable=True),
     sa.Column('comment_id', sa.Integer(), nullable=True),
     sa.Column('accompany_id', sa.Integer(), nullable=True),
     sa.Column('notice_id', sa.Integer(), nullable=True),
+    sa.Column('vocabulary_id', sa.Integer(), nullable=True),
     sa.Column('reported_user_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['accompany_id'], ['accompany.id'], ),
     sa.ForeignKeyConstraint(['comment_id'], ['comment.id'], ),
@@ -186,6 +266,7 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['post_id'], ['post.id'], ),
     sa.ForeignKeyConstraint(['reported_user_id'], ['user.id'], ),
     sa.ForeignKeyConstraint(['reporter_id'], ['user.id'], ),
+    sa.ForeignKeyConstraint(['vocabulary_id'], ['vocabulary.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###
@@ -195,14 +276,21 @@ def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_table('report')
     op.drop_table('like')
+    op.drop_table('bestComment')
     op.drop_table('comment')
     op.drop_table('tag')
+    op.drop_table('notification')
     op.drop_table('notice')
     op.drop_table('image')
     op.drop_table('bookmark')
     op.drop_table('application')
     op.drop_table('accompany_member')
+    op.drop_table('vocabulary')
+    op.drop_index(op.f('ix_user_activity_id'), table_name='user_activity')
+    op.drop_table('user_activity')
     op.drop_table('post')
+    op.drop_table('feedback')
+    op.drop_table('block')
     op.drop_table('accompany')
     op.drop_table('user')
     op.drop_table('board')

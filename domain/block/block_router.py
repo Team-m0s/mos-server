@@ -40,4 +40,8 @@ def block_user(create_user_block: BlockUser, token: str = Header(), db: Session 
     if not blocked_user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    is_blocked = block_crud.is_user_blocked(db, user=current_user, blocked_user=blocked_user)
+    if is_blocked:
+        raise HTTPException(status_code=400, detail="User is already blocked")
+
     block_crud.block_user(db, user=current_user, blocked_user=create_user_block)
