@@ -62,14 +62,21 @@ def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, 
     post = post_crud.get_post_by_post_id(db, post_id=post_id)
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
-    created_comment = comment_crud.create_comment(db, post=post, comment_create=_comment_create, user=current_user)
 
     author = post.user
     badge_count = notification_crud.get_unread_notification_count(db, user=author)
 
     blocked_users = block_crud.get_blocked_list(db, user=author)
-    if current_user.uuid not in [block.blocked_uuid for block in blocked_users]:
-        if author.uuid != current_user.uuid:
+
+    blocked_uuids = {block.blocked_uuid for block in blocked_users}
+    blocked_firebase_uuids = {block.blocked_firebase_uuid for block in blocked_users}
+
+    is_blocked = current_user.uuid not in blocked_uuids and current_user.firebase_uuid not in blocked_firebase_uuids
+    created_comment = comment_crud.create_comment(db, post=post, comment_create=_comment_create, user=current_user,
+                                                  is_blocked=is_blocked)
+
+    if author.uuid != current_user.uuid:
+        if not is_blocked:
             message = messaging.Message(
                 notification=messaging.Notification(
                     title=f'내 게시글 "{post.subject}"에 새로운 답글이 달렸어요.',
@@ -200,15 +207,20 @@ def sub_comment_create(comment_id: int, _comment_create: comment_schema.SubComme
     elif comment.parent_id:
         raise HTTPException(status_code=404, detail="Can not create comment")
 
-    created_comment = comment_crud.create_sub_comment(db, comment=comment, sub_comment_create=_comment_create,
-                                                      user=current_user)
-
     author = comment.user
     badge_count = notification_crud.get_unread_notification_count(db, user=author)
 
     blocked_users = block_crud.get_blocked_list(db, user=author)
-    if current_user.uuid not in [block.blocked_uuid for block in blocked_users]:
-        if author.uuid != current_user.uuid:
+
+    blocked_uuids = {block.blocked_uuid for block in blocked_users}
+    blocked_firebase_uuids = {block.blocked_firebase_uuid for block in blocked_users}
+
+    is_blocked = current_user.uuid not in blocked_uuids and current_user.firebase_uuid not in blocked_firebase_uuids
+    created_comment = comment_crud.create_sub_comment(db, comment=comment, sub_comment_create=_comment_create,
+                                                      user=current_user, is_blocked=is_blocked)
+
+    if author.uuid != current_user.uuid:
+        if not is_blocked:
             message = messaging.Message(
                 notification=messaging.Notification(
                     title=f'내 댓글 "{comment.content}"에 새로운 답글이 달렸어요.',

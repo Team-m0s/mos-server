@@ -12,7 +12,7 @@ from domain.user import user_crud
 from models import Post, Comment, User, Notice, Notification, BestComment, Vocabulary
 
 
-def create_comment(db: Session, post: Post, comment_create: CommentCreate, user: User):
+def create_comment(db: Session, post: Post, comment_create: CommentCreate, user: User, is_blocked: bool):
     user_crud.add_user_activity_and_points(db, user=user, activity_type='comment', activity_limit=30,
                                            activity_point=2)
 
@@ -24,14 +24,15 @@ def create_comment(db: Session, post: Post, comment_create: CommentCreate, user:
     db.add(db_comment)
 
     if post.user_id != user.id:
-        db_notification = Notification(title=f'내 게시글 "{post.subject}"에 새로운 댓글이 달렸어요.',
-                                       body=comment_create.content,
-                                       post_id=post.id,
-                                       create_date=datetime.now(),
-                                       is_Post=True,
-                                       user_id=post.user_id)
+        if not is_blocked:
+            db_notification = Notification(title=f'내 게시글 "{post.subject}"에 새로운 댓글이 달렸어요.',
+                                           body=comment_create.content,
+                                           post_id=post.id,
+                                           create_date=datetime.now(),
+                                           is_Post=True,
+                                           user_id=post.user_id)
 
-        db.add(db_notification)
+            db.add(db_notification)
 
     db.commit()
     db.refresh(db_comment)
@@ -40,7 +41,7 @@ def create_comment(db: Session, post: Post, comment_create: CommentCreate, user:
     return db_comment
 
 
-def create_sub_comment(db: Session, comment: Comment, sub_comment_create: SubCommentCreate, user: User):
+def create_sub_comment(db: Session, comment: Comment, sub_comment_create: SubCommentCreate, user: User, is_blocked: bool):
     user_crud.add_user_activity_and_points(db, user=user, activity_type='comment', activity_limit=30,
                                            activity_point=2)
 
@@ -53,14 +54,15 @@ def create_sub_comment(db: Session, comment: Comment, sub_comment_create: SubCom
     db.add(db_sub_comment)
 
     if comment.user_id != user.id:
-        db_notification = Notification(title=f'내 댓글 "{comment.content}"에 새로운 답글이 달렸어요.',
-                                       body=sub_comment_create.content,
-                                       post_id=comment.post_id,
-                                       create_date=datetime.now(),
-                                       is_Post=True,
-                                       user_id=comment.user_id)
+        if not is_blocked:
+            db_notification = Notification(title=f'내 댓글 "{comment.content}"에 새로운 답글이 달렸어요.',
+                                           body=sub_comment_create.content,
+                                           post_id=comment.post_id,
+                                           create_date=datetime.now(),
+                                           is_Post=True,
+                                           user_id=comment.user_id)
 
-        db.add(db_notification)
+            db.add(db_notification)
 
     db.commit()
     db.refresh(db_sub_comment)
