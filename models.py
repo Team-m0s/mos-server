@@ -371,4 +371,4 @@ class Notice(Base):
 class Insight(Base):
     __tablename__ = "insight"
     id = Column(Integer, primary_key=True)
-    content = Column(String, nullable=False)
+    content = Column(Text, nullable=False)

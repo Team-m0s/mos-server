@@ -1,3 +1,4 @@
+import json
 from sqlalchemy.orm import Session
 from models import User, Insight
 from domain.admin.admin_schema import InsightCreate
@@ -15,7 +16,8 @@ def get_insights(db: Session):
 
 
 def create_insight(db: Session, insight_create: InsightCreate):
-    db_insight = Insight(content=insight_create.content)
+    json_data = json.dumps(insight_create.content)
+    db_insight = Insight(content=json_data)
 
     db.add(db_insight)
     db.commit()
