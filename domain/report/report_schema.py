@@ -1,4 +1,5 @@
 from pydantic import BaseModel, field_validator
+from domain.user.user_schema import FeedbackUser
 from models import ReportReasonBoard, ReportReasonChat, ReportReasonAccompany
 from typing import List
 
@@ -45,6 +46,12 @@ class UserReport(ReportCreate):
 
 class UserFeedback(BaseModel):
     content: str
+
+
+class FeedbackBase(BaseModel):
+    content: str
+    user: FeedbackUser
+    create_date: str
 
 
 class AccompanyChatReport(BaseModel):

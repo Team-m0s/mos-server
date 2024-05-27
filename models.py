@@ -373,3 +373,4 @@ class Insight(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
     content = Column(Text, nullable=False)
+    create_date = Column(DateTime, nullable=True)
