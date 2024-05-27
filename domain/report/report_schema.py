@@ -1,3 +1,5 @@
+import datetime
+
 from pydantic import BaseModel, field_validator
 from domain.user.user_schema import FeedbackUser
 from models import ReportReasonBoard, ReportReasonChat, ReportReasonAccompany
@@ -51,7 +53,7 @@ class UserFeedback(BaseModel):
 class FeedbackBase(BaseModel):
     content: str
     user: FeedbackUser
-    create_date: str
+    create_date: datetime.datetime
 
 
 class AccompanyChatReport(BaseModel):
