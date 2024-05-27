@@ -8,4 +8,5 @@ class InsightBase(BaseModel):
 
 
 class InsightCreate(BaseModel):
+    title: str
     content: str

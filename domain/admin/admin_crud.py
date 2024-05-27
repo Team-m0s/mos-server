@@ -16,8 +16,10 @@ def get_insights(db: Session):
 
 
 def create_insight(db: Session, insight_create: InsightCreate):
-    json_data = json.dumps(insight_create.content)
-    db_insight = Insight(content=json_data)
+    title_json_date = json.dumps(insight_create.title, ensure_ascii=False)
+    content_json_data = json.dumps(insight_create.content, ensure_ascii=False)
+    db_insight = Insight(title=title_json_date,
+                         content=content_json_data)
 
     db.add(db_insight)
     db.commit()
