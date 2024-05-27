@@ -366,3 +366,9 @@ class Notice(Base):
     accompany = relationship("Accompany", backref="notices_accompany")
     user_id = Column(Integer, ForeignKey("user.id"))
     user = relationship("User", backref="notices_user")
+
+
+class Insight(Base):
+    __tablename__ = "insight"
+    id = Column(Integer, primary_key=True)
+    content = Column(String, nullable=False)
