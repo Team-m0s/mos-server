@@ -63,6 +63,14 @@ class PostCategory(enum.Enum):
     turkish = 'Türkçe'
     indonesian = 'Bahasa Indonesia'
     arabic = 'العربية'
+    bank = '은행'
+    rental = '집 임대･홈스테이'
+    law = '법률'
+    visa = '비자'
+    flight = '항공'
+    others = '그 외'
+    information = '정보'
+    promotion = '홍보'
 
 
 class Post(Base):
