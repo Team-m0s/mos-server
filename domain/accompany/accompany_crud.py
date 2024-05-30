@@ -159,6 +159,46 @@ def get_image_by_hash_all(db: Session, image_hash: str):
     return db.query(Image).filter(Image.image_hash == image_hash).all()
 
 
+def get_accompany_message_content(content_type: str, language_preference: str, message_type: str, accompany: Accompany):
+    titles = {
+        'new_notice': {
+            '한국어': '📢 리더가 새로운 공지를 등록했습니다!',
+            'English': '📢 The leader has posted a new announcement!',
+            # Add more languages here
+        },
+        'new_application': {
+            '한국어': '🙋🏻 내 동행에 새로운 지원자가 있어요!',
+            'English': '🙋🏻 You have a new applicant in your group!',
+            # Add more languages here
+        },
+        'application_approved': {
+            '한국어': f'🎉 동행 {accompany.title}의 멤버가 되었어요!',
+            'English': f'🎉 You have become a member of a group. {accompany.title}!',
+            # Add more languages here
+        },
+        'delegate_leader': {
+            '한국어': f'😎 동행 {accompany.title}의 리더가 되었어요!',
+            'English': f'😎 You are now the leader of the group. {accompany.title}!',
+        },
+    }
+
+    bodies = {
+        'application_approved': {
+            '한국어': '축하합니다! 이제 내 동행을 보러 가보실까요?',
+            'English': 'Congratulations! Shall we go see my group now?'
+        },
+        'delegate_leader': {
+            '한국어': '리더가 되면 여러 권한이 생겨요. 모임을 잘 이끌어주세요~!',
+            'English': 'As a leader, you will gain various privileges. Please lead the group well!',
+        }
+    }
+
+    if content_type == 'title':
+        return titles[message_type].get(language_preference, titles[message_type]['English'])
+    elif content_type == 'body':
+        return bodies[message_type].get(language_preference, bodies[message_type]['English'])
+
+
 def create_accompany(db: Session, accompany_create: AccompanyCreate, user: User):
     db_accompany = Accompany(title=accompany_create.title,
                              category=accompany_create.category,

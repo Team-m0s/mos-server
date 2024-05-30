@@ -26,7 +26,8 @@ def member_query_processor(total_member_min: int, total_member_max: int):
     return result
 
 
-def category_query_processor(category1: AccompanyCategory = None, category2: AccompanyCategory = None, category3: AccompanyCategory = None):
+def category_query_processor(category1: AccompanyCategory = None, category2: AccompanyCategory = None,
+                             category3: AccompanyCategory = None):
     if category1 is None and category2 is None and category3 is None:
         return None
 
@@ -106,7 +107,7 @@ def accompany_filtered_list(is_closed: bool, total_member: List[int] = Depends(m
 def get_liked_accompanies(token: str = Header(), page: int = 0, size: int = 10, db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
     total_pages, liked_accompanies = accompany_crud.get_accompany_liked_list(db, user=current_user,
-                                                                            start_index=page * size, limit=size)
+                                                                             start_index=page * size, limit=size)
 
     liked_accompanies = accompany_crud.set_accompany_detail(db, liked_accompanies)
 
@@ -216,7 +217,8 @@ def accompany_update(token: str = Header(), accompany_id: int = Form(...),
                                                              activity_scope=activity_scope,
                                                              images_accompany=image_creates,
                                                              city=city, introduce=introduce, total_member=total_member,
-                                                             tags_accompany=tag_creates, qna=qna, accompany_id=accompany_id)
+                                                             tags_accompany=tag_creates, qna=qna,
+                                                             accompany_id=accompany_id)
 
     accompany_crud.update_accompany(db, db_accompany=accompany, accompany_update=accompany_update_data)
 
@@ -242,9 +244,12 @@ def accompany_create_notice(accompany_id: int, _notice_create: notice_schema.Not
     if len(members) > 0:  # Check if there is at least one member
         for member in members:
             badge_count = notification_crud.get_unread_notification_count(db, user=member)
+            title = accompany_crud.get_accompany_message_content(content_type='title',
+                                                                 language_preference=member.language_preference,
+                                                                 message_type='new_notice', accompany=accompany)
             message = messaging.Message(
                 notification=messaging.Notification(
-                    title='📢 리더가 새로운 공지를 등록했습니다!',
+                    title=title,
                     body=_notice_create.content,
                 ),
                 data={
@@ -349,9 +354,13 @@ def accompany_apply(application_create: accompany_schema.ApplicationCreate, toke
     leader = user_crud.get_user_by_id(db, user_id=accompany.leader_id)
     badge_count = notification_crud.get_unread_notification_count(db, user=leader)
 
+    title = accompany_crud.get_accompany_message_content(content_type='title',
+                                                         language_preference=leader.language_preference,
+                                                         message_type='new_application', accompany=accompany)
+
     message = messaging.Message(
         notification=messaging.Notification(
-            title='🙋🏻 내 동행에 새로운 지원자가 있어요!',
+            title=title,
             body=application_create.answer,
         ),
         data={
@@ -393,10 +402,18 @@ def application_approve(application_id: int, token: str = Header(), db: Session 
 
     badge_count = notification_crud.get_unread_notification_count(db, user=member)
 
+    title = accompany_crud.get_accompany_message_content(content_type='title',
+                                                         language_preference=member.language_preference,
+                                                         message_type='application_approved', accompany=accompany)
+
+    body = accompany_crud.get_accompany_message_content(content_type='body',
+                                                        language_preference=member.language_preference,
+                                                        message_type='application_approved', accompany=accompany)
+
     message = messaging.Message(
         notification=messaging.Notification(
-            title=f'🎉 동행 {accompany.title}의 멤버가 되었어요!',
-            body='축하합니다! 이제 내 동행을 보러 가보실까요?',
+            title=title,
+            body=body,
         ),
         data={
             "accompany_id": str(accompany.id)
@@ -493,10 +510,18 @@ def accompany_delegate_leader(accompany_id: int, user_id: int, token: str = Head
     accompany_crud.assign_new_leader(db, accompany=accompany, member=member)
     badge_count = notification_crud.get_unread_notification_count(db, user=member)
 
+    title = accompany_crud.get_accompany_message_content(content_type='title',
+                                                         language_preference=member.language_preference,
+                                                         message_type='delegate_leader', accompany=accompany)
+
+    body = accompany_crud.get_accompany_message_content(content_type='body',
+                                                        language_preference=member.language_preference,
+                                                        message_type='delegate_leader', accompany=accompany)
+
     message = messaging.Message(
         notification=messaging.Notification(
-            title=f'😎 동행 {accompany.title}의 리더가 되었어요!',
-            body='리더가 되면 여러 권한이 생겨요. 모임을 잘 이끌어주세요~!',
+            title=title,
+            body=body,
         ),
         data={
             "accompany_id": str(accompany.id)
