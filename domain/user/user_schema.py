@@ -63,6 +63,10 @@ class NoticeUser(BaseModel):
     profile_img: str | None
 
 
+class FeedbackUser(BaseModel):
+    email: str
+
+
 class UserBase(BaseModel):
     id: int
     uuid: str
