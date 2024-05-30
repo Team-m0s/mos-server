@@ -54,9 +54,12 @@ def solve_vocabulary(vocabulary_id: int, user_id: int, token: str = Header(), db
     solver = user_crud.get_user_by_id(db, user_id)
     badge_count = notification_crud.get_unread_notification_count(db, user=solver)
 
+    title = vocabulary_crud.get_vocabulary_message_title(language_preference=solver.language_preference,
+                                                         message_type='voca_solved')
+
     message = messaging.Message(
         notification=messaging.Notification(
-            title='🎊 내 답변이 채택되었어요!',
+            title=title,
             body=vocabulary.subject,
         ),
         data={

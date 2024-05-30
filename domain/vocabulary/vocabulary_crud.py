@@ -43,6 +43,18 @@ def get_vocabulary_by_id(db: Session, vocabulary_id: int):
     return db.query(Vocabulary).filter(Vocabulary.id == vocabulary_id).first()
 
 
+def get_vocabulary_message_title(language_preference: str, message_type: str):
+    titles = {
+        'voca_solved': {
+            '한국어': '🎊 내 답변이 채택되었어요!',
+            'English': '🎊 Your answer has been accepted!',
+            # Add more languages here
+        },
+    }
+
+    return titles[message_type].get(language_preference, titles[message_type]['English'])
+
+
 def create_vocabulary(db: Session, vocabulary_create: VocabularyCreate, user: User):
     user_crud.add_user_activity_and_points(db, user=user, activity_type='vocabulary', activity_limit=5,
                                            activity_point=2)

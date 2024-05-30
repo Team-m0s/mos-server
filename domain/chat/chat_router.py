@@ -57,11 +57,14 @@ def personal_chat_create(personal_chat: chat_schema.PersonalChat, token: str = H
     blocked_uuids = {block.blocked_uuid for block in blocked_users}
     blocked_firebase_uuids = {block.blocked_firebase_uuid for block in blocked_users}
 
+    title = chat_crud.get_chat_message_title(language_preference=receiver.language_preference,
+                                             message_type='personal_chat')
+
     # sender의 UUID와 firebase_uuid가 각각의 집합에 포함되어 있는지 확인
     if sender.uuid not in blocked_uuids and sender.firebase_uuid not in blocked_firebase_uuids:
         message = messaging.Message(
             notification=messaging.Notification(
-                title='새로운 메시지가 있어요!',
+                title=title,
                 body=personal_chat.message,
             ),
             data={

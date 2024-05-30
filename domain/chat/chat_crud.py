@@ -76,3 +76,15 @@ def exit_personal_chat(talk_id: str, user: User):
             raise Exception("User not found in chat participants")
     else:
         raise Exception("Chat not found")
+
+
+def get_chat_message_title(language_preference: str, message_type: str):
+    titles = {
+        'personal_chat': {
+            '한국어': '새로운 메시지가 있어요!',
+            'English': 'You have a new message!',
+            # Add more languages here
+        },
+    }
+
+    return titles[message_type].get(language_preference, titles[message_type]['English'])

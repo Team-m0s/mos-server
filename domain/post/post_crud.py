@@ -241,6 +241,18 @@ HOT_STATUS_UPDATE_CRITERIA = {
 }
 
 
+def get_hot_message_title(language_preference: str, message_type: str):
+    titles = {
+        'hot_selected': {
+            '한국어': '🔥 내 게시글이 베스트로 선정되었어요.',
+            'English': '🔥 Your post has been selected as a Best Post.',
+            # Add more languages here
+        },
+    }
+
+    return titles[message_type].get(language_preference, titles[message_type]['English'])
+
+
 def update_hot_status(db: Session, post_id: int):
     # Get the post from the database
     post = db.query(Post).filter(Post.id == post_id).first()
@@ -274,10 +286,12 @@ def update_hot_status(db: Session, post_id: int):
                                        user_id=post.user_id)
         db.add(db_notification)
 
+        title = get_hot_message_title(language_preference=post.user.language_preference, message_type='hot_selected')
+
         # Add push notification sending here
         message = messaging.Message(
             notification=messaging.Notification(
-                title='🔥내 게시글이 베스트로 선정되었어요.',
+                title=title,
                 body=post.subject,
             ),
             android=messaging.AndroidConfig(
