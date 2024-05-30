@@ -32,6 +32,7 @@ class User(Base):
     profile_img = Column(String, nullable=True)
     introduce = Column(String, nullable=True)
     point = Column(Integer, nullable=False, default=0)
+    language_preference = Column(String, nullable=False, default="English")
     lang_level = Column(JSON, nullable=True)
     report_count = Column(Integer, nullable=False, default=0)
     register_date = Column(DateTime, nullable=False)

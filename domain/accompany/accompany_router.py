@@ -239,36 +239,37 @@ def accompany_create_notice(accompany_id: int, _notice_create: notice_schema.Not
     members = accompany_crud.get_members_by_accompany_id(db, accompany_id=accompany_id)
     messages = []
 
-    for member in members:
-        badge_count = notification_crud.get_unread_notification_count(db, user=member)
-        message = messaging.Message(
-            notification=messaging.Notification(
-                title='📢 리더가 새로운 공지를 등록했습니다!',
-                body=_notice_create.content,
-            ),
-            data={
-                "accompany_id": str(accompany.id)
-            },
-            android=messaging.AndroidConfig(
-                priority='high',
-                notification=messaging.AndroidNotification(
-                    sound='default'
-                )
-            ),
-            apns=messaging.APNSConfig(
-                payload=messaging.APNSPayload(
-                    aps=messaging.Aps(
-                        badge=badge_count,
-                        sound='default',
-                        content_available=True
+    if len(members) > 0:  # Check if there is at least one member
+        for member in members:
+            badge_count = notification_crud.get_unread_notification_count(db, user=member)
+            message = messaging.Message(
+                notification=messaging.Notification(
+                    title='📢 리더가 새로운 공지를 등록했습니다!',
+                    body=_notice_create.content,
+                ),
+                data={
+                    "accompany_id": str(accompany.id)
+                },
+                android=messaging.AndroidConfig(
+                    priority='high',
+                    notification=messaging.AndroidNotification(
+                        sound='default'
                     )
-                )
-            ),
-            token=member.fcm_token
-        )
-        messages.append(message)
+                ),
+                apns=messaging.APNSConfig(
+                    payload=messaging.APNSPayload(
+                        aps=messaging.Aps(
+                            badge=badge_count,
+                            sound='default',
+                            content_available=True
+                        )
+                    )
+                ),
+                token=member.fcm_token
+            )
+            messages.append(message)
 
-    messaging.send_each(messages)
+        messaging.send_each(messages)
 
     notice_crud.create_accompany_notice(db, accompany_id=accompany_id, user=current_user, notice_create=_notice_create)
 
