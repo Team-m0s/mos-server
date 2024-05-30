@@ -75,11 +75,14 @@ def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, 
     created_comment = comment_crud.create_comment(db, post=post, comment_create=_comment_create, user=current_user,
                                                   is_blocked=is_blocked)
 
+    title = comment_crud.get_comment_message_title(language_preference=author.language_preference,
+                                                   message_type='new_comment', post=post)
+
     if author.uuid != current_user.uuid:
         if not is_blocked:
             message = messaging.Message(
                 notification=messaging.Notification(
-                    title=f'내 게시글 "{post.subject}"에 새로운 답글이 달렸어요.',
+                    title=title,
                     body=_comment_create.content,
                 ),
                 data={
@@ -158,12 +161,15 @@ def voca_comment_create(vocabulary_id: int, _comment_create: comment_schema.Voca
     author = vocabulary.author
     badge_count = notification_crud.get_unread_notification_count(db, user=author)
 
+    title = comment_crud.get_comment_message_title(language_preference=author.language_preference,
+                                                   message_type='new_answer')
+
     blocked_users = block_crud.get_blocked_list(db, user=author)
     if current_user.uuid not in [block.blocked_uuid for block in blocked_users]:
         if author.uuid != current_user.uuid:
             message = messaging.Message(
                 notification=messaging.Notification(
-                    title='📗 내 단어장에 새로운 답변이 달렸어요!',
+                    title=title,
                     body=_comment_create.content,
                 ),
                 data={
@@ -219,11 +225,14 @@ def sub_comment_create(comment_id: int, _comment_create: comment_schema.SubComme
     created_comment = comment_crud.create_sub_comment(db, comment=comment, sub_comment_create=_comment_create,
                                                       user=current_user, is_blocked=is_blocked)
 
+    title = comment_crud.get_comment_message_title(language_preference=author.language_preference,
+                                                   message_type='new_sub_comment', comment=comment)
+
     if author.uuid != current_user.uuid:
         if not is_blocked:
             message = messaging.Message(
                 notification=messaging.Notification(
-                    title=f'내 댓글 "{comment.content}"에 새로운 답글이 달렸어요.',
+                    title=title,
                     body=_comment_create.content,
                 ),
                 data={

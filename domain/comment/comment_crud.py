@@ -168,6 +168,28 @@ def get_vocabulary_comment(db: Session, user_id: int, vocabulary_id: int):
     return db.query(Comment).filter(Comment.vocabulary_id == vocabulary_id, Comment.user_id == user_id).first()
 
 
+def get_comment_message_title(language_preference: str, message_type: str, post: Post = None, comment: Comment = None):
+    titles = {
+        'new_comment': {
+            '한국어': f'내 게시글 "{post.subject if post else ""}"에 새로운 답글이 달렸어요.' if post else "",
+            'English': f'Your post "{post.subject if post else ""}" has a new reply.' if post else "",
+            # Add more languages here
+        },
+        'new_sub_comment': {
+            '한국어': f'내 댓글 "{comment.content if comment else ""}"에 새로운 답글이 달렸어요.' if comment else "",
+            'English': f'Your comment "{comment.content if comment else ""}" has a new reply.' if comment else "",
+            # Add more languages here
+        },
+        'new_answer': {
+            '한국어': '📗 내 단어장에 새로운 답변이 달렸어요!',
+            'English': '📗 There is a new answer in your Vocabulary!',
+            # Add more languages here
+        },
+    }
+
+    return titles[message_type].get(language_preference, titles[message_type]['English'])
+
+
 def update_comment(db: Session, db_comment: Comment, comment_update: CommentUpdate):
     db_comment.content = comment_update.content
     db_comment.modify_date = datetime.now()
