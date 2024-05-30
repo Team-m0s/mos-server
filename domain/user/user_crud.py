@@ -11,7 +11,7 @@ from fastapi import FastAPI, Request, HTTPException, status
 from jose import jwt
 from jwt_token import ALGORITHM, SECRET_KEY
 from jose.exceptions import JWTError, ExpiredSignatureError
-from domain.user.user_schema import AuthSchema, UserUpdate
+from domain.user.user_schema import AuthSchema, UserUpdate, LanguagePref
 from utils import file_utils
 from firebase_admin import auth, firestore, credentials
 
@@ -55,6 +55,7 @@ def create_user_kakao(db: Session, user_info: dict, auth_schema: AuthSchema):
         email=user_info['email'],
         nickName=auth_schema.nick_name,
         profile_img=user_info.get("picture", None),
+        language_preference=auth_schema.language_preference,
         provider=auth_schema.provider,
         register_date=datetime.now()
     )
@@ -98,6 +99,7 @@ def create_user_google(db: Session, user_info: dict, auth_schema: AuthSchema):
         email=user_info['email'],
         nickName=auth_schema.nick_name,
         profile_img=user_info.get("picture", None),
+        language_preference=auth_schema.language_preference,
         provider=auth_schema.provider,
         register_date=datetime.now()
     )
@@ -125,6 +127,7 @@ def create_user_apple(db: Session, user_info: dict, auth_schema: AuthSchema):
         email=user_info['email'],
         nickName=auth_schema.nick_name,
         profile_img=user_info.get("picture", None),
+        language_preference=auth_schema.language_preference,
         provider=auth_schema.provider,
         register_date=datetime.now()
     )
@@ -143,6 +146,7 @@ def delete_user_sso(db: Session, db_user: User):
     db_user.profile_img = ""
     db_user.introduce = ""
     db_user.point = 0
+    db_user.language_preference = ""
     db_user.lang_level = None
     db_user.register_date = datetime(1970, 1, 1)
     db_user.report_count = 0
@@ -287,6 +291,12 @@ def update_user_profile(db: Session, db_user: User, user_update: UserUpdate):
     else:
         db_user.profile_img = f"https://www.mos-server.store/static/{submitted_image.image_url}"
 
+    db.commit()
+
+
+def update_user_language_preference(db: Session, db_user: User, new_language_preference: LanguagePref):
+    db_user.language_preference = new_language_preference
+    db.add(db_user)
     db.commit()
 
 

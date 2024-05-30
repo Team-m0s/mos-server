@@ -13,6 +13,7 @@ class AuthSchema(BaseModel):
     fcm_token: str
     provider: str
     nick_name: str | None
+    language_preference: str | None
 
     @field_validator('nick_name')
     def validate_nick_name(cls, v):
@@ -22,6 +23,10 @@ class AuthSchema(BaseModel):
             if v.strip() != v:
                 raise ValueError('닉네임에는 공백을 포함할 수 없습니다.')
         return v
+
+
+class LanguagePref(BaseModel):
+    language_preference: str
 
 
 class LanguageLevel(BaseModel):

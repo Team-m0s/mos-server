@@ -7,7 +7,7 @@ import json
 from models import User
 from database import get_db
 from domain.user import user_crud
-from domain.user.user_schema import UserUpdate, UserCreate, ImageCreate
+from domain.user.user_schema import UserUpdate, UserCreate, ImageCreate, LanguagePref
 from domain.post import post_schema
 from domain.post import post_crud
 from domain.like import like_crud
@@ -65,6 +65,12 @@ def user_profile_update(token: str = Header(), user_id: int = Form(...),
                                   introduce=introduce, images_user=image_create)
 
     user_crud.update_user_profile(db, db_user=current_user, user_update=user_update_data)
+
+
+@router.put("/update/language_preference", status_code=status.HTTP_204_NO_CONTENT, tags=["User"])
+def user_language_preference_update(language_preference: LanguagePref, token: str = Header(), db: Session = Depends(get_db)):
+    current_user = user_crud.get_current_user(db, token)
+    user_crud.update_user_language_preference(db, db_user=current_user, new_language_preference=language_preference)
 
 
 @router.post("/findUser", tags=["User"])
