@@ -278,7 +278,8 @@ def update_hot_status(db: Session, post_id: int):
         post.is_hot = True
         post.user.point += 50
 
-        db_notification = Notification(title='🔥내 게시글이 베스트로 선정되었어요.',
+        db_notification = Notification(translation_key='bestPostSelected',
+                                       title='',
                                        body=post.subject,
                                        post_id=post.id,
                                        create_date=datetime.now(),

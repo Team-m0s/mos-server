@@ -94,7 +94,8 @@ def mark_vocabulary_as_solved(db: Session, vocabulary: Vocabulary, user_id: int)
     vocabulary.is_solved = True
     vocabulary.solved_user_id = user_id
 
-    db_notification = Notification(title='🎊 내 답변이 채택되었어요!',
+    db_notification = Notification(translation_key='answerAccepted',
+                                   title='',
                                    body=vocabulary.subject,
                                    vocabulary_id=vocabulary.id,
                                    create_date=datetime.now(),

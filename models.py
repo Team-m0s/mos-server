@@ -170,6 +170,7 @@ class Notification(Base):
     __tablename__ = 'notification'
 
     id = Column(Integer, primary_key=True)
+    translation_key = Column(String, nullable=False)
     title = Column(String, nullable=False)
     body = Column(Text, nullable=False)
     post_id = Column(Integer, ForeignKey("post.id"))

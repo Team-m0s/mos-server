@@ -25,7 +25,8 @@ def create_comment(db: Session, post: Post, comment_create: CommentCreate, user:
 
     if post.user_id != user.id:
         if is_blocked:
-            db_notification = Notification(title=f'내 게시글 "{post.subject}"에 새로운 댓글이 달렸어요.',
+            db_notification = Notification(translation_key='newCommentOnPost',
+                                           title=post.subject,
                                            body=comment_create.content,
                                            post_id=post.id,
                                            create_date=datetime.now(),
@@ -55,7 +56,8 @@ def create_sub_comment(db: Session, comment: Comment, sub_comment_create: SubCom
 
     if comment.user_id != user.id:
         if is_blocked:
-            db_notification = Notification(title=f'내 댓글 "{comment.content}"에 새로운 답글이 달렸어요.',
+            db_notification = Notification(translation_key='newReplyOnComment',
+                                           title=comment.content,
                                            body=sub_comment_create.content,
                                            post_id=comment.post_id,
                                            create_date=datetime.now(),
@@ -94,7 +96,8 @@ def create_vocabulary_comment(db: Session, vocabulary: Vocabulary, voca_comment_
     db.add(db_voca_comment)
 
     if vocabulary.user_id != user.id:
-        db_notification = Notification(title='📗 내 단어장에 새로운 답변이 달렸어요!',
+        db_notification = Notification(translation_key='newAnswerInVocabulary',
+                                       title='',
                                        body=voca_comment_create.content,
                                        vocabulary_id=vocabulary.id,
                                        create_date=datetime.now(),

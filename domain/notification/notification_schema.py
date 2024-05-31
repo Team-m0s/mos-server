@@ -4,6 +4,7 @@ import datetime
 
 class Notification(BaseModel):
     id: int
+    translation_key: str
     title: str
     body: str
     post_id: int | None

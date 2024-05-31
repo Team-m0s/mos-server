@@ -188,6 +188,7 @@ def upgrade() -> None:
     )
     op.create_table('notification',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('translation_key', sa.String(), nullable=False),
     sa.Column('title', sa.String(), nullable=False),
     sa.Column('body', sa.Text(), nullable=False),
     sa.Column('post_id', sa.Integer(), nullable=True),

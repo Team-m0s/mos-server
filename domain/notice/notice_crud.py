@@ -25,7 +25,8 @@ def create_accompany_notice(db: Session, accompany_id: int, user: User, notice_c
     user_ids = [user.id for user in db_accompany.member]
 
     notifications = [{
-        'title': '리더가 새로운 공지를 등록했습니다',
+        'translation_key': 'newAnnouncement',
+        'title': '',
         'body': notice_create.content,
         'accompany_id': accompany_id,
         'create_date': datetime.now(),
