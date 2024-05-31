@@ -79,7 +79,7 @@ def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, 
                                                    message_type='new_comment', post=post)
 
     if author.uuid != current_user.uuid:
-        if not is_blocked:
+        if is_blocked:
             message = messaging.Message(
                 notification=messaging.Notification(
                     title=title,
@@ -164,36 +164,34 @@ def voca_comment_create(vocabulary_id: int, _comment_create: comment_schema.Voca
     title = comment_crud.get_comment_message_title(language_preference=author.language_preference,
                                                    message_type='new_answer')
 
-    blocked_users = block_crud.get_blocked_list(db, user=author)
-    if current_user.uuid not in [block.blocked_uuid for block in blocked_users]:
-        if author.uuid != current_user.uuid:
-            message = messaging.Message(
-                notification=messaging.Notification(
-                    title=title,
-                    body=_comment_create.content,
-                ),
-                data={
-                    "vocabulary_id": str(vocabulary.id)
-                },
-                android=messaging.AndroidConfig(
-                    priority='high',
-                    notification=messaging.AndroidNotification(
-                        sound='default'
+    if author.uuid != current_user.uuid:
+        message = messaging.Message(
+            notification=messaging.Notification(
+                title=title,
+                body=_comment_create.content,
+            ),
+            data={
+                "vocabulary_id": str(vocabulary.id)
+            },
+            android=messaging.AndroidConfig(
+                priority='high',
+                notification=messaging.AndroidNotification(
+                    sound='default'
+                )
+            ),
+            apns=messaging.APNSConfig(
+                payload=messaging.APNSPayload(
+                    aps=messaging.Aps(
+                        badge=badge_count,
+                        sound='default',
+                        content_available=True
                     )
-                ),
-                apns=messaging.APNSConfig(
-                    payload=messaging.APNSPayload(
-                        aps=messaging.Aps(
-                            badge=badge_count,
-                            sound='default',
-                            content_available=True
-                        )
-                    )
-                ),
-                token=author.fcm_token
-            )
+                )
+            ),
+            token=author.fcm_token
+        )
 
-            messaging.send(message)
+        messaging.send(message)
 
     return created_comment
 
@@ -229,7 +227,7 @@ def sub_comment_create(comment_id: int, _comment_create: comment_schema.SubComme
                                                    message_type='new_sub_comment', comment=comment)
 
     if author.uuid != current_user.uuid:
-        if not is_blocked:
+        if is_blocked:
             message = messaging.Message(
                 notification=messaging.Notification(
                     title=title,

@@ -24,7 +24,7 @@ def create_comment(db: Session, post: Post, comment_create: CommentCreate, user:
     db.add(db_comment)
 
     if post.user_id != user.id:
-        if not is_blocked:
+        if is_blocked:
             db_notification = Notification(title=f'내 게시글 "{post.subject}"에 새로운 댓글이 달렸어요.',
                                            body=comment_create.content,
                                            post_id=post.id,
@@ -54,7 +54,7 @@ def create_sub_comment(db: Session, comment: Comment, sub_comment_create: SubCom
     db.add(db_sub_comment)
 
     if comment.user_id != user.id:
-        if not is_blocked:
+        if is_blocked:
             db_notification = Notification(title=f'내 댓글 "{comment.content}"에 새로운 답글이 달렸어요.',
                                            body=sub_comment_create.content,
                                            post_id=comment.post_id,

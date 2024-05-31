@@ -295,7 +295,7 @@ def update_user_profile(db: Session, db_user: User, user_update: UserUpdate):
 
 
 def update_user_language_preference(db: Session, db_user: User, new_language_preference: LanguagePref):
-    db_user.language_preference = new_language_preference
+    db_user.language_preference = new_language_preference.language_preference
     db.add(db_user)
     db.commit()
 

@@ -107,13 +107,11 @@ class UserUpdate(BaseModel):
     lang_level: Dict[str, int] | None
     introduce: str | None
 
-    @field_validator('nickName')
-    # 빈 값은 허용하지 않으면서, 7글자 이하로 제한, 특수문자 입력 불가
-    def not_empty(cls, v):
-        if not v or not v.strip():
-            raise ValueError('빈 값은 허용되지 않습니다.')
-        if len(v) > 7:
-            raise ValueError('7글자 이하로 입력해주세요.')
-        if not v.isalnum():
-            raise ValueError('특수문자는 입력할 수 없습니다.')
+    @field_validator('nick_name')
+    def validate_nick_name(cls, v):
+        if v:
+            if len(v) < 2 or len(v) > 10:
+                raise ValueError('닉네임은 최소 2글자 이상, 10글자 이하만 가능합니다.')
+            if v.strip() != v:
+                raise ValueError('닉네임에는 공백을 포함할 수 없습니다.')
         return v
