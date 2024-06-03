@@ -10,6 +10,7 @@ from domain.user import user_crud
 from domain.user import user_schema
 from domain.admin import admin_schema
 from utils import file_utils
+from models import InsightCategory
 
 router = APIRouter(
     prefix="/api/admin",
@@ -40,7 +41,8 @@ def feedback_list(token: str = Header(), db: Session = Depends(get_db)):
 
 
 @router.get("/insights", response_model=admin_schema.InsightListResponse)
-def insight_lists(db: Session = Depends(get_db), search_keyword_title: str = None, search_keyword_content: str = None,
+def insight_lists(db: Session = Depends(get_db), category: InsightCategory = None,
+                  search_keyword_title: str = None, search_keyword_content: str = None,
                   search_keyword_title_exact: str = None, search_keyword_content_exact: str = None):
     total_insights, insights = admin_crud.get_insights(db, search_keyword_title, search_keyword_content,
                                                        search_keyword_title_exact, search_keyword_content_exact)

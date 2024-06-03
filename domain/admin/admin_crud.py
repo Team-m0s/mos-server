@@ -4,6 +4,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from models import User, Insight, Feedback
 from domain.admin.admin_schema import InsightCreate, InsightUpdate
+from models import InsightCategory
 
 
 def get_all_users(db: Session):
@@ -20,9 +21,13 @@ def get_all_feedbacks(db: Session):
     return total_feedbacks, db_feedbacks
 
 
-def get_insights(db: Session, search_keyword_title: str = None, search_keyword_content: str = None,
+def get_insights(db: Session, category: InsightCategory = None,
+                 search_keyword_title: str = None, search_keyword_content: str = None,
                  search_keyword_title_exact: str = None, search_keyword_content_exact: str = None):
     query = db.query(Insight)
+
+    if category:
+        query = query.filter(Insight.category == category)
 
     if search_keyword_title:
         query = query.filter(Insight.title.contains(search_keyword_title))
