@@ -3,6 +3,7 @@ import datetime
 from pydantic import BaseModel, field_validator
 from typing import Optional
 from domain.report.report_schema import FeedbackBase
+from models import InsightCategory
 
 
 class InsightBase(BaseModel):
@@ -28,7 +29,7 @@ class InsightCreate(BaseModel):
     title: str
     content: str
     main_image: str | None
-    category: str
+    category: InsightCategory
 
 
 class InsightUpdate(InsightCreate):

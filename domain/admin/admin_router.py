@@ -32,7 +32,7 @@ def user_list(token: str = Header(), db: Session = Depends(get_db)):
 def feedback_list(token: str = Header(), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
 
-    #if not current_user.is_admin:
+    # if not current_user.is_admin:
     #    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
 
     total_feedbacks, feedbacks = admin_crud.get_all_feedbacks(db)
@@ -51,7 +51,7 @@ def insight_lists(db: Session = Depends(get_db), search_keyword_title: str = Non
 def upload_images(images: List[UploadFile] = File(), token: str = Header(), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
 
-    #if not current_user.is_admin:
+    # if not current_user.is_admin:
     #    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
 
     image_url = []
@@ -66,12 +66,18 @@ def upload_images(images: List[UploadFile] = File(), token: str = Header(), db: 
 def insight_create(_insight_create: admin_schema.InsightCreate, token: str = Header(), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
 
+    # if not current_user.is_admin:
+    #    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+
     admin_crud.create_insight(db, insight_create=_insight_create)
 
 
 @router.put("/update/insight", status_code=status.HTTP_204_NO_CONTENT)
 def insight_update(_insight_update: admin_schema.InsightUpdate, token: str = Header(), db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
+
+    # if not current_user.is_admin:
+    #    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
 
     db_insight = admin_crud.get_insight_by_id(db, insight_id=_insight_update.insight_id)
 
@@ -85,6 +91,10 @@ def insight_update(_insight_update: admin_schema.InsightUpdate, token: str = Hea
 def insight_delete(_insight_delete: admin_schema.InsightDelete, token: str = Header(),
                    db: Session = Depends(get_db)):
     current_user = user_crud.get_current_user(db, token)
+
+    # if not current_user.is_admin:
+    #    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+
     db_insight = admin_crud.get_insight_by_id(db, insight_id=_insight_delete.insight_id)
 
     if not db_insight:
