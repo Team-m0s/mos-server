@@ -6,12 +6,12 @@ import random
 from sqlalchemy.orm import Session
 
 from domain.accompany import accompany_crud
-from models import User, Image, accompany_member, Accompany, UserActivity
+from models import User, Image, accompany_member, Accompany, UserActivity, NotificationSetting
 from fastapi import FastAPI, Request, HTTPException, status
 from jose import jwt
 from jwt_token import ALGORITHM, SECRET_KEY
 from jose.exceptions import JWTError, ExpiredSignatureError
-from domain.user.user_schema import AuthSchema, UserUpdate, LanguagePref
+from domain.user.user_schema import AuthSchema, UserUpdate, LanguagePref, NotificationSetting
 from utils import file_utils
 from firebase_admin import auth, firestore, credentials
 
@@ -61,6 +61,14 @@ def create_user_kakao(db: Session, user_info: dict, auth_schema: AuthSchema):
     )
     db.add(db_user)
     db.commit()
+
+    notification_setting = NotificationSetting(user_id=db_user.id,
+                                               noti_activity=auth_schema.noti_activity,
+                                               noti_chat=auth_schema.noti_chat,
+                                               noti_marketing=auth_schema.noti_marketing)
+    db.add(notification_setting)
+    db.commit()
+
     return db_user
 
 
@@ -105,6 +113,14 @@ def create_user_google(db: Session, user_info: dict, auth_schema: AuthSchema):
     )
     db.add(db_user)
     db.commit()
+
+    notification_setting = NotificationSetting(user_id=db_user.id,
+                                               noti_activity=auth_schema.noti_activity,
+                                               noti_chat=auth_schema.noti_chat,
+                                               noti_marketing=auth_schema.noti_marketing)
+    db.add(notification_setting)
+    db.commit()
+
     return db_user
 
 
@@ -133,6 +149,14 @@ def create_user_apple(db: Session, user_info: dict, auth_schema: AuthSchema):
     )
     db.add(db_user)
     db.commit()
+
+    notification_setting = NotificationSetting(user_id=db_user.id,
+                                               noti_activity=auth_schema.noti_activity,
+                                               noti_chat=auth_schema.noti_chat,
+                                               noti_marketing=auth_schema.noti_marketing)
+    db.add(notification_setting)
+    db.commit()
+
     return db_user
 
 
@@ -174,6 +198,8 @@ def delete_user_sso(db: Session, db_user: User):
     # Remove the user from these accompanies
     for accompany in member_accompanies:
         accompany_crud.leave_accompany(db, accompany_id=accompany.id, member=db_user)
+
+    db.query(NotificationSetting).filter(NotificationSetting.user_id == db_user.id).delete()
 
     db.commit()
 
@@ -297,6 +323,19 @@ def update_user_profile(db: Session, db_user: User, user_update: UserUpdate):
 def update_user_language_preference(db: Session, db_user: User, new_language_preference: LanguagePref):
     db_user.language_preference = new_language_preference.language_preference
     db.add(db_user)
+    db.commit()
+
+
+def update_user_notification_setting(db: Session, db_user: User, new_noti_setting: NotificationSetting):
+    db_noti_setting = db.query(NotificationSetting).filter(NotificationSetting.user_id == db_user.id).first()
+
+    if new_noti_setting.noti_activity is not None:
+        db_noti_setting.noti_activity = new_noti_setting.noti_activity
+    if new_noti_setting.noti_chat is not None:
+        db_noti_setting.noti_chat = new_noti_setting.noti_chat
+    if new_noti_setting.noti_marketing is not None:
+        db_noti_setting.noti_marketing = new_noti_setting.noti_marketing
+
     db.commit()
 
 

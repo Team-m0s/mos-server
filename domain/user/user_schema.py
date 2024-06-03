@@ -14,6 +14,9 @@ class AuthSchema(BaseModel):
     provider: str
     nick_name: str | None
     language_preference: str | None
+    noti_activity: bool | None
+    noti_chat: bool | None
+    noti_marketing: bool | None
 
     @field_validator('nick_name')
     def validate_nick_name(cls, v):
@@ -27,6 +30,12 @@ class AuthSchema(BaseModel):
 
 class LanguagePref(BaseModel):
     language_preference: str
+
+
+class NotificationSetting(BaseModel):
+    noti_activity: bool | None
+    noti_chat: bool | None
+    noti_marketing: bool | None
 
 
 class LanguageLevel(BaseModel):

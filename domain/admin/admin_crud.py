@@ -43,6 +43,8 @@ def get_insights(db: Session, category: InsightCategory = None,
         regex = r'(^|\s){}(\s|$)'.format(re.escape(search_keyword_content_exact))
         query = query.filter(Insight.content.op('regexp')(regex))
 
+    query = query.order_by(Insight.create_date.desc())
+
     db_insights = query.all()
     total_insights = len(db_insights)
 

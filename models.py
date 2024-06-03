@@ -187,6 +187,15 @@ class Notification(Base):
     is_Post = Column(Boolean, nullable=False)
 
 
+class NotificationSetting(Base):
+    __tablename__ = 'notification_setting'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("user.id"))
+    noti_activity = Column(Boolean, nullable=False)
+    noti_chat = Column(Boolean, nullable=False)
+    noti_marketing = Column(Boolean, nullable=False)
+
+
 class ReportReasonBoard(enum.Enum):
     hateSpeech = "욕설 / 비하발언"
     offTopic = "주제에 맞지 않는 글"
