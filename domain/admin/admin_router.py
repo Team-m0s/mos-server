@@ -44,7 +44,7 @@ def feedback_list(token: str = Header(), db: Session = Depends(get_db)):
 def insight_lists(db: Session = Depends(get_db), category: InsightCategory = None,
                   search_keyword_title: str = None, search_keyword_content: str = None,
                   search_keyword_title_exact: str = None, search_keyword_content_exact: str = None):
-    total_insights, insights = admin_crud.get_insights(db, search_keyword_title, search_keyword_content,
+    total_insights, insights = admin_crud.get_insights(db, category, search_keyword_title, search_keyword_content,
                                                        search_keyword_title_exact, search_keyword_content_exact)
     return {"total_insights": total_insights, "insights": insights}
 
