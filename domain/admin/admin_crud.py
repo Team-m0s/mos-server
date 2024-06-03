@@ -53,6 +53,8 @@ def create_insight(db: Session, insight_create: InsightCreate):
     content_json_data = json.dumps(insight_create.content, ensure_ascii=False)
     db_insight = Insight(title=title_json_data,
                          content=content_json_data,
+                         main_image=insight_create.main_image,
+                         category=insight_create.category,
                          create_date=datetime.now())
 
     db.add(db_insight)

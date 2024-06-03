@@ -9,6 +9,8 @@ class InsightBase(BaseModel):
     id: int
     title: str
     content: str
+    main_image = str | None
+    category = str
     create_date: datetime.datetime | None
 
 
@@ -25,6 +27,8 @@ class FeedbackListResponse(BaseModel):
 class InsightCreate(BaseModel):
     title: str
     content: str
+    main_image = str | None
+    category = str
 
 
 class InsightUpdate(InsightCreate):
