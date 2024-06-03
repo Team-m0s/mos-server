@@ -378,11 +378,16 @@ class Notice(Base):
     user = relationship("User", backref="notices_user")
 
 
+class InsightCategory(enum.Enum):
+    usefulInfo = '유용한 정보'
+    event = '이벤트'
+
+
 class Insight(Base):
     __tablename__ = "insight"
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
     content = Column(Text, nullable=False)
     main_image = Column(String, nullable=True)
-    category = Column(String, nullable=False, default='유용한 정보')
+    category = Column(Enum(InsightCategory), nullable=False, default=InsightCategory.usefulInfo)
     create_date = Column(DateTime, nullable=True)

@@ -107,7 +107,7 @@ class UserUpdate(BaseModel):
     lang_level: Dict[str, int] | None
     introduce: str | None
 
-    @field_validator('nick_name')
+    @field_validator('nickName')
     def validate_nick_name(cls, v):
         if v:
             if len(v) < 2 or len(v) > 10:
