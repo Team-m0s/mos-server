@@ -161,6 +161,17 @@ def create_user_apple(db: Session, user_info: dict, auth_schema: AuthSchema):
 
 
 def delete_user_sso(db: Session, db_user: User):
+    try:
+        auth.delete_user(db_user.firebase_uuid)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Failed to delete user from Firebase: " + str(e))
+
+    # Firestore에서 사용자 데이터 삭제
+    try:
+        firebase_db.collection('users').document(db_user.firebase_uuid).delete()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Failed to delete user data from Firestore: " + str(e))
+
     db_user.nickName = '알수없음'
     db_user.uuid = ""
     db_user.firebase_uuid = ""
