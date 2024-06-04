@@ -11,7 +11,7 @@ from fastapi import FastAPI, Request, HTTPException, status
 from jose import jwt
 from jwt_token import ALGORITHM, SECRET_KEY
 from jose.exceptions import JWTError, ExpiredSignatureError
-from domain.user.user_schema import AuthSchema, UserUpdate, LanguagePref, NotificationSetting
+from domain.user.user_schema import AuthSchema, UserUpdate, LanguagePref, NotificationSettingUpdate
 from utils import file_utils
 from firebase_admin import auth, firestore, credentials
 
@@ -326,7 +326,7 @@ def update_user_language_preference(db: Session, db_user: User, new_language_pre
     db.commit()
 
 
-def update_user_notification_setting(db: Session, db_user: User, new_noti_setting: NotificationSetting):
+def update_user_notification_setting(db: Session, db_user: User, new_noti_setting: NotificationSettingUpdate):
     db_noti_setting = db.query(NotificationSetting).filter(NotificationSetting.user_id == db_user.id).first()
 
     if new_noti_setting.noti_activity is not None:

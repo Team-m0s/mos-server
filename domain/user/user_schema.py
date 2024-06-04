@@ -32,7 +32,7 @@ class LanguagePref(BaseModel):
     language_preference: str
 
 
-class NotificationSetting(BaseModel):
+class NotificationSettingUpdate(BaseModel):
     noti_activity: bool | None
     noti_chat: bool | None
     noti_marketing: bool | None
