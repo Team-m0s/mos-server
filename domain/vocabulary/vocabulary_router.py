@@ -57,33 +57,36 @@ def solve_vocabulary(vocabulary_id: int, user_id: int, token: str = Header(), db
     title = vocabulary_crud.get_vocabulary_message_title(language_preference=solver.language_preference,
                                                          message_type='voca_solved')
 
-    message = messaging.Message(
-        notification=messaging.Notification(
-            title=title,
-            body=vocabulary.subject,
-        ),
-        data={
-            "vocabulary_id": str(vocabulary.id)
-        },
-        android=messaging.AndroidConfig(
-            priority='high',
-            notification=messaging.AndroidNotification(
-                sound='default'
-            )
-        ),
-        apns=messaging.APNSConfig(
-            payload=messaging.APNSPayload(
-                aps=messaging.Aps(
-                    badge=badge_count,
-                    sound='default',
-                    content_available=True
-                )
-            )
-        ),
-        token=solver.fcm_token
-    )
+    notification_setting = user_crud.get_user_notification_setting(db, solver)
 
-    messaging.send(message)
+    if notification_setting.noti_activity:
+        message = messaging.Message(
+            notification=messaging.Notification(
+                title=title,
+                body=vocabulary.subject,
+            ),
+            data={
+                "vocabulary_id": str(vocabulary.id)
+            },
+            android=messaging.AndroidConfig(
+                priority='high',
+                notification=messaging.AndroidNotification(
+                    sound='default'
+                )
+            ),
+            apns=messaging.APNSConfig(
+                payload=messaging.APNSPayload(
+                    aps=messaging.Aps(
+                        badge=badge_count,
+                        sound='default',
+                        content_available=True
+                    )
+                )
+            ),
+            token=solver.fcm_token
+        )
+
+        messaging.send(message)
 
     for comment in vocabulary.comment_vocabularies:
         comment.total_pages = total_pages

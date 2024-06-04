@@ -60,36 +60,39 @@ def personal_chat_create(personal_chat: chat_schema.PersonalChat, token: str = H
     title = chat_crud.get_chat_message_title(language_preference=receiver.language_preference,
                                              message_type='personal_chat')
 
-    # sender의 UUID와 firebase_uuid가 각각의 집합에 포함되어 있는지 확인
-    if sender.uuid not in blocked_uuids and sender.firebase_uuid not in blocked_firebase_uuids:
-        message = messaging.Message(
-            notification=messaging.Notification(
-                title=title,
-                body=personal_chat.message,
-            ),
-            data={
-                "talk_id": str(talk_id),
-                "last_message": str(personal_chat.message)
-            },
-            android=messaging.AndroidConfig(
-                priority='high',
-                notification=messaging.AndroidNotification(
-                    sound='default'
-                )
-            ),
-            apns=messaging.APNSConfig(
-                payload=messaging.APNSPayload(
-                    aps=messaging.Aps(
-                        badge=badge_count,
-                        sound='default',
-                        content_available=True,
-                    )
-                )
-            ),
-            token=receiver.fcm_token
-        )
+    notification_setting = user_crud.get_user_notification_setting(db, receiver)
 
-        messaging.send(message)
+    # sender의 UUID와 firebase_uuid가 각각의 집합에 포함되어 있는지 확인
+    if notification_setting.noti_chat:
+        if sender.uuid not in blocked_uuids and sender.firebase_uuid not in blocked_firebase_uuids:
+            message = messaging.Message(
+                notification=messaging.Notification(
+                    title=title,
+                    body=personal_chat.message,
+                ),
+                data={
+                    "talk_id": str(talk_id),
+                    "last_message": str(personal_chat.message)
+                },
+                android=messaging.AndroidConfig(
+                    priority='high',
+                    notification=messaging.AndroidNotification(
+                        sound='default'
+                    )
+                ),
+                apns=messaging.APNSConfig(
+                    payload=messaging.APNSPayload(
+                        aps=messaging.Aps(
+                            badge=badge_count,
+                            sound='default',
+                            content_available=True,
+                        )
+                    )
+                ),
+                token=receiver.fcm_token
+            )
+
+            messaging.send(message)
 
 
 @router.delete("/personal/exit", status_code=status.HTTP_204_NO_CONTENT, tags=["Chat"])

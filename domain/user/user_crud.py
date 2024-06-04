@@ -241,6 +241,10 @@ def get_image_by_hash_all(db: Session, image_hash: str):
     return db.query(Image).filter(Image.image_hash == image_hash).all()
 
 
+def get_user_notification_setting(db: Session, user: User):
+    return db.query(NotificationSetting).filter(NotificationSetting.user_id == user.id).first()
+
+
 def get_user_by_id(db: Session, user_id: int):
     return db.query(User).filter(User.id == user_id).first()
 

@@ -289,29 +289,32 @@ def update_hot_status(db: Session, post_id: int):
 
         title = get_hot_message_title(language_preference=post.user.language_preference, message_type='hot_selected')
 
-        # Add push notification sending here
-        message = messaging.Message(
-            notification=messaging.Notification(
-                title=title,
-                body=post.subject,
-            ),
-            android=messaging.AndroidConfig(
-                priority='high',
-                notification=messaging.AndroidNotification(
-                    sound='default'
-                )
-            ),
-            apns=messaging.APNSConfig(
-                payload=messaging.APNSPayload(
-                    aps=messaging.Aps(
-                        sound='default',
-                        content_available=True
-                    )
-                )
-            ),
-            token=post.user.fcm_token  # Assuming the User model has an fcm_token field
-        )
+        notification_setting = user_crud.get_user_notification_setting(db, post.user)
 
-        messaging.send(message)
+        # Add push notification sending here
+        if notification_setting.noti_activity:
+            message = messaging.Message(
+                notification=messaging.Notification(
+                    title=title,
+                    body=post.subject,
+                ),
+                android=messaging.AndroidConfig(
+                    priority='high',
+                    notification=messaging.AndroidNotification(
+                        sound='default'
+                    )
+                ),
+                apns=messaging.APNSConfig(
+                    payload=messaging.APNSPayload(
+                        aps=messaging.Aps(
+                            sound='default',
+                            content_available=True
+                        )
+                    )
+                ),
+                token=post.user.fcm_token  # Assuming the User model has an fcm_token field
+            )
+
+            messaging.send(message)
 
     db.commit()

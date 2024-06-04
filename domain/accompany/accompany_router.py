@@ -243,6 +243,7 @@ def accompany_create_notice(accompany_id: int, _notice_create: notice_schema.Not
 
     if len(members) > 0:  # Check if there is at least one member
         for member in members:
+            notification_setting = user_crud.get_user_notification_setting(db, member)
             badge_count = notification_crud.get_unread_notification_count(db, user=member)
             title = accompany_crud.get_accompany_message_content(content_type='title',
                                                                  language_preference=member.language_preference,
@@ -272,7 +273,8 @@ def accompany_create_notice(accompany_id: int, _notice_create: notice_schema.Not
                 ),
                 token=member.fcm_token
             )
-            messages.append(message)
+            if notification_setting.noti_activity:
+                messages.append(message)
 
         messaging.send_each(messages)
 
@@ -358,33 +360,36 @@ def accompany_apply(application_create: accompany_schema.ApplicationCreate, toke
                                                          language_preference=leader.language_preference,
                                                          message_type='new_application', accompany=accompany)
 
-    message = messaging.Message(
-        notification=messaging.Notification(
-            title=title,
-            body=application_create.answer,
-        ),
-        data={
-            "accompany_id": str(accompany.id)
-        },
-        android=messaging.AndroidConfig(
-            priority='high',
-            notification=messaging.AndroidNotification(
-                sound='default'
-            )
-        ),
-        apns=messaging.APNSConfig(
-            payload=messaging.APNSPayload(
-                aps=messaging.Aps(
-                    badge=badge_count,
-                    sound='default',
-                    content_available=True
-                )
-            )
-        ),
-        token=leader.fcm_token
-    )
+    notification_setting = user_crud.get_user_notification_setting(db, leader)
 
-    messaging.send(message)
+    if notification_setting.noti_activity:
+        message = messaging.Message(
+            notification=messaging.Notification(
+                title=title,
+                body=application_create.answer,
+            ),
+            data={
+                "accompany_id": str(accompany.id)
+            },
+            android=messaging.AndroidConfig(
+                priority='high',
+                notification=messaging.AndroidNotification(
+                    sound='default'
+                )
+            ),
+            apns=messaging.APNSConfig(
+                payload=messaging.APNSPayload(
+                    aps=messaging.Aps(
+                        badge=badge_count,
+                        sound='default',
+                        content_available=True
+                    )
+                )
+            ),
+            token=leader.fcm_token
+        )
+
+        messaging.send(message)
 
 
 @router.put("/application/approve/{application_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
@@ -410,33 +415,36 @@ def application_approve(application_id: int, token: str = Header(), db: Session 
                                                         language_preference=member.language_preference,
                                                         message_type='application_approved', accompany=accompany)
 
-    message = messaging.Message(
-        notification=messaging.Notification(
-            title=title,
-            body=body,
-        ),
-        data={
-            "accompany_id": str(accompany.id)
-        },
-        android=messaging.AndroidConfig(
-            priority='high',
-            notification=messaging.AndroidNotification(
-                sound='default'
-            )
-        ),
-        apns=messaging.APNSConfig(
-            payload=messaging.APNSPayload(
-                aps=messaging.Aps(
-                    badge=badge_count,
-                    sound='default',
-                    content_available=True
-                )
-            )
-        ),
-        token=member.fcm_token
-    )
+    notification_setting = user_crud.get_user_notification_setting(db, member)
 
-    messaging.send(message)
+    if notification_setting.noti_activity:
+        message = messaging.Message(
+            notification=messaging.Notification(
+                title=title,
+                body=body,
+            ),
+            data={
+                "accompany_id": str(accompany.id)
+            },
+            android=messaging.AndroidConfig(
+                priority='high',
+                notification=messaging.AndroidNotification(
+                    sound='default'
+                )
+            ),
+            apns=messaging.APNSConfig(
+                payload=messaging.APNSPayload(
+                    aps=messaging.Aps(
+                        badge=badge_count,
+                        sound='default',
+                        content_available=True
+                    )
+                )
+            ),
+            token=member.fcm_token
+        )
+
+        messaging.send(message)
 
 
 @router.put("/application/reject/{application_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Accompany"])
@@ -518,30 +526,33 @@ def accompany_delegate_leader(accompany_id: int, user_id: int, token: str = Head
                                                         language_preference=member.language_preference,
                                                         message_type='delegate_leader', accompany=accompany)
 
-    message = messaging.Message(
-        notification=messaging.Notification(
-            title=title,
-            body=body,
-        ),
-        data={
-            "accompany_id": str(accompany.id)
-        },
-        android=messaging.AndroidConfig(
-            priority='high',
-            notification=messaging.AndroidNotification(
-                sound='default'
-            )
-        ),
-        apns=messaging.APNSConfig(
-            payload=messaging.APNSPayload(
-                aps=messaging.Aps(
-                    badge=badge_count,
-                    sound='default',
-                    content_available=True
-                )
-            )
-        ),
-        token=member.fcm_token
-    )
+    notification_setting = user_crud.get_user_notification_setting(db, member)
 
-    messaging.send(message)
+    if notification_setting.noti_activity:
+        message = messaging.Message(
+            notification=messaging.Notification(
+                title=title,
+                body=body,
+            ),
+            data={
+                "accompany_id": str(accompany.id)
+            },
+            android=messaging.AndroidConfig(
+                priority='high',
+                notification=messaging.AndroidNotification(
+                    sound='default'
+                )
+            ),
+            apns=messaging.APNSConfig(
+                payload=messaging.APNSPayload(
+                    aps=messaging.Aps(
+                        badge=badge_count,
+                        sound='default',
+                        content_available=True
+                    )
+                )
+            ),
+            token=member.fcm_token
+        )
+
+        messaging.send(message)

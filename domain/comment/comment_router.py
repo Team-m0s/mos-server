@@ -78,35 +78,38 @@ def comment_create(post_id: int, _comment_create: comment_schema.CommentCreate, 
     title = comment_crud.get_comment_message_title(language_preference=author.language_preference,
                                                    message_type='new_comment', post=post)
 
-    if author.uuid != current_user.uuid:
-        if is_blocked:
-            message = messaging.Message(
-                notification=messaging.Notification(
-                    title=title,
-                    body=_comment_create.content,
-                ),
-                data={
-                    "post_id": str(post.id)
-                },
-                android=messaging.AndroidConfig(
-                    priority='high',
-                    notification=messaging.AndroidNotification(
-                        sound='default'
-                    )
-                ),
-                apns=messaging.APNSConfig(
-                    payload=messaging.APNSPayload(
-                        aps=messaging.Aps(
-                            badge=badge_count,
-                            sound='default',
-                            content_available=True
-                        )
-                    )
-                ),
-                token=author.fcm_token
-            )
+    notification_setting = user_crud.get_user_notification_setting(db, author)
 
-            messaging.send(message)
+    if author.uuid != current_user.uuid:
+        if notification_setting.noti_activity:
+            if is_blocked:
+                message = messaging.Message(
+                    notification=messaging.Notification(
+                        title=title,
+                        body=_comment_create.content,
+                    ),
+                    data={
+                        "post_id": str(post.id)
+                    },
+                    android=messaging.AndroidConfig(
+                        priority='high',
+                        notification=messaging.AndroidNotification(
+                            sound='default'
+                        )
+                    ),
+                    apns=messaging.APNSConfig(
+                        payload=messaging.APNSPayload(
+                            aps=messaging.Aps(
+                                badge=badge_count,
+                                sound='default',
+                                content_available=True
+                            )
+                        )
+                    ),
+                    token=author.fcm_token
+                )
+
+                messaging.send(message)
 
     return created_comment
 
@@ -164,34 +167,37 @@ def voca_comment_create(vocabulary_id: int, _comment_create: comment_schema.Voca
     title = comment_crud.get_comment_message_title(language_preference=author.language_preference,
                                                    message_type='new_answer')
 
-    if author.uuid != current_user.uuid:
-        message = messaging.Message(
-            notification=messaging.Notification(
-                title=title,
-                body=_comment_create.content,
-            ),
-            data={
-                "vocabulary_id": str(vocabulary.id)
-            },
-            android=messaging.AndroidConfig(
-                priority='high',
-                notification=messaging.AndroidNotification(
-                    sound='default'
-                )
-            ),
-            apns=messaging.APNSConfig(
-                payload=messaging.APNSPayload(
-                    aps=messaging.Aps(
-                        badge=badge_count,
-                        sound='default',
-                        content_available=True
-                    )
-                )
-            ),
-            token=author.fcm_token
-        )
+    notification_setting = user_crud.get_user_notification_setting(db, author)
 
-        messaging.send(message)
+    if author.uuid != current_user.uuid:
+        if notification_setting.noti_activity:
+            message = messaging.Message(
+                notification=messaging.Notification(
+                    title=title,
+                    body=_comment_create.content,
+                ),
+                data={
+                    "vocabulary_id": str(vocabulary.id)
+                },
+                android=messaging.AndroidConfig(
+                    priority='high',
+                    notification=messaging.AndroidNotification(
+                        sound='default'
+                    )
+                ),
+                apns=messaging.APNSConfig(
+                    payload=messaging.APNSPayload(
+                        aps=messaging.Aps(
+                            badge=badge_count,
+                            sound='default',
+                            content_available=True
+                        )
+                    )
+                ),
+                token=author.fcm_token
+            )
+
+            messaging.send(message)
 
     return created_comment
 
@@ -226,35 +232,38 @@ def sub_comment_create(comment_id: int, _comment_create: comment_schema.SubComme
     title = comment_crud.get_comment_message_title(language_preference=author.language_preference,
                                                    message_type='new_sub_comment', comment=comment)
 
-    if author.uuid != current_user.uuid:
-        if is_blocked:
-            message = messaging.Message(
-                notification=messaging.Notification(
-                    title=title,
-                    body=_comment_create.content,
-                ),
-                data={
-                    "post_id": str(comment.post_id)
-                },
-                android=messaging.AndroidConfig(
-                    priority='high',
-                    notification=messaging.AndroidNotification(
-                        sound='default'
-                    )
-                ),
-                apns=messaging.APNSConfig(
-                    payload=messaging.APNSPayload(
-                        aps=messaging.Aps(
-                            badge=badge_count,
-                            sound='default',
-                            content_available=True
-                        )
-                    )
-                ),
-                token=author.fcm_token
-            )
+    notification_setting = user_crud.get_user_notification_setting(db, author)
 
-            messaging.send(message)
+    if author.uuid != current_user.uuid:
+        if notification_setting.noti_activity:
+            if is_blocked:
+                message = messaging.Message(
+                    notification=messaging.Notification(
+                        title=title,
+                        body=_comment_create.content,
+                    ),
+                    data={
+                        "post_id": str(comment.post_id)
+                    },
+                    android=messaging.AndroidConfig(
+                        priority='high',
+                        notification=messaging.AndroidNotification(
+                            sound='default'
+                        )
+                    ),
+                    apns=messaging.APNSConfig(
+                        payload=messaging.APNSPayload(
+                            aps=messaging.Aps(
+                                badge=badge_count,
+                                sound='default',
+                                content_available=True
+                            )
+                        )
+                    ),
+                    token=author.fcm_token
+                )
+
+                messaging.send(message)
 
     return created_comment
 
