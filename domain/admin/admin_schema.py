@@ -45,7 +45,12 @@ class BannerBase(BaseModel):
     image: str | None
     destinationPage: str
     isTop: bool | None
-    create_date = datetime.datetime
+    create_date: datetime.datetime
+
+
+class BannerListResponse(BaseModel):
+    total_banners: int
+    banners: list[BannerBase]
 
 
 class BannerCreate(BaseModel):

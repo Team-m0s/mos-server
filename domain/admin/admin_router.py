@@ -105,12 +105,12 @@ def insight_delete(_insight_delete: admin_schema.InsightDelete, token: str = Hea
     admin_crud.delete_insight(db, db_insight=db_insight)
 
 
-@router.get("/banners", response_model=admin_schema.BannerBase)
+@router.get("/banners", response_model=admin_schema.BannerListResponse)
 def banner_lists(db: Session = Depends(get_db), search_keyword_title: str = None,
                  search_keyword_title_exact: str = None):
     total_banners, banners = admin_crud.get_banners(db, search_keyword_title, search_keyword_title_exact)
 
-    return {"total_insights": total_banners, "insights": banners}
+    return {"total_banners": total_banners, "banners": banners}
 
 
 @router.post("/create/banner", status_code=status.HTTP_204_NO_CONTENT)
