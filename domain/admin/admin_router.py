@@ -103,3 +103,51 @@ def insight_delete(_insight_delete: admin_schema.InsightDelete, token: str = Hea
         raise HTTPException(status_code=404, detail="Insight not found")
 
     admin_crud.delete_insight(db, db_insight=db_insight)
+
+
+@router.get("/banners", response_model=admin_schema.BannerBase)
+def banner_lists(db: Session = Depends(get_db), search_keyword_title: str = None,
+                 search_keyword_title_exact: str = None):
+    total_banners, banners = admin_crud.get_banners(db, search_keyword_title, search_keyword_title_exact)
+
+    return {"total_insights": total_banners, "insights": banners}
+
+
+@router.post("/create/banner", status_code=status.HTTP_204_NO_CONTENT)
+def banner_create(_banner_create: admin_schema.BannerCreate, token: str = Header(), db: Session = Depends(get_db)):
+    current_user = user_crud.get_current_user(db, token)
+
+    # if not current_user.is_admin:
+    #    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+
+    admin_crud.create_banner(db, banner_create=_banner_create)
+
+
+@router.put("/update/banner", status_code=status.HTTP_204_NO_CONTENT)
+def banner_update(_banner_update: admin_schema.BannerUpdate, token: str = Header(), db: Session = Depends(get_db)):
+    current_user = user_crud.get_current_user(db, token)
+
+    # if not current_user.is_admin:
+    #    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+
+    db_banner = admin_crud.get_banner_by_id(db, banner_id=_banner_update.banner_id)
+
+    if not db_banner:
+        raise HTTPException(status_code=404, detail="Banner not found")
+
+    admin_crud.update_banner(db, db_banner=db_banner, banner_update=_banner_update)
+
+
+@router.delete("/delete/banner", status_code=status.HTTP_204_NO_CONTENT)
+def banner_delete(_banner_delete: admin_schema.BannerDelete, token: str = Header(), db: Session = Depends(get_db)):
+    current_user = user_crud.get_current_user(db, token)
+
+    # if not current_user.is_admin:
+    #    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+
+    db_banner= admin_crud.get_banner_by_id(db, banner_id=_banner_delete.banner_id)
+
+    if not db_banner:
+        raise HTTPException(status_code=404, detail="Banner not found")
+
+    admin_crud.delete_banner(db, db_banner=db_banner)

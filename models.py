@@ -400,3 +400,13 @@ class Insight(Base):
     main_image = Column(String, nullable=True)
     category = Column(Enum(InsightCategory), nullable=False, default=InsightCategory.usefulInfo)
     create_date = Column(DateTime, nullable=True)
+
+
+class Banner(Base):
+    __tablename__ = "banner"
+    id = Column(Integer, primary_key=True)
+    title = Column(String, nullable=False)
+    image = Column(String, nullable=True)
+    destinationPage = Column(String, nullable=False)
+    isTop = Column(Boolean, nullable=False, default=False)
+    create_date = Column(DateTime, nullable=False)

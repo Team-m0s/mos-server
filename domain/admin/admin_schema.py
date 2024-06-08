@@ -38,3 +38,26 @@ class InsightUpdate(InsightCreate):
 
 class InsightDelete(BaseModel):
     insight_id: int
+
+
+class BannerBase(BaseModel):
+    title: str
+    image: str | None
+    destinationPage: str
+    isTop: bool | None
+    create_date = datetime.datetime
+
+
+class BannerCreate(BaseModel):
+    title: str
+    image: str | None
+    destinationPage: str
+    isTop: bool | None
+
+
+class BannerUpdate(BannerCreate):
+    banner_id: int
+
+
+class BannerDelete(BaseModel):
+    banner_id: int

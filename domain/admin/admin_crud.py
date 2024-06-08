@@ -2,8 +2,8 @@ import json
 import re
 from datetime import datetime
 from sqlalchemy.orm import Session
-from models import User, Insight, Feedback
-from domain.admin.admin_schema import InsightCreate, InsightUpdate
+from models import User, Insight, Feedback, Banner
+from domain.admin.admin_schema import InsightCreate, InsightUpdate, BannerCreate, BannerUpdate
 from models import InsightCategory
 
 
@@ -74,6 +74,11 @@ def update_insight(db: Session, db_insight: Insight, insight_update: InsightUpda
 
     db_insight.title = title_json_data
     db_insight.content = content_json_data
+
+    if insight_update.main_image:
+        db_insight.main_image = insight_update.main_image
+
+    db_insight.category = insight_update.category
     db_insight.create_date = datetime.now()
 
     db.add(db_insight)
@@ -83,4 +88,60 @@ def update_insight(db: Session, db_insight: Insight, insight_update: InsightUpda
 
 def delete_insight(db: Session, db_insight: Insight):
     db.delete(db_insight)
+    db.commit()
+
+
+def get_banners(db: Session, search_keyword_title: str = None, search_keyword_title_exact: str = None):
+    query = db.query(Banner)
+
+    if search_keyword_title:
+        query = query.filter(Banner.title.contains(search_keyword_title))
+
+    if search_keyword_title_exact:
+        regex = r'(^|\s){}(\s|$)'.format(re.escape(search_keyword_title_exact))
+        query = query.filter(Banner.title.op('regexp')(regex))
+
+    query = query.order_by(Banner.create_date.desc())
+
+    db_banners = query.all()
+    total_banners = len(db_banners)
+
+    return total_banners, db_banners
+
+
+def get_banner_by_id(db: Session, banner_id: int):
+    return db.query(Banner).filter(Banner.id == banner_id).first()
+
+
+def create_banner(db: Session, banner_create: BannerCreate):
+    db_banner = Banner(title=banner_create.title,
+                       image=banner_create.image,
+                       destinationPage=banner_create.destinationPage,
+                       isTop=banner_create.isTop,
+                       create_date=datetime.now())
+
+    db.add(db_banner)
+    db.commit()
+
+
+def update_banner(db: Session, db_banner: Banner, banner_update: BannerUpdate):
+    db_banner.title = banner_update.title
+
+    if banner_update.image:
+        db_banner.image = banner_update.image
+
+    db_banner.destinationPage = banner_update.destinationPage
+
+    if banner_update.isTop:
+        db_banner.isTop = banner_update.isTop
+
+    db_banner.create_date = datetime.now()
+
+    db.add(db_banner)
+    db.commit()
+    db.refresh(db_banner)
+
+
+def delete_banner(db: Session, db_banner: Banner):
+    db.delete(db_banner)
     db.commit()
