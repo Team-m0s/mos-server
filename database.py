@@ -2,8 +2,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-SQLALCHEMY_DATABASE_URL = "postgresql://mos_admin:REMOVED@mos-server-db-instance.cbkqmgeusqyw.ap-northeast-2.rds" \
-                          ".amazonaws.com/mosAPI "
+SQLALCHEMY_DATABASE_URL = "postgresql://mos_admin:REMOVED@mos-server-db-rds.cbkqmgeusqyw.ap-northeast-2.rds" \
+                          ".amazonaws.com/mosAPI"
 
 if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
     engine = create_engine(
