@@ -36,6 +36,7 @@ class User(Base):
     lang_level = Column(JSON, nullable=True)
     report_count = Column(Integer, nullable=False, default=0)
     register_date = Column(DateTime, nullable=False)
+    deletion_date = Column(DateTime, nullable=True)
     last_nickname_change = Column(DateTime, nullable=True)
     suspension_period = Column(DateTime, nullable=True)
     is_admin = Column(Boolean, nullable=False, default=False)

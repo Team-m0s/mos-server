@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import firebase_admin
 import random
 from sqlalchemy.orm import Session
+from database import SessionLocal
 
 from domain.accompany import accompany_crud
 from models import User, Image, accompany_member, Accompany, UserActivity, NotificationSetting
@@ -160,33 +161,8 @@ def create_user_apple(db: Session, user_info: dict, auth_schema: AuthSchema):
     return db_user
 
 
-def delete_user_sso(db: Session, db_user: User):
-    try:
-        auth.delete_user(db_user.firebase_uuid)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail="Failed to delete user from Firebase: " + str(e))
-
-    # Firestore에서 사용자 데이터 삭제
-    try:
-        firebase_db.collection('users').document(db_user.firebase_uuid).delete()
-    except Exception as e:
-        raise HTTPException(status_code=400, detail="Failed to delete user data from Firestore: " + str(e))
-
-    db_user.nickName = '알수없음'
-    db_user.uuid = ""
-    db_user.firebase_uuid = ""
-    db_user.fcm_token = ""
-    db_user.provider = ""
-    db_user.email = ""
-    db_user.profile_img = ""
-    db_user.introduce = ""
-    db_user.point = 0
-    db_user.language_preference = ""
-    db_user.lang_level = None
-    db_user.register_date = datetime(1970, 1, 1)
-    db_user.report_count = 0
-    db_user.last_nickname_change = None
-    db_user.suspension_period = None
+def mark_user_to_delete(db: Session, db_user: User):
+    db_user.deletion_date = datetime.now() + timedelta(days=7)
 
     leader_accompanies = db.query(Accompany).filter(Accompany.leader_id == db_user.id).all()
 
@@ -213,6 +189,41 @@ def delete_user_sso(db: Session, db_user: User):
     db.query(NotificationSetting).filter(NotificationSetting.user_id == db_user.id).delete()
 
     db.commit()
+
+
+def delete_user_sso():
+    db = SessionLocal()
+    current_date = datetime.now().date()
+
+    users_to_delete = db.query(User).filter(User.deletion_date <= current_date).all()
+
+    for user in users_to_delete:
+        try:
+            auth.delete_user(user.firebase_uuid)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail="Failed to delete user from Firebase: " + str(e))
+
+        # Firestore에서 사용자 데이터 삭제
+        try:
+            firebase_db.collection('users').document(user.firebase_uuid).delete()
+        except Exception as e:
+            raise HTTPException(status_code=400, detail="Failed to delete user data from Firestore: " + str(e))
+
+        user.nickName = '알수없음'
+        user.uuid = ""
+        user.firebase_uuid = ""
+        user.fcm_token = ""
+        user.provider = ""
+        user.email = ""
+        user.profile_img = ""
+        user.introduce = ""
+        user.point = 0
+        user.language_preference = ""
+        user.lang_level = None
+        user.register_date = datetime(1970, 1, 1)
+        user.report_count = 0
+        user.last_nickname_change = None
+        user.suspension_period = None
 
 
 def generate_unique_uuid(db: Session):
