@@ -171,7 +171,7 @@ def mark_user_to_delete(db: Session, db_user: User):
         members = accompany_crud.get_members_by_accompany_id(db, accompany_id=accompany.id)
 
         # If the user is the only member, delete the accompany
-        if len(members) == 1:
+        if len(members) == 0:
             accompany_crud.delete_accompany(db, accompany_id=accompany.id)
         else:
             # If there are other members, delegate the leader role to another member

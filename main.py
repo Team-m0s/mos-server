@@ -140,13 +140,15 @@ async def kakao_auth(auth_schema: AuthSchema = Body(...), token: str = Header(),
     user_info = dict(id_info)
     db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
 
-    if auth_schema.nick_name:
-        db_user = user_crud.create_user_kakao(db, user_info=user_info, auth_schema=auth_schema)
-
+    if db_user:
+        if db_user.deletion_date is not None:
+            if datetime.now() < db_user.deletion_date + timedelta(days=7):
+                raise HTTPException(status_code=400, detail="Cannot re-register within 7 days after deletion.")
+        else:
+            user_crud.update_fcm_token(db, db_user=db_user, token=auth_schema.fcm_token)
     else:
-        if db_user is None:
-            raise HTTPException(status_code=404, detail="User not found")
-        user_crud.update_fcm_token(db, db_user=db_user, token=auth_schema.fcm_token)
+        if auth_schema.nick_name:
+            db_user = user_crud.create_user_google(db, user_info=user_info, auth_schema=auth_schema)
 
     # 토큰 생성
     access_token = jwt_token.create_access_token(data={"sub": user_info['sub']}, expires_delta=timedelta(minutes=15))
@@ -166,13 +168,15 @@ async def apple_auth(auth_schema: AuthSchema = Body(...), token: str = Header(),
     user_info = dict(id_info)
     db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
 
-    if auth_schema.nick_name:
-        db_user = user_crud.create_user_apple(db, user_info=user_info, auth_schema=auth_schema)
-
+    if db_user:
+        if db_user.deletion_date is not None:
+            if datetime.now() < db_user.deletion_date + timedelta(days=7):
+                raise HTTPException(status_code=400, detail="Cannot re-register within 7 days after deletion.")
+        else:
+            user_crud.update_fcm_token(db, db_user=db_user, token=auth_schema.fcm_token)
     else:
-        if db_user is None:
-            raise HTTPException(status_code=404, detail="User not found")
-        user_crud.update_fcm_token(db, db_user=db_user, token=auth_schema.fcm_token)
+        if auth_schema.nick_name:
+            db_user = user_crud.create_user_google(db, user_info=user_info, auth_schema=auth_schema)
 
     # 토큰 생성
     access_token = jwt_token.create_access_token(data={"sub": user_info['sub']}, expires_delta=timedelta(minutes=15))
@@ -186,7 +190,7 @@ async def apple_auth(auth_schema: AuthSchema = Body(...), token: str = Header(),
 
 
 @app.delete("/account/google/delete", tags=["Authentication"])
-def google_revoke(uuid: str = Header(), db: Session = Depends(get_db)):
+async def google_revoke(uuid: str = Header(), db: Session = Depends(get_db)):
     db_user = user_crud.get_user_by_uuid(db, uuid=uuid)
 
     if db_user is None:
@@ -196,7 +200,7 @@ def google_revoke(uuid: str = Header(), db: Session = Depends(get_db)):
 
 
 @app.delete("/account/kakao/delete", tags=["Authentication"])
-def kakao_revoke(uuid: str = Header(), db: Session = Depends(get_db)):
+async def kakao_revoke(uuid: str = Header(), db: Session = Depends(get_db)):
     db_user = user_crud.get_user_by_uuid(db, uuid=uuid)
 
     if db_user is None:
