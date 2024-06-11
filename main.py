@@ -111,15 +111,21 @@ async def google_auth(auth_schema: AuthSchema = Body(...), token: str = Header()
     user_info = dict(id_info)
     db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
 
-    if db_user:
-        if db_user.deletion_date is not None:
-            if datetime.now() < db_user.deletion_date + timedelta(days=7):
+    if auth_schema.nick_name:
+        if db_user is not None:
+            if datetime.now() < db_user.deletion_date:
                 raise HTTPException(status_code=400, detail="Cannot re-register within 7 days after deletion.")
         else:
-            user_crud.update_fcm_token(db, db_user=db_user, token=auth_schema.fcm_token)
+            db_user = user_crud.create_user_kakao(db, user_info=user_info, auth_schema=auth_schema)
+
     else:
-        if auth_schema.nick_name:
-            db_user = user_crud.create_user_google(db, user_info=user_info, auth_schema=auth_schema)
+        if db_user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        if db_user.deletion_date is not None:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        user_crud.update_fcm_token(db, db_user=db_user, token=auth_schema.fcm_token)
 
     access_token_expires = timedelta(minutes=15)  # 토큰 유효 시간 설정
     access_token = jwt_token.create_access_token(data={"sub": user_info['sub']},
@@ -140,15 +146,21 @@ async def kakao_auth(auth_schema: AuthSchema = Body(...), token: str = Header(),
     user_info = dict(id_info)
     db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
 
-    if db_user:
-        if db_user.deletion_date is not None:
-            if datetime.now() < db_user.deletion_date + timedelta(days=7):
+    if auth_schema.nick_name:
+        if db_user is not None:
+            if datetime.now() < db_user.deletion_date:
                 raise HTTPException(status_code=400, detail="Cannot re-register within 7 days after deletion.")
         else:
-            user_crud.update_fcm_token(db, db_user=db_user, token=auth_schema.fcm_token)
+            db_user = user_crud.create_user_kakao(db, user_info=user_info, auth_schema=auth_schema)
+
     else:
-        if auth_schema.nick_name:
-            db_user = user_crud.create_user_google(db, user_info=user_info, auth_schema=auth_schema)
+        if db_user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        if db_user.deletion_date is not None:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        user_crud.update_fcm_token(db, db_user=db_user, token=auth_schema.fcm_token)
 
     # 토큰 생성
     access_token = jwt_token.create_access_token(data={"sub": user_info['sub']}, expires_delta=timedelta(minutes=15))
@@ -168,15 +180,21 @@ async def apple_auth(auth_schema: AuthSchema = Body(...), token: str = Header(),
     user_info = dict(id_info)
     db_user = user_crud.get_user_by_uuid(db, user_info['sub'])
 
-    if db_user:
-        if db_user.deletion_date is not None:
-            if datetime.now() < db_user.deletion_date + timedelta(days=7):
+    if auth_schema.nick_name:
+        if db_user is not None:
+            if datetime.now() < db_user.deletion_date:
                 raise HTTPException(status_code=400, detail="Cannot re-register within 7 days after deletion.")
         else:
-            user_crud.update_fcm_token(db, db_user=db_user, token=auth_schema.fcm_token)
+            db_user = user_crud.create_user_kakao(db, user_info=user_info, auth_schema=auth_schema)
+
     else:
-        if auth_schema.nick_name:
-            db_user = user_crud.create_user_google(db, user_info=user_info, auth_schema=auth_schema)
+        if db_user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        if db_user.deletion_date is not None:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        user_crud.update_fcm_token(db, db_user=db_user, token=auth_schema.fcm_token)
 
     # 토큰 생성
     access_token = jwt_token.create_access_token(data={"sub": user_info['sub']}, expires_delta=timedelta(minutes=15))
