@@ -23,7 +23,8 @@ def get_all_feedbacks(db: Session):
 
 def get_insights(db: Session, category: InsightCategory = None,
                  search_keyword_title: str = None, search_keyword_content: str = None,
-                 search_keyword_title_exact: str = None, search_keyword_content_exact: str = None):
+                 search_keyword_title_exact: str = None, search_keyword_content_exact: str = None,
+                 insight_language: LanguageCategory = None):
     query = db.query(Insight)
 
     if category:
@@ -42,6 +43,9 @@ def get_insights(db: Session, category: InsightCategory = None,
     if search_keyword_content_exact:
         regex = r'(^|\s){}(\s|$)'.format(re.escape(search_keyword_content_exact))
         query = query.filter(Insight.content.op('regexp')(regex))
+
+    if insight_language:
+        query = query.filter(Insight.language == insight_language)
 
     query = query.order_by(Insight.create_date.desc())
 
@@ -62,6 +66,7 @@ def create_insight(db: Session, insight_create: InsightCreate):
                          content=content_json_data,
                          main_image=insight_create.main_image,
                          category=insight_create.category,
+                         language=insight_create.language,
                          create_date=datetime.now())
 
     db.add(db_insight)
@@ -79,6 +84,10 @@ def update_insight(db: Session, db_insight: Insight, insight_update: InsightUpda
         db_insight.main_image = insight_update.main_image
 
     db_insight.category = insight_update.category
+
+    if insight_update.language:
+        db_insight.language = insight_update.language
+
     db_insight.create_date = datetime.now()
 
     db.add(db_insight)

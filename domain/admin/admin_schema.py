@@ -30,6 +30,7 @@ class InsightCreate(BaseModel):
     content: str
     main_image: str | None
     category: InsightCategory
+    language: LanguageCategory | None
 
 
 class InsightUpdate(InsightCreate):
@@ -41,6 +42,7 @@ class InsightDelete(BaseModel):
 
 
 class BannerBase(BaseModel):
+    id: int
     title: str
     image: str | None
     destinationPage: str

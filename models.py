@@ -405,6 +405,7 @@ class Insight(Base):
     content = Column(Text, nullable=False)
     main_image = Column(String, nullable=True)
     category = Column(Enum(InsightCategory), nullable=False, default=InsightCategory.usefulInfo)
+    language = Column(Enum(LanguageCategory), nullable=False, default=LanguageCategory.korean)
     create_date = Column(DateTime, nullable=True)
 
 
