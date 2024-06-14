@@ -4,7 +4,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from models import User, Insight, Feedback, Banner
 from domain.admin.admin_schema import InsightCreate, InsightUpdate, BannerCreate, BannerUpdate
-from models import InsightCategory
+from models import InsightCategory, LanguageCategory
 
 
 def get_all_users(db: Session):
@@ -91,7 +91,8 @@ def delete_insight(db: Session, db_insight: Insight):
     db.commit()
 
 
-def get_banners(db: Session, search_keyword_title: str = None, search_keyword_title_exact: str = None):
+def get_banners(db: Session, search_keyword_title: str = None, search_keyword_title_exact: str = None,
+                banner_language: LanguageCategory = None):
     query = db.query(Banner)
 
     if search_keyword_title:
@@ -100,6 +101,9 @@ def get_banners(db: Session, search_keyword_title: str = None, search_keyword_ti
     if search_keyword_title_exact:
         regex = r'(^|\s){}(\s|$)'.format(re.escape(search_keyword_title_exact))
         query = query.filter(Banner.title.op('regexp')(regex))
+
+    if banner_language:
+        query = query.filter(Banner.language == banner_language)
 
     query = query.order_by(Banner.create_date.desc())
 
@@ -118,6 +122,7 @@ def create_banner(db: Session, banner_create: BannerCreate):
                        image=banner_create.image,
                        destinationPage=banner_create.destinationPage,
                        isTop=banner_create.isTop,
+                       language=banner_create.language,
                        create_date=datetime.now())
 
     db.add(db_banner)
@@ -134,6 +139,9 @@ def update_banner(db: Session, db_banner: Banner, banner_update: BannerUpdate):
 
     if banner_update.isTop:
         db_banner.isTop = banner_update.isTop
+
+    if banner_update.language:
+        db_banner.language = banner_update.language
 
     db_banner.create_date = datetime.now()
 

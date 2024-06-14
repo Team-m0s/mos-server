@@ -10,7 +10,7 @@ from domain.user import user_crud
 from domain.user import user_schema
 from domain.admin import admin_schema
 from utils import file_utils
-from models import InsightCategory
+from models import InsightCategory, LanguageCategory
 
 router = APIRouter(
     prefix="/api/admin",
@@ -107,8 +107,9 @@ def insight_delete(_insight_delete: admin_schema.InsightDelete, token: str = Hea
 
 @router.get("/banners", response_model=admin_schema.BannerListResponse)
 def banner_lists(db: Session = Depends(get_db), search_keyword_title: str = None,
-                 search_keyword_title_exact: str = None):
-    total_banners, banners = admin_crud.get_banners(db, search_keyword_title, search_keyword_title_exact)
+                 search_keyword_title_exact: str = None, banner_language: LanguageCategory = None,):
+    total_banners, banners = admin_crud.get_banners(db, search_keyword_title, search_keyword_title_exact,
+                                                    banner_language)
 
     return {"total_banners": total_banners, "banners": banners}
 

@@ -8,6 +8,11 @@ from datetime import datetime
 import enum
 
 
+class LanguageCategory(enum.Enum):
+    korean = '한국어'
+    english = 'English'
+
+
 class UserActivity(Base):
     __tablename__ = "user_activity"
 
@@ -410,4 +415,5 @@ class Banner(Base):
     image = Column(String, nullable=True)
     destinationPage = Column(String, nullable=False)
     isTop = Column(Boolean, nullable=False, default=False)
+    language = Column(Enum(LanguageCategory), nullable=False, default=LanguageCategory.korean)
     create_date = Column(DateTime, nullable=False)
