@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir -r /mos-server/requirements.txt
 COPY ./ /mos-server/
 
 # 실행
-CMD ["gunicorn", "--bind", "0.0.0.0:${BIND_PORT}", "main:app", "--worker-class", "uvicorn.workers.UvicornWorker", "--access-logfile", "./errorLog.log"]
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${BIND_PORT} main:app --worker-class uvicorn.workers.UvicornWorker --access-logfile ./errorLog.log"]
