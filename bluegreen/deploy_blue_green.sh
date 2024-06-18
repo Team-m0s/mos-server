@@ -49,6 +49,7 @@ if [ -z "$IS_GREEN" ]; then # blue라면
 
   echo "5. reload nginx"
   sudo cp -p /etc/nginx/nginx-green.conf /etc/nginx/nginx.conf || exit 1
+  sudo cp -p /etc/nginx/sites-available/fastapi-green /etc/nginx/sites-available/fastapi || exit 1
   sudo systemctl restart nginx || exit 1
 
   if [ "$(docker ps -q -f name=blue)" ]; then
@@ -87,6 +88,7 @@ else
 
   echo "5. reload nginx"
   sudo cp -p /etc/nginx/nginx-blue.conf /etc/nginx/nginx.conf || exit 1
+  sudo cp -p /etc/nginx/sites-available/fastapi-blue /etc/nginx/sites-available/fastapi || exit 1
   sudo systemctl restart nginx || exit 1
 
   if [ "$(docker ps -q -f name=green)" ]; then
