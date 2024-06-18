@@ -2,12 +2,12 @@ version: '3.3'
 services:
   green:
     container_name: green
-    image: jaypark/image
+    image: mink0824/mos-server
     ports:
       - "8080:8080"
 
   blue:
     container_name: blue
-    image: jaypark/image
+    image: mink0824/mos-server
     ports:
       - "8081:8080"
