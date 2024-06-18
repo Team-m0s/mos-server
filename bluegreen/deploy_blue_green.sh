@@ -15,12 +15,10 @@ if [ -z $IS_GREEN  ];then # blue라면
     echo "3. green health check..."
     sleep 3
 
-    REQUEST=$(curl -s -o /dev/null -w "%{http_code}" https://www.mos-server.store/) # green으로 request
-      if [ "$REQUEST" -eq 200 ]; then # 서비스 가능하면 health check 중지
+    REQUEST=$(curl https://www.mos-server.store/) # green으로 request
+      if [ -n "$REQUEST" ]; then # 서비스 가능하면 health check 중지
         echo "health check success"
-        break
-      else
-        echo "health check failed with status code $REQUEST"
+        break ;
       fi
   done;
 
@@ -32,7 +30,7 @@ if [ -z $IS_GREEN  ];then # blue라면
     echo "5. blue container down"
     docker-compose stop blue
   fi
-  
+
 else
   echo "### GREEN => BLUE ###"
 
@@ -45,14 +43,12 @@ else
   while [ 1 = 1 ]; do
     echo "3. blue health check..."
     sleep 3
+    REQUEST=$(curl https://www.mos-server.store/) # blue로 request
 
-    REQUEST=$(curl -s -o /dev/null -w "%{http_code}" https://www.mos-server.store/) # green으로 request
-      if [ "$REQUEST" -eq 200 ]; then # 서비스 가능하면 health check 중지
-        echo "health check success"
-        break
-      else
-        echo "health check failed with status code $REQUEST"
-      fi
+    if [ -n "$REQUEST" ]; then # 서비스 가능하면 health check 중지
+      echo "health check success"
+      break ;
+    fi
 
   done;
 
@@ -62,7 +58,7 @@ else
 
   if [ "$(docker ps -q -f name=green)" ]; then
     echo "5. green container down"
-    docker-compose stop green
+    docker compose stop green
   fi
 
 fi
