@@ -222,7 +222,7 @@ def delete_post(db: Session, db_post: Post):
 
 
 HOT_STATUS_UPDATE_CRITERIA = {
-    3: (5, 5),
+    3: (1, 1),
     4: (7, 6),
     5: (5, 5),
     6: (5, 5),
