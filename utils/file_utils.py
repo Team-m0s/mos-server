@@ -11,7 +11,7 @@ def save_image_file(image_file: UploadFile):
         file_name = f"{uuid4()}{file_extension}"  # 고유한 파일명 생성
         file_path = f"uploaded_images/{file_name}"
 
-        with open('static/' + file_path, "wb") as buffer:
+        with open('/mos-server/static/' + file_path, "wb") as buffer:
             buffer.write(image_file.file.read())
 
         image_file.file.seek(0)
@@ -22,7 +22,7 @@ def save_image_file(image_file: UploadFile):
 
 def delete_image_file(image_path: str):
     try:
-        os.remove('static/' + image_path)
+        os.remove('/mos-server/static/' + image_path)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"File delete error: {e}")
 
