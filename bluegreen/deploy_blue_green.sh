@@ -15,10 +15,12 @@ if [ -z $IS_GREEN  ];then # blue라면
     echo "3. green health check..."
     sleep 3
 
-    REQUEST=$(curl http://127.0.0.1:8080) # green으로 request
-      if [ -n "$REQUEST" ]; then # 서비스 가능하면 health check 중지
+    REQUEST=$(curl -s -o /dev/null -w "%{http_code}" https://www.mos-server.store/) # green으로 request
+      if [ "$REQUEST" -eq 200 ]; then # 서비스 가능하면 health check 중지
         echo "health check success"
-        break ;
+        break
+      else
+        echo "health check failed with status code $REQUEST"
       fi
   done;
 
@@ -43,12 +45,14 @@ else
   while [ 1 = 1 ]; do
     echo "3. blue health check..."
     sleep 3
-    REQUEST=$(curl http://127.0.0.1:8081) # blue로 request
 
-    if [ -n "$REQUEST" ]; then # 서비스 가능하면 health check 중지
-      echo "health check success"
-      break ;
-    fi
+    REQUEST=$(curl -s -o /dev/null -w "%{http_code}" https://www.mos-server.store/) # green으로 request
+      if [ "$REQUEST" -eq 200 ]; then # 서비스 가능하면 health check 중지
+        echo "health check success"
+        break
+      else
+        echo "health check failed with status code $REQUEST"
+      fi
 
   done;
 
