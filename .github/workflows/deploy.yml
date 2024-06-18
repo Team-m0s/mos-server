@@ -1,0 +1,51 @@
+name: CD with FastAPI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        python -m venv venv
+        . venv/bin/activate
+        pip install -r requirements.txt
+
+    - name: Build Docker image
+      run: |
+        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO }}/fastapi-app .
+
+    - name: Push Docker image
+      run: |
+        docker push ${{ secrets.DOCKER_REPO }}/fastapi-app
+
+    - name: Deploy to server
+      uses: appleboy/ssh-action@master
+      id: deploy
+      with:
+        host: ${{ secrets.REMOTE_IP }}
+        username: ${{ secrets.REMOTE_SSH_ID }}
+        key: ${{ secrets.REMOTE_SSH_KEY }}
+        port: ${{ secrets.REMOTE_SSH_PORT }}
+        script: |
+          sudo docker rm -f $(docker ps -qa)
+          sudo docker pull ${{ secrets.DOCKER_REPO }}/fastapi-app
+          docker-compose up -d
+          docker image prune -f
