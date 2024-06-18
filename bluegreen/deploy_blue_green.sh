@@ -6,10 +6,10 @@ if [ -z $IS_GREEN  ];then # blue라면
   echo "### BLUE => GREEN ###"
 
   echo "1. get green image"
-  docker compose pull green # green으로 이미지를 내려받습니다.
+  docker-compose pull green # green으로 이미지를 내려받습니다.
 
   echo "2. green container up"
-  docker compose up -d green # green 컨테이너 실행
+  docker-compose up -d green # green 컨테이너 실행
 
   while [ 1 = 1 ]; do
     echo "3. green health check..."
@@ -28,17 +28,17 @@ if [ -z $IS_GREEN  ];then # blue라면
 
   if [ "$(docker ps -q -f name=blue)" ]; then
     echo "5. blue container down"
-    docker compose stop blue
+    docker-compose stop blue
   fi
   
 else
   echo "### GREEN => BLUE ###"
 
   echo "1. get blue image"
-  docker compose pull blue
+  docker-compose pull blue
 
   echo "2. blue container up"
-  docker compose up -d blue
+  docker-compose up -d blue
 
   while [ 1 = 1 ]; do
     echo "3. blue health check..."
@@ -58,7 +58,7 @@ else
 
   if [ "$(docker ps -q -f name=green)" ]; then
     echo "5. green container down"
-    docker compose stop green
+    docker-compose stop green
   fi
 
 fi
