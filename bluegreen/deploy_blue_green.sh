@@ -16,7 +16,7 @@ if [ -z $IS_GREEN  ];then # blue라면
     sleep 3
 
     REQUEST=$(curl -s -o /dev/null -w "%{http_code}" https://www.mos-server.store/) # blue로 request
-      if [ "$REQUEST" -eq 200]; then # 서비스 가능하면 health check 중지
+      if [ "$REQUEST" -eq 200 ]; then # 서비스 가능하면 health check 중지
         echo "health check success"
         break
       else
@@ -47,7 +47,7 @@ else
     sleep 3
 
     REQUEST=$(curl -s -o /dev/null -w "%{http_code}" https://www.mos-server.store/) # blue로 request
-      if [ "$REQUEST" -eq 200]; then # 서비스 가능하면 health check 중지
+      if [ "$REQUEST" -eq 200 ]; then # 서비스 가능하면 health check 중지
         echo "health check success"
         break
       else
