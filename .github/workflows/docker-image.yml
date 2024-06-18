@@ -44,7 +44,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           source: "bluegreen/deploy_blue_green.sh,bluegreen/docker-compose.yml"
-          target: "/home/ec2-user/"
+          target: "~/mos-server-test"
       # ec2 접속
       - name: Application Run
         uses: appleboy/ssh-action@master
@@ -54,7 +54,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            cd /home/ec2-user/bluegreen
+            cd ~/mos-server-test/bluegreen
             docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPONAME }}
             chmod 777 ./deploy_blue_green.sh
