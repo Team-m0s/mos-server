@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir -r /code/requirements.txt
 COPY ./ /code/
 
 # 실행
-CMD ["gunicorn", "--bind", "0:8000", "app.main:app", "--worker-class", "uvicorn.workers.UvicornWorker", "--daemon", "--access-logfile", "./errorLog.log"]
+CMD ["gunicorn", "--bind", "0:8080", "app.main:app", "--worker-class", "uvicorn.workers.UvicornWorker", "--daemon", "--access-logfile", "./errorLog.log"]
