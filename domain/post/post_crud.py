@@ -135,7 +135,7 @@ def create_post(db: Session, post_create: PostCreate, board: Board, user: User):
                    content=post_create.content,
                    category=post_create.category,
                    is_anonymous=post_create.is_anonymous,
-                   create_date=datetime.now(),
+                   create_date=datetime.utcnow(),
                    user=user)
     db.add(db_post)
     db.commit()
@@ -155,7 +155,7 @@ def update_post(db: Session, db_post: Post, post_update: PostUpdate):
     db_post.content = post_update.content
     db_post.category = post_update.category
     db_post.is_anonymous = post_update.is_anonymous
-    db_post.modify_date = datetime.now()
+    db_post.modify_date = datetime.utcnow()
     db.add(db_post)
     db.commit()
     db.refresh(db_post)
