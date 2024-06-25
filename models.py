@@ -354,7 +354,7 @@ class Application(Base):
     accompany_id = Column(Integer, ForeignKey('accompany.id'))
     accompany = relationship('Accompany', backref="application_accompanies")
     answer = Column(String, nullable=True)
-    apply_date = Column(String, nullable=False)
+    apply_date = Column(DateTime, nullable=False)
 
 
 class Image(Base):

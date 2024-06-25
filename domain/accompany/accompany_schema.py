@@ -38,7 +38,7 @@ class ApplicationBase(BaseModel):
     id: int
     user: UserBase
     answer: str
-    apply_date: str
+    apply_date: datetime.datetime
 
 
 class ApplicationCreate(BaseModel):
