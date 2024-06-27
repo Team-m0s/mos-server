@@ -30,8 +30,11 @@ def block_user(db: Session, user: User, blocked_user: BlockUser):
     talks_ref = user_crud.firebase_db.collection('talks')
     user_talks = talks_ref.where('participants', 'array_contains', user.firebase_uuid).get()
 
-    # Get all personal chats the blocked user is participating in
-    blocked_user_talks = talks_ref.where('participants', 'array_contains', blocked_user.blocked_firebase_uuid).get()
+    # 차단된 사용자가 참여 중인 모든 개인 채팅을 가져오기 전에 None 체크
+    if blocked_user.blocked_firebase_uuid is not None:
+        blocked_user_talks = talks_ref.where('participants', 'array_contains', blocked_user.blocked_firebase_uuid).get()
+    else:
+        blocked_user_talks = []
 
     # 사용자가 참여 중인 대화 ID 집합 생성
     user_talk_ids = {talk.id for talk in user_talks}
