@@ -47,3 +47,4 @@ def block_user(db: Session, user: User, blocked_user: BlockUser):
     # Exit the user from each personal chat with the blocked user
     for talk_id in common_talk_ids:
         chat_crud.exit_personal_chat(talk_id, user)
+
