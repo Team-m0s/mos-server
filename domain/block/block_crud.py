@@ -11,9 +11,11 @@ def get_blocked_list(db: Session, user: User):
 
 
 def is_user_blocked(db: Session, user: User, blocked_user: User):
-    db_blocked = db.query(Block).filter(Block.blocker_uuid == user.uuid) & \
-                 ((Block.blocked_uuid == blocked_user.uuid) |
-                  (Block.blocked_firebase_uuid == blocked_user.firebase_uuid)).first()
+    db_blocked = db.query(Block).filter(
+        (Block.blocker_uuid == user.uuid) &
+        ((Block.blocked_uuid == blocked_user.uuid) |
+         (Block.blocked_firebase_uuid == blocked_user.firebase_uuid))
+    ).first()
     return db_blocked
 
 
