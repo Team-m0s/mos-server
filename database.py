@@ -5,6 +5,8 @@ from sqlalchemy.orm import sessionmaker
 SQLALCHEMY_DATABASE_URL = "postgresql://mos_admin:REMOVED@mos-server-db-rds.cbkqmgeusqyw.ap-northeast-2.rds" \
                           ".amazonaws.com/mosAPI"
 
+#SQLALCHEMY_DATABASE_URL = "postgresql://postgres:REMOVED@localhost/postgres"
+
 if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
     engine = create_engine(
         SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}

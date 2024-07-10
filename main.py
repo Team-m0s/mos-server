@@ -53,11 +53,12 @@ app.add_middleware(
 )
 
 app.mount("/static", StaticFiles(directory="/mos-server/static"), name="static")
+#app.mount("/static", StaticFiles(directory="static"), name="static")
 
 sso = KakaoSSO(
     client_id=os.getenv("KAKAO_CLIENT_ID"),
     client_secret=os.getenv("KAKAO_CLIENT_SECRET"),
-    # redirect_uri="http://127.0.0.1:8000/login/kakao/callback",
+    #redirect_uri="http://127.0.0.1:8000/login/kakao/callback",
     redirect_uri="http://ec2-13-125-254-93.ap-northeast-2.compute.amazonaws.com:8000/login/kakao/callback",
     allow_insecure_http=True,
 )

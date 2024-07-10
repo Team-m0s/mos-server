@@ -135,7 +135,7 @@ def post_detail(post_id: int, token: Optional[str] = Header(None), comment_sort_
     return _post
 
 
-@router.post("/create", status_code=status.HTTP_204_NO_CONTENT, tags=["Post"])
+@router.post("/create", response_model=post_schema.PostDetail, status_code=status.HTTP_201_CREATED, tags=["Post"])
 def post_create(token: str = Header(), board_id: int = Form(...),
                 subject: str = Form(...), content: str = Form(...), category: PostCategory = Form(None),
                 is_anonymous: bool = Form(...),
@@ -173,7 +173,15 @@ def post_create(token: str = Header(), board_id: int = Form(...),
     post_create_data = post_schema.PostCreate(subject=subject, content=content, category=category,
                                               is_anonymous=is_anonymous, images_post=image_creates)
 
-    post_crud.create_post(db, post_create=post_create_data, board=board, user=current_user)
+    new_post = post_crud.create_post(db, post_create=post_create_data, board=board, user=current_user)
+    new_post_detail = post_schema.PostDetail.from_orm(new_post)
+
+    images = post_crud.get_image_by_post_id(db, post_id=new_post.id)
+    new_post_detail.image_urls = [accompany_schema.ImageBase(id=image.id,
+                                                        image_url=f"https://www.mos-server.store/static/{image.image_url}")
+                            for image in images if image.image_url] if images else []
+
+    return new_post_detail
 
 
 @router.put("/update", status_code=status.HTTP_204_NO_CONTENT, tags=["Post"])

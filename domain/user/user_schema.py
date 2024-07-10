@@ -60,6 +60,9 @@ class PostUser(BaseModel):
     nickName: str
     profile_img: str | None
 
+    class Config:
+        from_attributes = True
+
 
 class CommentUser(BaseModel):
     id: int

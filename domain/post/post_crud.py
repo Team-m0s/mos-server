@@ -148,6 +148,7 @@ def create_post(db: Session, post_create: PostCreate, board: Board, user: User):
         db.add(db_image)
 
     db.commit()
+    return db_post
 
 
 def update_post(db: Session, db_post: Post, post_update: PostUpdate):

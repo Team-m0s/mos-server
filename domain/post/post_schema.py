@@ -23,7 +23,7 @@ class PostDetail(BaseModel):
     is_blinded: bool | None
     create_date: datetime.datetime
     modify_date: datetime.datetime | None
-    comment_count: int
+    comment_count: int = 0
     comment_posts: list[Comment] = []
 
     class Config:

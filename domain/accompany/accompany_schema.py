@@ -11,10 +11,16 @@ class ImageBase(BaseModel):
     id: int
     image_url: str
 
+    class Config:
+        from_attributes = True
+
 
 class ImageCreate(BaseModel):
     image_url: str
     image_hash: Optional[str] = None
+
+    class Config:
+        from_attributes = True
 
 
 class TagBase(BaseModel):
