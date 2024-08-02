@@ -18,7 +18,8 @@ from firebase_admin import auth, firestore, credentials
 
 # Check if the default app already exists
 if not firebase_admin._apps:
-    cred = credentials.Certificate("mos-app-a124a-firebase-adminsdk-xpjdc-71d6ca1659.json")
+    cred = credentials.Certificate("/mos-server/migrations/mos-app-a124a-firebase-adminsdk-xpjdc-71d6ca1659.json")
+    # cred = credentials.Certificate("migrations/mos-app-a124a-firebase-adminsdk-xpjdc-71d6ca1659.json")
     firebase_admin.initialize_app(cred)
 
 firebase_db = firestore.client()
