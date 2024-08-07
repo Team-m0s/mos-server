@@ -18,6 +18,9 @@ KAKAO_CLIENT_ID = os.getenv("KAKAO_CLIENT_ID_IOS")
 APPLE_CLIENT_ID = os.getenv("APPLE_CLIENT_ID")
 APPLE_PRIVATE_KEY = os.getenv("APPLE_PRIVATE_KEY")
 
+if APPLE_PRIVATE_KEY:
+    APPLE_PRIVATE_KEY = APPLE_PRIVATE_KEY.replace('\\n', '\n')
+
 kakao_jwks_cache = {}
 apple_jwks_cache = {}
 
