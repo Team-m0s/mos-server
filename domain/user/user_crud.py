@@ -16,7 +16,7 @@ from domain.user.user_schema import AuthSchema, UserUpdate, LanguagePref, Notifi
 from utils import file_utils
 from firebase_admin import auth, firestore, credentials
 
-# Check if the default app already exists
+# Check if the default firebase app already exists
 if not firebase_admin._apps:
     cred = credentials.Certificate("/mos-server/migrations/firebase_key.json")
     # cred = credentials.Certificate("migrations/firebase_key.json")
