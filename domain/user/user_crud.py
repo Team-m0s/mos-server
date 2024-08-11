@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 import firebase_admin
 import random
+import json
 from sqlalchemy.orm import Session
 from database import SessionLocal
 
@@ -16,10 +17,14 @@ from domain.user.user_schema import AuthSchema, UserUpdate, LanguagePref, Notifi
 from utils import file_utils
 from firebase_admin import auth, firestore, credentials
 
+# with open("migrations/firebase_key.json") as f:
+with open("/mos-server/migrations/firebase_key.json") as f:
+    firebase_config = json.load(f)
+
 # Check if the default firebase app already exists
 if not firebase_admin._apps:
-    # cred = credentials.Certificate("migrations/firebase_key.json")
-    firebase_admin.initialize_app()
+    cred = credentials.Certificate(firebase_config)
+    firebase_admin.initialize_app(cred)
 
 firebase_db = firestore.client()
 
