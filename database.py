@@ -1,11 +1,15 @@
+import os
+
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
 
-SQLALCHEMY_DATABASE_URL = "postgresql://mos_admin:REMOVED@mos-server-db-rds.cbkqmgeusqyw.ap-northeast-2.rds" \
-                          ".amazonaws.com/mosAPI"
+load_dotenv()
 
-#SQLALCHEMY_DATABASE_URL = "postgresql://postgres:REMOVED@localhost/postgres"
+SQLALCHEMY_DATABASE_URL = os.getenv("RDS_DB_URL")
+
+#SQLALCHEMY_DATABASE_URL = os.getenv("LOCAL_DB_URL")
 
 if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
     engine = create_engine(
