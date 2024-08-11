@@ -15,8 +15,8 @@ jobs:
     # Firebase Key 파일 생성 단계 추가
     - name: Create Firebase Key file
       run: |
-        echo "$FIREBASE_KEY" > migrations/mos-app-a124a-firebase-adminsdk-xpjdc-b5423140fb.json
-        chmod 664 migrations/mos-app-a124a-firebase-adminsdk-xpjdc-b5423140fb.json
+        echo "$FIREBASE_KEY" > migrations/firebase_key.json
+        chmod 664 migrations/firebase_key.json
       env:
         FIREBASE_KEY: ${{ secrets.FIREBASE_KEY }}
     
