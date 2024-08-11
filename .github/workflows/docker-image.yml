@@ -16,6 +16,7 @@ jobs:
     - name: Create Firebase Key file
       run: |
         echo "$FIREBASE_KEY" > migrations/mos-app-a124a-firebase-adminsdk-xpjdc-b5423140fb.json
+        chmod 664 migrations/mos-app-a124a-firebase-adminsdk-xpjdc-b5423140fb.json
       env:
         FIREBASE_KEY: ${{ secrets.FIREBASE_KEY }}
     
