@@ -19,6 +19,10 @@ jobs:
         chmod 664 migrations/firebase_key.json
       env:
         FIREBASE_KEY: ${{ secrets.FIREBASE_KEY }}
+
+    # .env 파일 생성 단계 추가
+    - name: Create .env file
+      run: echo "${{ secrets.DOT_ENV_FILE_CONTENT }}" > .env
     
     # Docker 이미지 Build (1)        
     - name: docker image build
