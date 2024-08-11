@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import firebase_admin
 import random
 import json
+import logging
 from sqlalchemy.orm import Session
 from database import SessionLocal
 
@@ -28,17 +29,26 @@ from firebase_admin import auth, firestore, credentials
 #
 # firebase_db = firestore.client()
 
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+logger.debug("Firebase 초기화 시작")
 try:
     with open("/mos-server/migrations/firebase_key.json") as f:
+        logger.debug("Firebase 키 파일 열기 성공")
         firebase_config = json.load(f)
+        logger.debug("Firebase 설정 로드 성공")
 
     if not firebase_admin._apps:
         cred = credentials.Certificate(firebase_config)
+        logger.debug("Firebase 인증 정보 생성 성공")
         firebase_admin.initialize_app(cred)
+        logger.debug("Firebase 앱 초기화 성공")
 
     firebase_db = firestore.client()
+    logger.debug("Firestore 클라이언트 생성 성공")
 except Exception as e:
-    print(f"Firebase 인증 오류: {str(e)}")
+    logger.error(f"Firebase 초기화 중 오류 발생: {str(e)}")
 
 
 def add_user_to_firestore(uid: str, user_info: dict, auth_schema: AuthSchema):
